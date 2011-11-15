@@ -1,16 +1,38 @@
 package edu.unc.genomics.io;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+
 /**
  * @author timpalpant
- * Holds information about a WigFile
+ * Holds information about a TextWigFile
+ * and some kind of index for finding data
  */
-public class WigIndex {
+class WigIndex {
+	protected List<Contig> contigs;
+	
 	protected long numBases;
 	protected double total;
 	protected double mean;
 	protected double stdev;
 	protected double min;
 	protected double max;
+	
+	public static WigIndex indexFile(Path p) throws IOException {
+		BufferedReader reader = Files.newBufferedReader(p, Charset.defaultCharset());
+		
+		WigIndex index = new WigIndex();
+		String line;
+		while ((line = reader.readLine()) != null) {
+			// TODO: do the indexing
+		}
+		
+		return index;
+	}
 	
 	/**
 	 * @return the numBases
@@ -83,5 +105,14 @@ public class WigIndex {
 	 */
 	public void setMax(double max) {
 		this.max = max;
+	}
+	
+	
+	/**
+	 * @author timpalpant
+	 * Holds information about a Contig in a WigFile
+	 */
+	private static class Contig {
+		
 	}
 }

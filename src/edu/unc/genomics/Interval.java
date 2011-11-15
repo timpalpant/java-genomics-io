@@ -1,9 +1,9 @@
 package edu.unc.genomics;
 
 public class Interval {
-	protected String chr;
-	protected int start;
-	protected int stop;
+	private String chr;
+	private int start;
+	private int stop;
 	
 	public Interval(String chr, int start, int stop) {
 		this.chr = chr;

@@ -1,89 +1,53 @@
 package edu.unc.genomics.io;
 
+import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 
-import edu.ucsc.genome.TrackHeader;
-import edu.unc.genomics.Contig;
-
 public abstract class WigFile {
-	protected TrackHeader header;
 	protected Path p;
-	protected WigIndex index;
-	
-	protected List<String> chromosomes;
 	
 	protected WigFile(Path p) {
 		this.p = p;
-		this.header = new TrackHeader("wiggle_0");
-		this.index = new WigIndex();
 	}
 	
-	public abstract Contig query(String chr, int start, int stop);
-	
-	public List<String> chromosomes() {
-		if (chromosomes == null) {
-			chromosomes = new ArrayList<String>();
-			
+	public static WigFile autodetect(Path p) throws IOException {
+		WigFile wig;
+		
+		if (BigWigFile.isBigWig(p)) {
+			wig = new BigWigFile(p);
+		} else {
+			wig = new TextWigFile(p);
 		}
 		
-		return chromosomes;
+		return wig;
 	}
 	
-	public int getChrStart(String chr) {
-		
-	}
+	public abstract double[] query(String chr, int start, int stop);
 	
-	public int getChrStop(String chr) {
-		
-	}
+	public abstract List<String> chromosomes();
 	
-	public boolean includes(String chr, int start, int stop) {
-		
-	}
+	public abstract int getChrStart(String chr);
 	
-	public boolean includes(String chr, int start) {
-		
-	}
+	public abstract int getChrStop(String chr);
 	
-	public boolean includes(String chr) {
-		
-	}
+	public abstract boolean includes(String chr, int start, int stop);
 	
-	public long length() {
-		return size();
-	}
+	public abstract boolean includes(String chr);
 	
-	public long size() {
-		return numBases();
-	}
+	public abstract long length();
 	
-	public long numBases() {
-		return index.getNumBases();
-	}
+	public abstract long numBases();
 	
-	public double total() {
-		return index.getTotal();
-	}
+	public abstract double total();
 	
-	public double mean() {
-		return index.getMean();
-	}
+	public abstract double mean();
 	
-	public double stdev() {
-		return index.getStdev();
-	}
+	public abstract double stdev();
 	
-	public double min() {
-		return index.getMin();
-	}
+	public abstract double min();
 	
-	public double max() {
-		return index.getMax();
-	}
+	public abstract double max();
 	
-	public String toString() {
-		
-	}
+	public abstract String toString();
 }

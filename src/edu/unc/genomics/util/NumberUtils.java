@@ -1,4 +1,4 @@
-package edu.unc.util;
+package edu.unc.genomics.util;
 
 /**
  * @author timpalpant

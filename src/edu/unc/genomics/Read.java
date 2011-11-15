@@ -1,8 +1,8 @@
 package edu.unc.genomics;
 
 public class Read extends Interval {
-	protected String seq;
-	protected String qual;
+	private String seq;
+	private String qual;
 	
 	/**
 	 * @return the seq
