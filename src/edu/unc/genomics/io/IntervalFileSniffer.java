@@ -52,8 +52,8 @@ public class IntervalFileSniffer {
 	protected boolean isBed() throws IOException {
 		if (isBinary()) { return false; }
 		if (numColumns() < 3 || numColumns() > 12) { return false; }
-		if (!NumberUtils.isInteger(column(2)) || !NumberUtils.isInteger(column(3))) { return false; }
-		if (numColumns() == 4 && NumberUtils.isNumeric(column(4))) { return false; }
+		if (!NumUtils.isInteger(column(2)) || !NumUtils.isInteger(column(3))) { return false; }
+		if (numColumns() == 4 && NumUtils.isNumeric(column(4))) { return false; }
 		
 		try { 
 			// Parse BedEntry
@@ -67,8 +67,8 @@ public class IntervalFileSniffer {
 	protected boolean isBedGraph() throws IOException {
 		if (isBinary()) { return false; }
 		if (numColumns() != 4) { return false; }
-		if (!NumberUtils.isInteger(column(2)) || !NumberUtils.isInteger(column(3))) { return false; }
-		if (!NumberUtils.isNumeric(column(4))) { return false; }
+		if (!NumUtils.isInteger(column(2)) || !NumUtils.isInteger(column(3))) { return false; }
+		if (!NumUtils.isNumeric(column(4))) { return false; }
 		
 		try { 
 			// Parse BedGraphEntry

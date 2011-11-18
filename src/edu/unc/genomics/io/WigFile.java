@@ -2,7 +2,9 @@ package edu.unc.genomics.io;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
+import java.util.Set;
+
+import edu.unc.genomics.Interval;
 
 public abstract class WigFile {
 	protected Path p;
@@ -11,7 +13,7 @@ public abstract class WigFile {
 		this.p = p;
 	}
 	
-	public static WigFile autodetect(Path p) throws IOException {
+	public static WigFile autodetect(Path p) throws IOException, WigFileException {
 		WigFile wig;
 		
 		if (BigWigFile.isBigWig(p)) {
@@ -23,19 +25,25 @@ public abstract class WigFile {
 		return wig;
 	}
 	
-	public abstract double[] query(String chr, int start, int stop);
+	public float[] query(Interval i) throws IOException, WigFileException {
+		return query(i.getChr(), i.getStart(), i.getStop());
+	}
 	
-	public abstract List<String> chromosomes();
+	public abstract float[] query(String chr, int start, int stop) throws IOException, WigFileException;
+	
+	public abstract Set<String> chromosomes();
 	
 	public abstract int getChrStart(String chr);
 	
 	public abstract int getChrStop(String chr);
 	
+	public boolean includes(Interval i) {
+		return includes(i.getChr(), i.getStart(), i.getStop());
+	}
+	
 	public abstract boolean includes(String chr, int start, int stop);
 	
 	public abstract boolean includes(String chr);
-	
-	public abstract long length();
 	
 	public abstract long numBases();
 	

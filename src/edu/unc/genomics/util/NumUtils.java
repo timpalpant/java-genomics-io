@@ -4,7 +4,7 @@ package edu.unc.genomics.util;
  * @author timpalpant
  *
  */
-public class NumberUtils {
+public class NumUtils {
 	public static boolean isInteger(String str) {  
 	  try {  
 	    Integer.parseInt(str); 

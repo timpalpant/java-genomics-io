@@ -2,7 +2,8 @@ package edu.unc.genomics.io;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.broad.igv.bbfile.BBFileReader;
 import org.broad.igv.bbfile.BBTotalSummaryBlock;
@@ -38,9 +39,13 @@ public class BigWigFile extends WigFile {
 	}
 	
 	@Override
-	public double[] query(String chr, int start, int stop) {
+	public float[] query(String chr, int start, int stop) throws WigFileException {
+		if (!includes(chr, start, stop)) {
+			throw new WigFileException("BigWigFile does not contain data for region: " + chr + ":" + start + "-" + stop);
+		}
+		
 		int length = stop - start + 1;
-		double[] result = new double[length];
+		float[] result = new float[length];
 		
 		BigWigIterator it = reader.getBigWigIterator(chr, start, chr, stop, false);
 		while (it.hasNext()) {
@@ -54,8 +59,8 @@ public class BigWigFile extends WigFile {
 	}
 
 	@Override
-	public List<String> chromosomes() {
-		return reader.getChromosomeNames();
+	public Set<String> chromosomes() {
+		return new HashSet<String>(reader.getChromosomeNames());
 	}
 
 	@Override
@@ -83,11 +88,6 @@ public class BigWigFile extends WigFile {
 	@Override
 	public boolean includes(String chr) {
 		return reader.getChromosomeID(chr) != -1;
-	}
-
-	@Override
-	public long length() {
-		return numBases();
 	}
 
 	@Override
