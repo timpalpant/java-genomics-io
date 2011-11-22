@@ -16,7 +16,7 @@ public class BedGraphFile extends TextIntervalFile<BedGraphEntry> {
 		super(p, new BedGraphEntryFactory());
 	}
 
-	private static class BedGraphEntryFactory implements IntervalFactory<BedGraphEntry> {
+	public static class BedGraphEntryFactory implements IntervalFactory<BedGraphEntry> {
 
 		@Override
 		public BedGraphEntry parse(String line) {

@@ -19,7 +19,7 @@ public class BedFile extends TextIntervalFile<BedEntry> {
 		super(p, new BedEntryFactory());
 	}
 	
-	private static class BedEntryFactory implements IntervalFactory<BedEntry> {
+	public static class BedEntryFactory implements IntervalFactory<BedEntry> {
 		
 		@Override
 		public BedEntry parse(String line) {

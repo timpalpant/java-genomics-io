@@ -1,0 +1,20 @@
+= Ruby-Genomics
+
+This is a collection of scripts for genomics data processing, primarily high-throughput next-generation sequencing.
+
+== Examples
+
+Scripts can be run on the command-line. Calling any script without arguments will display the help, as well as the missing mandatory arguments:
+
+  $ > ruby wigmath/averager.rb 
+  $ Missing switch: -g or --genome
+  $ Missing switch: -o or --output
+  $ Usage: ruby wigmath/averager.rb file1.bw file2.bw -o output.bw
+  $  -h, --help                       Display this screen
+  $  -p, --threads N                  Number of processes (default: 2)
+  $  -g, --genome ASSEMBLY            Genome assembly
+  $  -o, --output FILE                Output file (BigWig)
+
+=== Convert BedGraph format file into a Wiggle file
+
+  $ ruby dataprocessing/bedGraphToWig.rb -i input.bedGraph -o output.wig
