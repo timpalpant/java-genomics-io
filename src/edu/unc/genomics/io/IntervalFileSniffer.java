@@ -6,8 +6,12 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import edu.unc.util.FileUtils;
-import edu.unc.util.NumberUtils;
+import org.broad.igv.bbfile.BBFileReader;
+
+import edu.unc.genomics.BedEntry;
+import edu.unc.genomics.BedGraphEntry;
+import edu.unc.genomics.util.FileUtils;
+import edu.unc.genomics.util.NumUtils;
 
 import net.sf.samtools.SAMFileReader;
 
@@ -19,44 +23,35 @@ public class IntervalFileSniffer {
 		this.p = p;
 	}
 	
-	public static Class<? extends IntervalFile> sniff(Path p) {
-		return (new IntervalFileSniffer(p)).autodetect();
-	}
-	
-	public Class<? extends IntervalFile> autodetect() {
-		Class<? extends IntervalFile> clazz;
-		
-		if (isBed()) {
-			clazz = BedFile.class;
-		} else if (isBedGraph()) {
-			clazz = BedGraphFile.class;
-		} else if (isSAM()) {
-			clazz = SAMFile.class;
-		} else if (isBAM()) {
-			clazz = BAMFile.class;
-		} else {
-			throw new IntervalFileSnifferException("Could not auto-detect interval file type");
+	public boolean isAscii() throws IntervalFileSnifferException {
+		try {
+			return FileUtils.isAsciiText(p);
+		} catch (IOException e) {
+			throw new IntervalFileSnifferException("IOException while attempting to determine if file is binary");
 		}
-		
-		return clazz;
 	}
 	
-	protected boolean isAscii() throws IOException {
-		return FileUtils.isAsciiText(p);
-	}
-	
-	protected boolean isBinary() throws IOException {
+	public boolean isBinary() throws IntervalFileSnifferException {
 		return !isAscii();
 	}
 	
-	protected boolean isBed() throws IOException {
-		if (isBinary()) { return false; }
+	public boolean isBigBed() {
+		try {
+			BBFileReader reader = new BBFileReader(p.toString());
+			return reader.isBigBedFile();
+		} catch (IOException e) {
+			return false;
+		}
+	}
+	
+	public boolean isBed() throws IntervalFileSnifferException {
+		if (!isAscii()) { return false; }
 		if (numColumns() < 3 || numColumns() > 12) { return false; }
 		if (!NumUtils.isInteger(column(2)) || !NumUtils.isInteger(column(3))) { return false; }
 		if (numColumns() == 4 && NumUtils.isNumeric(column(4))) { return false; }
 		
 		try { 
-			// Parse BedEntry
+			BedEntry.parse(getFirstLine());
 		} catch (Exception e) {
 			return false;
 		}
@@ -64,14 +59,14 @@ public class IntervalFileSniffer {
 		return true;
 	}
 	
-	protected boolean isBedGraph() throws IOException {
-		if (isBinary()) { return false; }
+	public boolean isBedGraph() throws IntervalFileSnifferException {
+		if (!isAscii()) { return false; }
 		if (numColumns() != 4) { return false; }
 		if (!NumUtils.isInteger(column(2)) || !NumUtils.isInteger(column(3))) { return false; }
 		if (!NumUtils.isNumeric(column(4))) { return false; }
 		
 		try { 
-			// Parse BedGraphEntry
+			BedGraphEntry.parse(getFirstLine());
 		} catch (Exception e) {
 			return false;
 		}
@@ -79,23 +74,45 @@ public class IntervalFileSniffer {
 		return true;
 	}
 	
-	protected boolean isSAM() throws IOException {
-		SAMFileReader reader = new SAMFileReader(p.toFile());
-		return !reader.isBinary();
+	public boolean isBAM() {
+		try {
+			SAMFileReader.setDefaultValidationStringency(SAMFileReader.ValidationStringency.STRICT);
+			SAMFileReader reader = new SAMFileReader(p.toFile());
+			return reader.isBinary();
+		} catch (Exception e) {
+			return false;
+		} finally {
+			SAMFileReader.setDefaultValidationStringency(SAMFileReader.ValidationStringency.DEFAULT_STRINGENCY);
+		}
 	}
 	
-	protected boolean isBAM() {
+	public boolean isSAM() throws IntervalFileSnifferException {
+		if (!isAscii()) { return false; }
+		if (numColumns() < 4) { return false; }
+		if (!NumUtils.isInteger(column(4))) { return false; }
+		
+		// TODO: Better checking for SAM files
+		/*try {
+		SAMFileReader.setDefaultValidationStringency(SAMFileReader.ValidationStringency.STRICT);
 		SAMFileReader reader = new SAMFileReader(p.toFile());
-		return reader.isBinary();
+			return !reader.isBinary();
+		} catch (Exception e) {
+			return false;
+		} finally {
+			SAMFileReader.setDefaultValidationStringency(SAMFileReader.ValidationStringency.DEFAULT_STRINGENCY);
+		}*/
+		
+		return true;
 	}
 	
-	protected String getFirstLine() throws IntervalFileSnifferException {
+	private String getFirstLine() throws IntervalFileSnifferException {
 		if (firstLine == null) {
 			try {
 				BufferedReader reader = Files.newBufferedReader(p, Charset.defaultCharset());
 				firstLine = reader.readLine();
 				
-				while (firstLine.length() == 0 || firstLine.startsWith("track")) {
+				while (firstLine.length() == 0 || firstLine.startsWith("track") 
+						|| firstLine.startsWith("#") || firstLine.startsWith("@")) {
 					firstLine = reader.readLine();
 				}
 				
@@ -108,11 +125,11 @@ public class IntervalFileSniffer {
 		return firstLine;
 	}
 	
-	protected int numColumns() {
-		return firstLine.split("\t").length;
+	private int numColumns() throws IntervalFileSnifferException {
+		return getFirstLine().split("\t").length;
 	}
 	
-	protected String column(int n) {
-		return firstLine.split("\t")[n-1];
+	private String column(int n) throws IntervalFileSnifferException {
+		return getFirstLine().split("\t")[n-1];
 	}
 }

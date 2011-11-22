@@ -7,21 +7,21 @@ package edu.unc.genomics.io;
  * @author timpalpant
  *
  */
-public class WigFileException extends Exception {
+public class IntervalFileFormatException extends RuntimeException {
 
-	private static final long serialVersionUID = 3824318160375643583L;
+	private static final long serialVersionUID = 7459693587746345198L;
 
 	/**
 	 * 
 	 */
-	public WigFileException() {
+	public IntervalFileFormatException() {
 		// TODO Auto-generated constructor stub
 	}
 
 	/**
 	 * @param message
 	 */
-	public WigFileException(String message) {
+	public IntervalFileFormatException(String message) {
 		super(message);
 		// TODO Auto-generated constructor stub
 	}
@@ -29,7 +29,7 @@ public class WigFileException extends Exception {
 	/**
 	 * @param cause
 	 */
-	public WigFileException(Throwable cause) {
+	public IntervalFileFormatException(Throwable cause) {
 		super(cause);
 		// TODO Auto-generated constructor stub
 	}
@@ -38,7 +38,7 @@ public class WigFileException extends Exception {
 	 * @param message
 	 * @param cause
 	 */
-	public WigFileException(String message, Throwable cause) {
+	public IntervalFileFormatException(String message, Throwable cause) {
 		super(message, cause);
 		// TODO Auto-generated constructor stub
 	}
@@ -49,7 +49,7 @@ public class WigFileException extends Exception {
 	 * @param enableSuppression
 	 * @param writableStackTrace
 	 */
-	public WigFileException(String message, Throwable cause,
+	public IntervalFileFormatException(String message, Throwable cause,
 			boolean enableSuppression, boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
 		// TODO Auto-generated constructor stub

@@ -2,7 +2,11 @@ package edu.unc.genomics.io;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Set;
+
+import org.broad.igv.bbfile.WigItem;
 
 import edu.unc.genomics.Interval;
 
@@ -13,6 +17,12 @@ public abstract class WigFile {
 		this.p = p;
 	}
 	
+	/**
+	 * @param p
+	 * @return
+	 * @throws IOException
+	 * @throws WigFileException
+	 */
 	public static WigFile autodetect(Path p) throws IOException, WigFileException {
 		WigFile wig;
 		
@@ -25,11 +35,31 @@ public abstract class WigFile {
 		return wig;
 	}
 	
-	public float[] query(Interval i) throws IOException, WigFileException {
-		return query(i.getChr(), i.getStart(), i.getStop());
+	/**
+	 * @param iter
+	 * @return
+	 */
+	public static float[] flattenData(Iterator<WigItem> iter, int start, int stop) {
+		int length = stop - start + 1;
+		float[] data = new float[length];
+		
+		while (iter.hasNext()) {
+			WigItem item = iter.next();
+			for (int i = item.getStartBase(); i <= item.getEndBase(); i++) {
+				if (i-start > 0 && i-start < data.length) {
+					data[i-start] = item.getWigValue();
+				}
+			}
+		}
+		
+		return data;
 	}
 	
-	public abstract float[] query(String chr, int start, int stop) throws IOException, WigFileException;
+	public Iterator<WigItem> query(Interval i) throws IOException, WigFileException {
+		return query(i.getChr(), i.low(), i.high());
+	}
+	
+	public abstract Iterator<WigItem> query(String chr, int start, int stop) throws IOException, WigFileException;
 	
 	public abstract Set<String> chromosomes();
 	

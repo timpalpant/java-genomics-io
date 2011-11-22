@@ -1,8 +1,8 @@
 package edu.unc.genomics;
 
 public class ValuedInterval extends Interval {
-	private String id;
-	private Double value;
+	protected String id;
+	protected Double value;
 	
 	public ValuedInterval(String chr, int start, int stop, String id, Double value) {
 		super(chr, start, stop);

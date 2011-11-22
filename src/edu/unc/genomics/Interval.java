@@ -1,26 +1,19 @@
 package edu.unc.genomics;
 
-public class Interval {
-	private String chr;
-	private int start;
-	private int stop;
+import java.io.Serializable;
+
+public class Interval implements Serializable {
+	
+	private static final long serialVersionUID = 7515817773660876485L;
+	
+	protected String chr;
+	protected int start;
+	protected int stop;
 	
 	public Interval(String chr, int start, int stop) {
 		this.chr = chr;
 		this.start = start;
 		this.stop = stop;
-	}
-	
-	public Interval(String chr, int start) {
-		this(chr, start, 0);
-	}
-	
-	public Interval(String chr) {
-		this(chr, 0);
-	}
-	
-	public Interval() {
-		this(null);
 	}
 	
 	public String toBed() {
