@@ -1,20 +1,75 @@
-= Ruby-Genomics
+= Java Genomics IO API
 
-This is a collection of scripts for genomics data processing, primarily high-throughput next-generation sequencing.
+This library provides a simple and performant API for working with many genomic file formats in a consistent fashion. It was prototyped in Ruby (https://github.com/timpalpant/bioruby-genomic-file). The library requires JDK7 since it makes use of switches on Strings and the new File/Path classes.
+
+The library is mainly a wrapper to pull together multiple existing libraries, including Picard (http://picard.sourceforge.net) for reading SAM/BAM files and the BigWig/BigBed readers provided by the Broad Institute (http://code.google.com/p/bigwig). The complete list of file formats currently supported is:
+
+* Bed
+* BigBed
+* BedGraph
+* SAM
+* BAM
+* Wiggle
+* BigWig
+* Tabix (all formats, but format cannot be auto detected yet)
+
+Coming soon:
+
+* GFF
+* TwoBit
+* Fasta
+* Fastq
+
+Currently, only Tabix, BigBed, BAM, Wiggle, and BigWig files may be queried randomly. Crude random querying may be implemented for other ASCII-text formats, but for now it is recommended that you first convert the files into Tabix format since this is highly performant. In addition, the library is mostly for reading files (input). Output functionality may be added in the future, but is less of a priority.
 
 == Examples
 
-Scripts can be run on the command-line. Calling any script without arguments will display the help, as well as the missing mandatory arguments:
+For applications that only require interval information (chr:start-stop), the format of the interval file can be auto-detected, and the intervals can be iterated over:
 
-  $ > ruby wigmath/averager.rb 
-  $ Missing switch: -g or --genome
-  $ Missing switch: -o or --output
-  $ Usage: ruby wigmath/averager.rb file1.bw file2.bw -o output.bw
-  $  -h, --help                       Display this screen
-  $  -p, --threads N                  Number of processes (default: 2)
-  $  -g, --genome ASSEMBLY            Genome assembly
-  $  -o, --output FILE                Output file (BigWig)
+  $ IntervalFile<? extends Interval> loci = null;
+  $ try {
+  $   loci = IntervalFile.autodetect(lociFile);
+  $ } catch (IntervalFileSnifferException e) {
+  $  log.fatal("Error autodetecting interval file format");
+  $  e.printStackTrace();
+  $ }
+  $
+  $ for (Interval interval : loci) {
+  $   System.out.println(interval.toBed());
+  $ }
 
-=== Convert BedGraph format file into a Wiggle file
+This is particularly useful for writing Galaxy tools (http://getgalaxy.com).
 
-  $ ruby dataprocessing/bedGraphToWig.rb -i input.bedGraph -o output.wig
+Alternatively, if the file format is known and type-specific data is needed, it can be opened directly:
+
+  $ BAMFile bam = new BAMFile(bamFile);
+  $ for (BAMEntry entry : bam) {
+  $   System.out.println(entry.getQuality());
+  $ }
+
+This could also be accomplished by casting in the first place, but is not recommended.
+
+Similar abstraction is provided for Wig/BigWig files:
+
+  $ WigFile wig = WigFile.autodetect(wigOrBigWigFile);
+  $ Iterator<WigItem> result = wig.query("chr23", 10_000, 1_000_000);
+  $ while(result.hasNext()) {
+  $   System.out.println(result.getWigValue());
+  $ }
+  $ 
+  $ Iterator<WigItem> result2 = wig.query("chr23", 1, 10_000);
+  $ float[] data = WigFile.flattenData(result, 1, 10_000);
+
+Rudimentary indexing is provided for text-Wig files, while BigWig files are accessed using the R-tree information. This means that performance is somewhat better for BigWig files. However, in some cases it is inconvenient or impossible to convert Wig files to BigWig since the wigToBigWig tool consumes ~4 x (file size) memory. The indexing scheme used for text-Wig files requires relatively modest memory, even for human-scale genomes, yet ensures an upper bound for seek times in random queries.
+
+With all readers, data is buffered and lazy-parsed to minimize memory requirements and maximize disk performance.
+
+Tabix can be used if you wish to make random queries against interval files, but you must specify the type of data in the file and pass the appropriate factory for parsing the results:
+
+  $ TabixFile<BedGraphEntry> t = new TabixFile<BedGraphEntry>(tabixedBedGraphFile, new BedGraphFile.BedGraphEntryFactory());
+  $ Iterator<BedGraphEntry> result = t.query("chr22", 1, 100_000);
+  $ while (result.hasNext()) {
+  $   System.out.println(result.getValue());
+  $ }
+
+See also https://github.com/timpalpant/java-genomics-toolkit for some full implementations using this library.
