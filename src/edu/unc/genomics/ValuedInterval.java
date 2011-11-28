@@ -1,6 +1,7 @@
 package edu.unc.genomics;
 
 public class ValuedInterval extends Interval {
+	private static final long serialVersionUID = 2976113135643438146L;
 	protected String id;
 	protected Double value;
 	

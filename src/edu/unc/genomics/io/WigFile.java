@@ -2,6 +2,7 @@ package edu.unc.genomics.io;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -45,6 +46,7 @@ public abstract class WigFile {
 	public static float[] flattenData(Iterator<WigItem> iter, int start, int stop) {
 		int length = stop - start + 1;
 		float[] data = new float[length];
+		Arrays.fill(data, Float.NaN);
 		
 		while (iter.hasNext()) {
 			WigItem item = iter.next();

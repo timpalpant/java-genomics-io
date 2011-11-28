@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import edu.unc.genomics.io.LineReader;
 import edu.unc.genomics.io.LineReaderIterator;
@@ -213,6 +214,9 @@ public class TabixReader implements LineReader, Iterable<String> {
 		return mFp.readLine();
 	}
 	
+	public Set<String> chromosomes() {
+		return mChr2tid.keySet();
+	}
 
 	@Override
 	public Iterator<String> iterator() {

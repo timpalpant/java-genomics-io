@@ -12,7 +12,7 @@ import edu.unc.genomics.IntervalFactory;
  */
 public class BedGraphFile extends TextIntervalFile<BedGraphEntry> {
 
-	protected BedGraphFile(Path p) throws IOException {
+	public BedGraphFile(Path p) throws IOException {
 		super(p, new BedGraphEntryFactory());
 	}
 

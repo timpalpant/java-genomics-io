@@ -4,6 +4,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -46,13 +47,9 @@ public abstract class IntervalFile<T extends Interval> implements Iterable<T>, C
 		}
 	}
 	
-	public int count() {
-		int count = 0;
-		for (Interval i : this) {
-			count++;
-		}
-		return count;
-	}
+	public abstract int count();
+	
+	public abstract Set<String> chromosomes();
 	
 	public Iterator<T> query(Interval i) throws UnsupportedOperationException {
 		return query(i.getChr(), i.low(), i.high());

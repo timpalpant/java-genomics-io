@@ -12,8 +12,8 @@ import edu.unc.genomics.IntervalFactory;
  */
 class StringIntervalIterator<T extends Interval> implements Iterator<T> {
 
-	private Iterator<String> it;
-	private IntervalFactory<T> factory;
+	protected Iterator<String> it;
+	protected IntervalFactory<T> factory;
 	
 	public StringIntervalIterator(Iterator<String> it, IntervalFactory<T> factory) {
 		this.it = it;

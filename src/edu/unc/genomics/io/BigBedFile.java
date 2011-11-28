@@ -5,7 +5,9 @@ package edu.unc.genomics.io;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.broad.igv.bbfile.BBFileReader;
 import org.broad.igv.bbfile.BedFeature;
@@ -26,6 +28,16 @@ public class BigBedFile extends IntervalFile<BedEntry> {
 		if (!reader.isBigBedFile()) {
 			throw new IntervalFileFormatException("Not a BigBed file!");
 		}
+	}
+	
+	@Override
+	public int count() {
+		return reader.getDataCount();
+	}
+	
+	@Override
+	public Set<String> chromosomes() {
+		return new HashSet<String>(reader.getChromosomeNames());
 	}
 
 	@Override
