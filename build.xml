@@ -1,7 +1,7 @@
 <project name="java-genomics-io" default="dist" basedir=".">
-    <description>
-        build the java-genomics-io.jar file
-    </description>
+  <description>
+  	build the java-genomics-io.jar file
+  </description>
   <!-- set global properties for this build -->
   <property name="src" location="src"/>
   <property name="test" location="test"/>
@@ -13,10 +13,10 @@
     <!-- Create the build directory structure used by compile -->
     <mkdir dir="${build}"/>
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" destdir="${build}">
+    <javac srcdir="${src}" destdir="${build}" source="1.7" target="1.7">
       <classpath location="lib/log4j-1.2.15.jar"/>
       <classpath location="lib/sam-1.56.jar"/>
-      <classpath location="lib/Bigwig.jar"/>
+      <classpath location="lib/BigWig.jar"/>
     </javac>
   </target>
 

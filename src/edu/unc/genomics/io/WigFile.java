@@ -5,14 +5,18 @@ import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.broad.igv.bbfile.WigItem;
 
 import edu.unc.genomics.Interval;
 
 public abstract class WigFile {
-	protected Path p;
+	
+	private static final Logger log = Logger.getLogger(WigFile.class);
+	protected final Path p;
 	
 	protected WigFile(Path p) {
+		log.debug("Initializing wig file: " + p.getFileName());
 		this.p = p;
 	}
 	
@@ -52,6 +56,10 @@ public abstract class WigFile {
 		}
 		
 		return data;
+	}
+	
+	public Path getPath() {
+		return p;
 	}
 	
 	public Iterator<WigItem> query(Interval i) throws IOException, WigFileException {

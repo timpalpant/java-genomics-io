@@ -39,7 +39,7 @@ public class IntervalFileSniffer {
 		try {
 			BBFileReader reader = new BBFileReader(p.toString());
 			return reader.isBigBedFile();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			return false;
 		}
 	}

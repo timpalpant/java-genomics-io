@@ -113,7 +113,6 @@ public class TextWigFile extends WigFile {
 		}
 		
 		List<Contig> relevantContigs = getContigsForQuery(chr, start, stop);
-
 		return new TextWigIterator(raf, relevantContigs.iterator(), chr, start, stop);
 	}
 	
@@ -133,6 +132,12 @@ public class TextWigFile extends WigFile {
 	public String toString() {
 		StringBuilder s = new StringBuilder("ASCII Text Wiggle file: " + header.toString() + "\n");
 		
+		s.append("Chromosomes:\n");
+		for (String chr : chromosomes) {
+			s.append('\t').append(chr).append(" start=").append(getChrStart(chr)).append(" stop=").append(getChrStop(chr)).append('\n');
+		}
+		
+		s.append("Contigs:\n");
 		for (Contig c : contigs) {
 			s.append("\t").append(c.toString()).append('\n');
 		}
@@ -292,7 +297,9 @@ public class TextWigFile extends WigFile {
 					if (delim == -1) {
 						throw new WigFileException("Illegal format in variableStep contig, line " + lineNum);
 					}
-					contig.setStart(Integer.parseInt(firstLine.substring(0, delim)));
+					bp = Integer.parseInt(firstLine.substring(0, delim));
+					contig.setStart(bp);
+					raf.seek(cursor);
 				} else {
 					bp = contig.getStart() - ((FixedStepContig)contig).getStep();
 				}
@@ -329,10 +336,18 @@ public class TextWigFile extends WigFile {
 			}
 		}
 		
+		// Set the stop info for the last contig
+		if (contigs.size() > 0) {
+			contig.setStopLine(lineNum);
+			contig.setStop(bp + contig.getSpan() - 1);
+		}
+		
+		// Set the stats info
 		mean = total / numBases;
 		double variance = (sumOfSquares - total*mean) / numBases;
 		stdev = Math.sqrt(variance);
 
+		// Set the Set of chromosomes
 		chromosomes = new HashSet<String>();
 		for (Contig c : contigs) {
 			chromosomes.add(c.getChr());
@@ -494,7 +509,6 @@ public class TextWigFile extends WigFile {
 		private boolean advanceContig() {
 			while (relevantContigsIter.hasNext()) {
 				Contig currentContig = relevantContigsIter.next();
-				log.debug("Loading data from Contig: " + currentContig.toString());
 				try {
 					currentContigIter = currentContig.query(raf, chr, start, stop);
 					if (currentContigIter.hasNext()) {

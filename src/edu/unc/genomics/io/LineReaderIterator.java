@@ -23,7 +23,7 @@ public class LineReaderIterator implements Iterator<String> {
 	
 	@Override
 	public boolean hasNext() {
-		return (nextLine == null);
+		return (nextLine != null);
 	}
 
 	@Override

@@ -21,7 +21,7 @@ public abstract class Contig extends Interval implements Serializable {
 	private int span;
 	private long startLine;
 	private long stopLine;
-	private Map<Integer, Long> index = new HashMap<Integer, Long>();;
+	private Map<Integer, Long> index = new HashMap<Integer, Long>();
 	
 	protected static final String FIXED_STEP = "fixedStep";
 	protected static final String VARIABLE_STEP = "variableStep";
@@ -64,6 +64,7 @@ public abstract class Contig extends Interval implements Serializable {
 	 */
 	public int getUpstreamIndexedBP(int bp) {
 		int closestBP = -1;
+		// TODO: Better way to seek for indexed position (R-tree)
 		for (int indexBP : index.keySet()) {
 			if (indexBP > closestBP && indexBP <= bp) {
 	    	closestBP = indexBP;

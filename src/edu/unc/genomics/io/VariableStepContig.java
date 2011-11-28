@@ -4,9 +4,12 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Iterator;
 
+import org.apache.log4j.Logger;
 import org.broad.igv.bbfile.WigItem;
 
 public class VariableStepContig extends Contig {
+	
+	private static final Logger log = Logger.getLogger(VariableStepContig.class);
 	
 	private static final long serialVersionUID = 3139905829545756903L;
 
@@ -95,7 +98,7 @@ public class VariableStepContig extends Contig {
 				
 				int delim = line.indexOf('\t');
 				bp = Integer.parseInt(line.substring(0, delim));
-				if (bp + getSpan() - 1 > low) {
+				if (bp + getSpan() - 1 >= low) {
 					value = Float.parseFloat(line.substring(delim+1));
 					hasNextLine = true;
 					break;
@@ -114,7 +117,7 @@ public class VariableStepContig extends Contig {
 			
 			try {
 				String line = raf.readLine();
-				if (line == null) {
+				if (line == null || line.startsWith(Contig.FIXED_STEP) || line.startsWith(Contig.VARIABLE_STEP)) {
 					hasNextLine = false;
 				} else {
 					int delim = line.indexOf('\t');

@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: java-genomics-io
+Bundle-SymbolicName: java-genomics-io
+Bundle-Version: 1.0.0
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Description: This project provides java readers for common genomic file formats.
+Bundle-DocURL: http://github.com/timpalpant/java-genomics-io
+Bundle-ClassPath: .,
+ lib/BigWig.jar,
+ lib/sam-1.56.jar,
+ lib/log4j-1.2.15.jar
+Export-Package: edu.unc.genomics.io
