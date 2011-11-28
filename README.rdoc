@@ -2,23 +2,7 @@
 
 This library provides a simple and performant API for working with many genomic file formats in a consistent fashion. It was prototyped in Ruby (https://github.com/timpalpant/bioruby-genomic-file). The library requires JDK7 since it makes use of switches on Strings and the new File/Path classes.
 
-The library is mainly a wrapper to pull together multiple existing libraries, including Picard (http://picard.sourceforge.net) for reading SAM/BAM files and the BigWig/BigBed readers provided by the Broad Institute (http://code.google.com/p/bigwig). The complete list of file formats currently supported is:
-
-* Bed
-* BigBed
-* BedGraph
-* SAM
-* BAM
-* Wiggle
-* BigWig
-* Tabix (all formats, but format cannot be auto detected yet)
-
-Coming soon:
-
-* GFF
-* TwoBit
-* Fasta
-* Fastq
+The library is mainly a wrapper to pull together multiple existing libraries, including Picard (http://picard.sourceforge.net) for reading SAM/BAM files and the BigWig/BigBed readers provided by the Broad Institute (http://code.google.com/p/bigwig). The complete list of file formats currently supported is: Bed, BigBed, BedGraph, SAM, BAM, Wiggle, BigWig, Tabix (all formats, but format cannot be auto detected yet). Coming soon: GFF, TwoBit, Fasta, Fastq.
 
 Currently, only Tabix, BigBed, BAM, Wiggle, and BigWig files may be queried randomly. Crude random querying may be implemented for other ASCII-text formats, but for now it is recommended that you first convert the files into Tabix format since this is highly performant. In addition, the library is mostly for reading files (input). Output functionality may be added in the future, but is less of a priority.
 
@@ -38,13 +22,19 @@ For applications that only require interval information (chr:start-stop), the fo
   $   System.out.println(interval.toBed());
   $ }
 
-This is particularly useful for writing Galaxy tools (http://getgalaxy.com).
+This is particularly useful for writing Galaxy tools (http://getgalaxy.org).
 
 Alternatively, if the file format is known and type-specific data is needed, it can be opened directly:
 
   $ BAMFile bam = new BAMFile(bamFile);
   $ for (BAMEntry entry : bam) {
   $   System.out.println(entry.getQuality());
+  $ }
+  $ 
+  $ Iterator<BAMEntry> result = bam.query("chr1", 1, 1_000_000);
+  $ while(result.hasNext()) {
+  $   BAMEntry entry = result.next();
+  $   // process the alignment
   $ }
 
 This could also be accomplished by casting in the first place, but is not recommended.
@@ -69,6 +59,7 @@ Tabix can be used if you wish to make random queries against interval files, but
   $ TabixFile<BedGraphEntry> t = new TabixFile<BedGraphEntry>(tabixedBedGraphFile, new BedGraphFile.BedGraphEntryFactory());
   $ Iterator<BedGraphEntry> result = t.query("chr22", 1, 100_000);
   $ while (result.hasNext()) {
+  $   BedGraphEntry entry = result.next();
   $   System.out.println(result.getValue());
   $ }
 
