@@ -2,7 +2,6 @@ package edu.unc.genomics.io;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 

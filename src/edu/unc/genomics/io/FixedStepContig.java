@@ -151,11 +151,7 @@ public class FixedStepContig extends Contig {
 				currentLine++;
 				
 				float value = Float.parseFloat(line);
-				
-				// Clamp to the region specified in the query
-				int itemStart = Math.max(bp, low);
-				int itemStop = Math.min(bp+getSpan()-1, high);
-				WigItem item = new WigItem(itemIndex++, chr, itemStart, itemStop, value);
+				WigItem item = new WigItem(itemIndex++, chr, bp, bp+getSpan()-1, value);
 							
 				bp += getStep();
 				
