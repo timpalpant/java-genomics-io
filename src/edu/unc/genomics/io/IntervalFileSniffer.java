@@ -11,7 +11,8 @@ import org.broad.igv.bbfile.BBFileReader;
 import edu.unc.genomics.BedEntry;
 import edu.unc.genomics.BedGraphEntry;
 import edu.unc.genomics.util.FileUtils;
-import edu.unc.genomics.util.NumUtils;
+
+import org.apache.commons.lang3.StringUtils;
 
 import net.sf.samtools.SAMFileReader;
 
@@ -47,8 +48,8 @@ public class IntervalFileSniffer {
 	public boolean isBed() throws IntervalFileSnifferException {
 		if (!isAscii()) { return false; }
 		if (numColumns() < 3 || numColumns() > 12) { return false; }
-		if (!NumUtils.isInteger(column(2)) || !NumUtils.isInteger(column(3))) { return false; }
-		if (numColumns() == 4 && NumUtils.isNumeric(column(4))) { return false; }
+		if (!StringUtils.isNumeric(column(2)) || !StringUtils.isNumeric(column(3))) { return false; }
+		if (numColumns() == 4 && StringUtils.isNumeric(column(4))) { return false; }
 		
 		try { 
 			BedEntry.parse(getFirstLine());
@@ -62,8 +63,8 @@ public class IntervalFileSniffer {
 	public boolean isBedGraph() throws IntervalFileSnifferException {
 		if (!isAscii()) { return false; }
 		if (numColumns() != 4) { return false; }
-		if (!NumUtils.isInteger(column(2)) || !NumUtils.isInteger(column(3))) { return false; }
-		if (!NumUtils.isNumeric(column(4))) { return false; }
+		if (!StringUtils.isNumeric(column(2)) || !StringUtils.isNumeric(column(3))) { return false; }
+		if (!StringUtils.isNumeric(column(4))) { return false; }
 		
 		try { 
 			BedGraphEntry.parse(getFirstLine());
@@ -89,7 +90,7 @@ public class IntervalFileSniffer {
 	public boolean isSAM() throws IntervalFileSnifferException {
 		if (!isAscii()) { return false; }
 		if (numColumns() < 4) { return false; }
-		if (!NumUtils.isInteger(column(4))) { return false; }
+		if (!StringUtils.isNumeric(column(4))) { return false; }
 		
 		// TODO: Better checking for SAM files
 		/*try {

@@ -103,6 +103,13 @@ public class TextWigFile extends WigFile {
 		
 		loadIndex(index, false);
 	}
+	
+	@Override
+	public void close() {
+		try {
+			raf.close();
+		} catch (Exception e) { }
+	}
 
 	@Override
 	public Iterator<WigItem> query(String chr, int start, int stop) throws IOException, WigFileException {

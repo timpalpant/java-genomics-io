@@ -3,7 +3,9 @@ package edu.unc.genomics.io;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -45,6 +47,21 @@ public abstract class IntervalFile<T extends Interval> implements Iterable<T>, C
 		} else {
 			throw new IntervalFileSnifferException("Could not autodetect Interval file format");
 		}
+	}
+	
+	public static List<Interval> loadAll(Path p) throws IntervalFileSnifferException, IOException {
+		IntervalFile<? extends Interval> intervalFile = autodetect(p);
+		
+		List<Interval> intervals = new ArrayList<Interval>();
+		try {
+			for (Interval interval : intervalFile) {
+				intervals.add(interval);
+			}
+		} finally {
+			intervalFile.close();
+		}
+		
+		return intervals;
 	}
 	
 	public abstract int count();

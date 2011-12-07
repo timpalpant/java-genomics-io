@@ -15,6 +15,7 @@
     <!-- Compile the java code from ${src} into ${build} -->
     <javac srcdir="${src}" destdir="${build}" source="1.7" target="1.7">
       <classpath location="lib/log4j-1.2.15.jar"/>
+      <classpath location="lib/commons-lang3-3.1.jar"/>
       <classpath location="lib/sam-1.56.jar"/>
       <classpath location="lib/BigWig.jar"/>
     </javac>

@@ -7,5 +7,6 @@
 	<classpathentry kind="lib" path="lib/BigWig.jar" sourcepath="/bigwig-api/src"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.15.jar"/>
 	<classpathentry kind="lib" path="lib/sam-1.56.jar" sourcepath="/picard/src"/>
+	<classpathentry kind="lib" path="lib/commons-lang3-3.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

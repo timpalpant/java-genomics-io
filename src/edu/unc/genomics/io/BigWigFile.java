@@ -39,6 +39,9 @@ public class BigWigFile extends WigFile {
 	}
 	
 	@Override
+	public void close() { }
+	
+	@Override
 	public Iterator<WigItem> query(String chr, int start, int stop) throws WigFileException {
 		if (!includes(chr, start, stop)) {
 			throw new WigFileException("BigWigFile does not contain data for region: " + chr + ":" + start + "-" + stop);

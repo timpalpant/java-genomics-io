@@ -1,17 +1,19 @@
 package edu.unc.genomics.io;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.broad.igv.bbfile.WigItem;
 
 import edu.unc.genomics.Interval;
 
-public abstract class WigFile {
+public abstract class WigFile implements Closeable {
 	
 	private static final Logger log = Logger.getLogger(WigFile.class);
 	protected final Path p;
@@ -44,7 +46,9 @@ public abstract class WigFile {
 	 * @return
 	 */
 	public static float[] flattenData(Iterator<WigItem> iter, int start, int stop) {
-		int length = stop - start + 1;
+		int low = Math.min(start, stop);
+		int high = Math.max(start, stop);
+		int length = high - low + 1;
 		float[] data = new float[length];
 		Arrays.fill(data, Float.NaN);
 		
@@ -55,6 +59,10 @@ public abstract class WigFile {
 					data[i-start] = item.getWigValue();
 				}
 			}
+		}
+		
+		if (start > stop) {
+			ArrayUtils.reverse(data);
 		}
 		
 		return data;
