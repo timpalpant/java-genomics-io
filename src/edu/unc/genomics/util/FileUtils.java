@@ -19,34 +19,27 @@ public class FileUtils {
 	}
 	
 	public static boolean isAsciiText(Path p, double threshold) throws IOException {
-		InputStream fis = Files.newInputStream(p);
 		int totalCount = 0;
 		int binaryCount = 0;
-		try {
+		try (InputStream fis = Files.newInputStream(p)) {
 			for (int i = 1; i < 1024; i++) {
 				if (fis.available() == 0) { break; }
 				int current = fis.read();
 				if (current < 32 || current > 127) { binaryCount++; }
 				totalCount++;
 			}
-		} finally {
-			fis.close();
 		}
 		
 		return ((double)binaryCount)/totalCount < threshold;
 	}
 	
 	public static long countLines(Path p) throws IOException {
-		BufferedReader reader = Files.newBufferedReader(p, Charset.defaultCharset());
-		
 		long count = 0;
-		try {
+		try (BufferedReader reader = Files.newBufferedReader(p, Charset.defaultCharset())) {
 			String line;
 			while ((line = reader.readLine()) != null) {
 				count++;
 			}
-		} finally {
-			reader.close();
 		}
 		
 		return count;

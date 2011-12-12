@@ -30,19 +30,22 @@ public abstract class IntervalFile<T extends Interval> implements Iterable<T>, C
 		IntervalFileSniffer sniffer = new IntervalFileSniffer(p);
 		
 		if (sniffer.isBigBed()) {
-			log.debug("Autodetected BigBed filetype for: " + p.getFileName().toString());
+			log.info("Autodetected BigBed filetype for: " + p.getFileName().toString());
 			return new BigBedFile(p);
 		} else if (sniffer.isBAM()) {
-			log.debug("Autodetected BAM filetype for: " + p.getFileName().toString());
+			log.info("Autodetected BAM filetype for: " + p.getFileName().toString());
 			return new SAMFile(p);
+		} else if (sniffer.isGFF()) {
+			log.info("Autodetected GFF filetype for: " + p.getFileName().toString());
+			return new GFFFile(p);
 		} else if (sniffer.isBedGraph()) {
-			log.debug("Autodetected BedGraph filetype for: " + p.getFileName().toString());
+			log.info("Autodetected BedGraph filetype for: " + p.getFileName().toString());
 			return new BedGraphFile(p);
 		} else if (sniffer.isBed()) {
-			log.debug("Autodetected Bed filetype for: " + p.getFileName().toString());
+			log.info("Autodetected Bed filetype for: " + p.getFileName().toString());
 			return new BedFile(p);
 		} else if (sniffer.isSAM()) {
-			log.debug("Autodetected SAM filetype for: " + p.getFileName().toString());
+			log.info("Autodetected SAM filetype for: " + p.getFileName().toString());
 				return new SAMFile(p);
 		} else {
 			throw new IntervalFileSnifferException("Could not autodetect Interval file format");
@@ -50,15 +53,11 @@ public abstract class IntervalFile<T extends Interval> implements Iterable<T>, C
 	}
 	
 	public static List<Interval> loadAll(Path p) throws IntervalFileSnifferException, IOException {
-		IntervalFile<? extends Interval> intervalFile = autodetect(p);
-		
 		List<Interval> intervals = new ArrayList<Interval>();
-		try {
+		try (IntervalFile<? extends Interval> intervalFile = autodetect(p)) {
 			for (Interval interval : intervalFile) {
 				intervals.add(interval);
 			}
-		} finally {
-			intervalFile.close();
 		}
 		
 		return intervals;
@@ -73,4 +72,8 @@ public abstract class IntervalFile<T extends Interval> implements Iterable<T>, C
 	}
 	
 	public abstract Iterator<T> query(String chr, int start, int stop) throws UnsupportedOperationException;
+	
+	public Path getPath() {
+		return p;
+	}
 }

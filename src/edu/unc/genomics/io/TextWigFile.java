@@ -61,8 +61,8 @@ public class TextWigFile extends WigFile {
 			try {
 				header = TrackHeader.parse(headerLine);
 			} catch (TrackHeaderException e) {
-				System.err.println("Error parsing UCSC track header in file: " + p.toString());
-				System.err.println(e.getMessage());
+				log.error("Error parsing UCSC track header in file: " + p.toString());
+				e.printStackTrace();
 			}
 		}
 
@@ -73,7 +73,7 @@ public class TextWigFile extends WigFile {
 		Path indexFile = p.resolveSibling(p.getFileName()+INDEX_EXTENSION);
 		try {
 			loadIndex(indexFile, true);
-		} catch (Exception e) {
+		} catch (IOException | WigFileException e) {
 			// (Re)generate if the index could not be loaded
 			generateIndex();
 			saveIndex(indexFile);
@@ -108,7 +108,9 @@ public class TextWigFile extends WigFile {
 	public void close() {
 		try {
 			raf.close();
-		} catch (Exception e) { }
+		} catch (IOException e) { 
+			throw new RuntimeException("Error closing TextWigFile");
+		}
 	}
 
 	@Override
@@ -369,49 +371,50 @@ public class TextWigFile extends WigFile {
 	 */
 	private void loadIndex(Path p, boolean matchChecksum) throws IOException, WigFileException {
 		log.debug("Attempting to load Wig file index from disk");
-		InputStream is = Files.newInputStream(p);
-		BufferedInputStream bis = new BufferedInputStream(is);
-		ObjectInputStream dis = new ObjectInputStream(bis);
-		
-		// Load and match version
-		long version = dis.readLong();
-		if (version != serialVersionUID) {
-			throw new WigFileException("Cannot load index from older version!");
-		}
-		// Load and optionally match checksum
-		long indexChecksum = dis.readLong();
-		if (matchChecksum && indexChecksum != checksum) {
-			throw new WigFileException("Index does not match checksum of Wig file!");
-		}
-		
-		// Load statistics
-		numBases = dis.readLong();
-		total = dis.readDouble();
-		mean = dis.readDouble();
-		stdev = dis.readDouble();
-		min = dis.readDouble();
-		max = dis.readDouble();
-		
-		try {
-			// Load chromosomes
-			int numChromosomes = dis.readInt();
-			chromosomes = new HashSet<String>(numChromosomes);
-			for (int i = 0; i < numChromosomes; i++) {
-				String chr = (String) dis.readObject();
-				chromosomes.add(chr);
+		try (InputStream is = Files.newInputStream(p)) {
+			BufferedInputStream bis = new BufferedInputStream(is);
+			ObjectInputStream dis = new ObjectInputStream(bis);
+			
+			// Load and match version
+			long version = dis.readLong();
+			if (version != serialVersionUID) {
+				throw new WigFileException("Cannot load index from older version!");
+			}
+			// Load and optionally match checksum
+			long indexChecksum = dis.readLong();
+			if (matchChecksum && indexChecksum != checksum) {
+				throw new WigFileException("Index does not match checksum of Wig file!");
 			}
 			
-			// Load Contigs
-			int numContigs = dis.readInt();
-			contigs = new ArrayList<Contig>(numContigs);
-			for (int i = 0; i < numContigs; i++) {
-				Contig contig = (Contig) dis.readObject();
-				contigs.add(contig);
+			// Load statistics
+			numBases = dis.readLong();
+			total = dis.readDouble();
+			mean = dis.readDouble();
+			stdev = dis.readDouble();
+			min = dis.readDouble();
+			max = dis.readDouble();
+			
+			try {
+				// Load chromosomes
+				int numChromosomes = dis.readInt();
+				chromosomes = new HashSet<String>(numChromosomes);
+				for (int i = 0; i < numChromosomes; i++) {
+					String chr = (String) dis.readObject();
+					chromosomes.add(chr);
+				}
+				
+				// Load Contigs
+				int numContigs = dis.readInt();
+				contigs = new ArrayList<Contig>(numContigs);
+				for (int i = 0; i < numContigs; i++) {
+					Contig contig = (Contig) dis.readObject();
+					contigs.add(contig);
+				}
+			} catch (ClassNotFoundException e) {
+				log.error("ClassNotFoundException while loading Wig index from file");
+				e.printStackTrace();
+				throw new WigFileException("ClassNotFoundException while trying to load Wig index from file");
 			}
-		} catch (ClassNotFoundException e) {
-			log.error("ClassNotFoundException while loading Wig index from file");
-			e.printStackTrace();
-			throw new WigFileException("ClassNotFoundException while trying to load Wig index from file");
 		}
 	}
 	
@@ -422,11 +425,10 @@ public class TextWigFile extends WigFile {
 	 */
 	private void saveIndex(Path p) throws IOException {
 		log.debug("Writing Wig index information to disk");
-		OutputStream os = Files.newOutputStream(p);
-		BufferedOutputStream bos = new BufferedOutputStream(os);
-		ObjectOutputStream dos = new ObjectOutputStream(bos);
-		
-		try {
+		try (OutputStream os = Files.newOutputStream(p)) {
+			BufferedOutputStream bos = new BufferedOutputStream(os);
+			ObjectOutputStream dos = new ObjectOutputStream(bos);
+			
 			// Write the serialization version and corresponding Wig file checksum
 			// at the top so it can easily be matched
 			dos.writeLong(serialVersionUID);
@@ -451,14 +453,11 @@ public class TextWigFile extends WigFile {
 			for (Contig c : contigs) {
 				dos.writeObject(c);
 			}
-		} catch (Exception e) {
+		} catch (IOException e) {
 			log.error("Error saving Wig index information to disk!: " + e.getMessage());
 			e.printStackTrace();
 			// Remove the file because it's probably corrupt
 			Files.deleteIfExists(p);
-		} finally {
-			dos.flush();
-			dos.close();
 		}
 	}
 	

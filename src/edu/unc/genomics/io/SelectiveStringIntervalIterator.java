@@ -44,7 +44,7 @@ public class SelectiveStringIntervalIterator<T extends Interval> extends StringI
 			T interval = factory.parse(line);
 			
 			// Validate that the interval meets the selection criteria (overlaps the specified window)
-			if (interval.getChr().equals(chr) && interval.getStop() >= start && interval.getStart() <= stop) {
+			if (interval != null && interval.getChr().equals(chr) && interval.getStop() >= start && interval.getStart() <= stop) {
 				nextInterval = interval;
 			}
 		}

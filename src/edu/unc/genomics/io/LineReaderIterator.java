@@ -44,6 +44,8 @@ public class LineReaderIterator implements Iterator<String> {
 		} catch (IOException e) {
 			log.error("Error getting next line from BufferedReader");
 			e.printStackTrace();
+			nextLine = null;
+			throw new RuntimeException("Error getting next line from BufferedReader");
 		}
 	}
 

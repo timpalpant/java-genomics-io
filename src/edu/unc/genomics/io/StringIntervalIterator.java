@@ -27,8 +27,13 @@ class StringIntervalIterator<T extends Interval> implements Iterator<T> {
 
 	@Override
 	public T next() {
-		String line = it.next();
-		return factory.parse(line);
+		T interval = null;
+		while ((interval == null) && it.hasNext()) {
+			String line = it.next();
+			interval = factory.parse(line);
+		}
+		
+		return interval;
 	}
 
 	@Override

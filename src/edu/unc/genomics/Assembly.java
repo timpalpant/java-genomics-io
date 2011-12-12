@@ -12,22 +12,41 @@ import java.util.Set;
 import java.util.zip.DataFormatException;
 
 public class Assembly implements Iterable<String> {
-	private Map<String, Integer> index = new HashMap<String, Integer>();
+	private final Path p;
+	private final Map<String, Integer> index = new HashMap<String, Integer>();
 	
 	public Assembly(Path p) throws IOException, DataFormatException {
-		BufferedReader reader = Files.newBufferedReader(p, Charset.defaultCharset());
-		
-		String line;
-		while ((line = reader.readLine()) != null) {
-			int delim = line.indexOf('\t');
-			if (delim == -1) {
-				throw new DataFormatException("Invalid format in Assembly file");
+		this.p = p;
+		try (BufferedReader reader = Files.newBufferedReader(p, Charset.defaultCharset())) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				int delim = line.indexOf('\t');
+				if (delim == -1) {
+					throw new DataFormatException("Invalid format in Assembly file");
+				}
+				
+				try {
+					String chr = line.substring(0, delim);
+					Integer length = Integer.valueOf(line.substring(delim+1));
+					index.put(chr, length);
+				} catch (NumberFormatException e) {
+					throw new DataFormatException("Invalid format in Assembly file");
+				}
 			}
-			
-			String chr = line.substring(0, delim);
-			Integer length = Integer.valueOf(line.substring(delim+1));
-			index.put(chr, length);
 		}
+	}
+	
+	public Path getPath() {
+		return p;
+	}
+	
+	@Override
+	public String toString() {
+		String name = p.getFileName().toString();
+		if (name.endsWith(".len")) {
+			name = name.substring(0, name.length()-4);
+		}
+		return name;
 	}
 	
 	public Set<String> chromosomes() {

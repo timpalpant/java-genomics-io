@@ -30,6 +30,10 @@ public class BedEntry extends ValuedInterval {
 	}
 	
 	public static BedEntry parse(String line) {
+		if (line.startsWith("#") || line.startsWith("track")) {
+			return null;
+		}
+		
 		String[] entry = line.split("\t");
 		if (entry.length < 3) {
 			throw new IntervalFileFormatException("Invalid Bed entry has < 3 columns");
@@ -71,42 +75,6 @@ public class BedEntry extends ValuedInterval {
 		}
 		
 		return bed;
-	}
-	
-	public String toBed6() {
-		StringBuilder s = new StringBuilder();
-		
-		s.append(chr).append('\t');
-		s.append(low()-1).append('\t');
-		s.append(high()).append('\t');
-		if (id != null) {
-			s.append(id);
-		} else {
-			s.append('.');
-		}
-		s.append('\t');
-		if (value != null) {
-			s.append(value);
-		} else {
-			s.append('.');
-		}
-		s.append('\t');
-		s.append(strand());
-		
-		return s.toString();
-	}
-	
-	public String toBed12() {
-		StringBuilder s = new StringBuilder(toBed6());
-		
-		// TODO: Add Bed12 fields
-		
-		return s.toString();
-	}
-	
-	@Override
-	public String toBed() {
-		return toBed6();
 	}
 
 	/**

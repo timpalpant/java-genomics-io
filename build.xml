@@ -28,7 +28,6 @@
     <!-- Put everything in ${build} into the BigWig.jar file -->
     <jar jarfile="${dist}/java-genomics-io.jar" manifest="META-INF/MANIFEST.MF">
       <fileset dir="${build}" />
-      <fileset dir="." includes="**/*.jar"/>
       <fileset dir="." includes="log4j.properties"/>
     </jar>
   </target>

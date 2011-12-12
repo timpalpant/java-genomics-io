@@ -7,7 +7,7 @@ package edu.unc.genomics.io;
  * @author timpalpant
  * 
  */
-public class IntervalFileSnifferException extends Exception {
+public class IntervalFileSnifferException extends RuntimeException {
 
 	private static final long serialVersionUID = 4085343850715532399L;
 
