@@ -63,6 +63,14 @@ public abstract class IntervalFile<T extends Interval> implements Iterable<T>, C
 		return intervals;
 	}
 	
+	public List<T> loadAll() {
+		List<T> intervals = new ArrayList<>();
+		for (T interval : this) {
+			intervals.add(interval);
+		}
+		return intervals;
+	}
+	
 	public abstract int count();
 	
 	public abstract Set<String> chromosomes();
