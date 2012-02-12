@@ -1,0 +1,13 @@
+chrI	SpotArray	feature	11	30	10.0	+	.	probe_id=Spot1;count=1
+chrI	SpotArray	feature	95	101	13.2	-	.	probe_id=Spot2;count=1
+chrII	SpotArray	feature	21	50	5.0	+	.	probe_id=Spot3;count=1
+chrIII	SpotArray	feature	16	20	2.0	-	.	probe_id=Spot4;count=1
+invalid entry
+chrIV	SpotArray	feature	100201	100220	10.0	-	.	probe_id=Spot5;count=1
+chrIV	SpotArray	feature	1000001	1001000	1.0	+	.	probe_id=Spot6;count=1
+chrIV	SpotArray	feature	1	12	12.0	+	.	probe_id=Spot7;count=1
+chrIV	SpotArray	feature	2	10	1.0	-	.	probe_id=Spot8;count=1
+chrI	SpotArray	feature	16	20	.	+	.	probe_id=Spot9;count=1
+chrII	SpotArray	feature	10	26	.	-	.	probe_id=Spot1;count=1
+invalid entry
+chrI	SpotArray

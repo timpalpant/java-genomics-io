@@ -33,10 +33,10 @@ public class TextWigFile extends WigFile {
 	private static Logger log = Logger.getLogger(TextWigFile.class);
 	
 	private BufferedRandomAccessFile raf;
-	private TrackHeader header = new TrackHeader("wiggle_0");;
+	private TrackHeader header = new TrackHeader("wiggle_0");
 	
-	private List<Contig> contigs = new ArrayList<Contig>();;
-	private Set<String> chromosomes = new HashSet<String>();;
+	private List<Contig> contigs = new ArrayList<Contig>();
+	private Set<String> chromosomes = new HashSet<String>();
 	
 	private long checksum;
 	
@@ -75,6 +75,7 @@ public class TextWigFile extends WigFile {
 			loadIndex(indexFile, true);
 		} catch (IOException | WigFileException e) {
 			// (Re)generate if the index could not be loaded
+			Files.deleteIfExists(indexFile);
 			generateIndex();
 			saveIndex(indexFile);
 		}
@@ -129,7 +130,7 @@ public class TextWigFile extends WigFile {
 		List<Contig> relevantContigs = new ArrayList<Contig>();
 		
 		for (Contig c : contigs) {
-			if (c.getChr().equals(chr) && c.getStop() > start && c.getStart() < stop) {
+			if (c.getChr().equals(chr) && c.getStop() >= start && c.getStart() <= stop) {
 				relevantContigs.add(c);
 			}
 		}

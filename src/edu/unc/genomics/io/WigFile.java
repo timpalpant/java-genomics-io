@@ -55,8 +55,8 @@ public abstract class WigFile implements Closeable {
 		while (iter.hasNext()) {
 			WigItem item = iter.next();
 			for (int i = item.getStartBase(); i <= item.getEndBase(); i++) {
-				if (i-start > 0 && i-start < data.length) {
-					data[i-start] = item.getWigValue();
+				if (i >= low && i <= high) {
+					data[i-low] = item.getWigValue();
 				}
 			}
 		}

@@ -1,4 +1,7 @@
 build
 dist
 bin
+reports
 *.class
+jacoco.exec
+.DS_Store

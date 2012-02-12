@@ -24,17 +24,4 @@ public class ArrayUtils {
 		}
 		return ret;
 	}
-	
-	public static float[] add(float[] v1, float[] v2) {
-		if (v1.length != v2.length) {
-			throw new IllegalArgumentException("Cannot add arrays of unequal length");
-		}
-		
-		float[] result = new float[v1.length];
-		for (int i = 0; i < v1.length; i++) {
-			result[i] = v1[i] + v2[i];
-		}
-		
-		return result;
-	}
 }
