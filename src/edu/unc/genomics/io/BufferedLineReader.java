@@ -1,6 +1,7 @@
 package edu.unc.genomics.io;
 
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.Iterator;
 
@@ -12,7 +13,7 @@ import edu.unc.genomics.io.LineReader;
  * @author timpalpant
  *
  */
-public class BufferedLineReader implements LineReader, Iterable<String> {
+public class BufferedLineReader implements LineReader, Iterable<String>, Closeable {
 
 	private BufferedReader reader;
 	
@@ -21,6 +22,11 @@ public class BufferedLineReader implements LineReader, Iterable<String> {
 	 */
 	public BufferedLineReader(BufferedReader reader) {
 		this.reader = reader;
+	}
+	
+	@Override
+	public void close() throws IOException {
+		reader.close();
 	}
 
 	@Override

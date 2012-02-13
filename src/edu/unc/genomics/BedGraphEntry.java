@@ -47,8 +47,12 @@ public class BedGraphEntry extends ValuedInterval {
 		}
 		
 		String chr = entry[0];
-		int start = Integer.parseInt(entry[1]);
+		// BedGraph is 0-indexed, half-open
+		int start = Integer.parseInt(entry[1]) + 1;
 		int stop = Integer.parseInt(entry[2]);
+		if (start > stop) {
+			throw new IntervalFileFormatException("Invalid BedGraph entry has start > stop");
+		}
 		BedGraphEntry bedGraph = new BedGraphEntry(chr, start, stop);
 		
 		if (entry.length >= 4) {

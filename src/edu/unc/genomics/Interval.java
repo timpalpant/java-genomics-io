@@ -28,7 +28,7 @@ public class Interval implements Serializable {
 		return chr + "\tSpotArray\tfeature\t" + low() + "\t" + high() + "\t.\t" + strand() + "\t.\tprobe_id=no_id;count=1";
 	}
 	
-	public int center() {
+	public final int center() {
 		return (start + stop) / 2;
 	}
 	
@@ -36,32 +36,32 @@ public class Interval implements Serializable {
 		return Math.abs(stop-start) + 1;
 	}
 	
+	public boolean includes(final String chr, final int bp) {
+		return this.chr == chr && includes(bp);
+	}
+	
 	public boolean includes(final int bp) {
 		return low() <= bp && high() >= bp;
 	}
 	
-	public int low() {
+	public final int low() {
 		return Math.min(start, stop);
 	}
 	
-	public int high() {
+	public final int high() {
 		return Math.max(start, stop);
 	}
 
-	public boolean isWatson() {
+	public final boolean isWatson() {
 		return stop >= start;
 	}
 	
-	public boolean isCrick() {
+	public final boolean isCrick() {
 		return !isWatson();
 	}
 	
-	public String strand() {
+	public final String strand() {
 		return isWatson() ? "+" : "-";
-	}
-	
-	public boolean isValid() {
-		return start > 0 && stop > 0;
 	}
 	
   /* (non-Javadoc)

@@ -9,7 +9,9 @@
   <property name="dist"  location="dist"/>
   <property name="lib"   location="lib"/>
   <property name="reports"   location="reports"/>
-  <property name="reports.xml"   location="${reports}/junit-xml"/>
+  <property name="reports.junit"   location="${reports}/junit"/>
+  <property name="reports.junit.xml"   location="${reports.junit}/xml"/>
+  <property name="reports.jacoco"   location="${reports}/jacoco"/>
   
   <path id="classpath">
     <fileset dir="${lib}">
@@ -56,32 +58,35 @@
   </target>
    
 	<target name="test" depends="compile">
-	  <delete dir="${reports}" />
 	  <mkdir dir="${reports}" />
-	  <mkdir dir="${reports.xml}" />
+	  <mkdir dir="${reports.junit}" />
+	  <mkdir dir="${reports.junit.xml}" />
 	  
 		<junit fork="true" forkmode="once" dir="${basedir}" failureProperty="test.failed">
 			<classpath location="${build}" />
 			<classpath refid="classpath" />
 
 			<formatter type="xml" />
-			<batchtest todir="${reports.xml}">
+			<batchtest todir="${reports.junit.xml}">
 				<fileset dir="${test}">
-					<include name="**/*Test.java" />
+				  <include name="**/*Test.java" />
+				  <exclude name="**/Abstract*Test.java" />
 				</fileset>
 			</batchtest>
 		</junit>
 
-		<junitreport todir="${reports.xml}">
-			<fileset dir="${reports.xml}">
+		<junitreport todir="${reports.junit.xml}">
+			<fileset dir="${reports.junit.xml}">
 				<include name="TEST-*.xml" />
 			</fileset>
-			<report format="frames" todir="${reports}" />
+			<report format="frames" todir="${reports.junit}" />
 		</junitreport>
 	</target>
 	
 	<target name="coverage" depends="compile">
 	  <delete file="jacoco.exec" />
+	  <mkdir dir="${reports}" />
+	  <mkdir dir="${reports.jacoco}" />
 	  
 	  <jacoco:coverage>
 	    <junit fork="true" forkmode="once" dir="${basedir}" failureProperty="test.failed">
@@ -90,7 +95,8 @@
 
   			<batchtest>
   				<fileset dir="${test}">
-  					<include name="**/*Test.java" />
+  				  <include name="**/*Test.java" />
+  				  <exclude name="**/Abstract*Test.java" />
   				</fileset>
   			</batchtest>
   		</junit>
@@ -113,7 +119,7 @@
 	      </sourcefiles>
 	    </structure>
 	    
-	    <html destdir="${reports}" />
+	    <html destdir="${reports.jacoco}" />
 	  </jacoco:report>
 	</target>
 

@@ -2,23 +2,29 @@ package edu.genomics;
 
 import static org.junit.Assert.*;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import edu.unc.genomics.GFFEntry;
+
 public class GFFEntryTest {
+
+	private final String TEST_GFF_ENTRY = "chrIV\tSpotArray\tfeature\t11\t30\t10.0\t-\t.\tprobe_id=Spot1;count=1";
+	private GFFEntry test;
 
 	@Before
 	public void setUp() throws Exception {
-	}
-
-	@After
-	public void tearDown() throws Exception {
+		test = GFFEntry.parse(TEST_GFF_ENTRY);
 	}
 
 	@Test
 	public void testParse() {
-		fail("Not yet implemented");
+		assertEquals("chrIV", test.getChr());
+		assertEquals(30, test.getStart());
+		assertEquals(11, test.getStop());
+		assertEquals("Spot1", test.getId());
+		assertEquals(10.0, test.getValue().doubleValue(), 1e-15);
+		assertEquals("-", test.strand());
 	}
 
 }

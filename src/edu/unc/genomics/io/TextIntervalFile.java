@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 
 import edu.unc.genomics.Interval;
 import edu.unc.genomics.IntervalFactory;
+import edu.unc.genomics.util.FileUtils;
 
 /**
  * @author timpalpant
@@ -26,13 +27,21 @@ public abstract class TextIntervalFile<T extends Interval> extends IntervalFile<
 	private Set<String> chromosomes;
 	private int count = 0;
 	
+	private final BufferedReader reader;
+	private final Iterator<T> iter;
+	
 	protected TextIntervalFile(Path p, IntervalFactory<T> factory) throws IOException {
 		super(p);
 		this.factory = factory;
+		reader = Files.newBufferedReader(p, Charset.defaultCharset());
+		BufferedLineReader lineReader = new BufferedLineReader(reader);
+		iter = new StringIntervalIterator<T>(lineReader.iterator(), factory);
 	}
 	
 	@Override
-	public void close() {	}
+	public void close() throws IOException {	
+		reader.close();
+	}
 	
 	public Set<String> chromosomes() {
 		if (chromosomes == null) {
@@ -49,8 +58,11 @@ public abstract class TextIntervalFile<T extends Interval> extends IntervalFile<
 	
 	public int count() {
 		if (count == 0) {
-			for (Interval i : this) {
-				count++;
+			try {
+				count = FileUtils.countLines(p);
+			} catch (IOException e) {
+				log.error("Error counting lines in file: " + p);
+				e.printStackTrace();
 			}
 		}
 		
@@ -59,35 +71,12 @@ public abstract class TextIntervalFile<T extends Interval> extends IntervalFile<
 
 	@Override
 	public Iterator<T> iterator() {
-		BufferedReader reader = null;
-		
-		try {
-			reader = Files.newBufferedReader(p, Charset.defaultCharset());
-		} catch (IOException e) {
-			log.error("Error opening BufferedReader for file: " + p.toString());
-			e.printStackTrace();
-		}
-		
-		BufferedLineReader lineReader = new BufferedLineReader(reader);
-		return new StringIntervalIterator<T>(lineReader.iterator(), factory);
+		return iter;
 	}
 
 	@Override
 	public Iterator<T> query(String chr, int start, int stop) {
-		//throw new UnsupportedOperationException("Cannot randomly query unindexed TextIntervalFiles");
-		
-		log.warn("Random queries against text files will result in poor performance. Indexing with Tabix is recommended.");
-		BufferedReader reader = null;
-		
-		try {
-			reader = Files.newBufferedReader(p, Charset.defaultCharset());
-		} catch (IOException e) {
-			log.error("Error opening BufferedReader for file: " + p.toString());
-			e.printStackTrace();
-		}
-		
-		BufferedLineReader lineReader = new BufferedLineReader(reader);
-		return new SelectiveStringIntervalIterator<T>(lineReader.iterator(), factory, chr, start, stop);
+		throw new UnsupportedOperationException("Cannot randomly query unindexed TextIntervalFiles");
 	}
 	
 }

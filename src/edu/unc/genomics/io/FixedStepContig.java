@@ -132,7 +132,7 @@ public class FixedStepContig extends Contig {
 			// Skip to the start line
 			for (currentLine = getLineNumForBasePair(closestUpstream); 
 					currentLine < startLine; currentLine++) {
-				raf.readLine();
+				System.out.println(raf.readLine());
 			}
 			
 			// Set the base pair we are at (may be < start if span > 1)
@@ -141,7 +141,7 @@ public class FixedStepContig extends Contig {
 		
 		@Override
 		public boolean hasNext() {
-			return currentLine < stopLine;
+			return currentLine <= stopLine;
 		}
 
 		@Override

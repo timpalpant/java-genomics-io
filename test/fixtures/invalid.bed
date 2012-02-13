@@ -7,7 +7,7 @@ chrIV	100200	100220	Spot5	10.0	-
 chrIV	1000000	1001000	Spot6	1
 chrIV	0	12	Spot7	12	+
 chrIV	1	10	Spot8	1.0	-
-chrI	15	20	Spot9
+chrI	15	20	Spot9	.	+
 chrII	25	10	Spot1
 illegal entry
 chrII 1

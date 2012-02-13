@@ -76,7 +76,7 @@ public abstract class WigFile implements Closeable {
 		return query(i.getChr(), i.low(), i.high());
 	}
 	
-	public abstract Iterator<WigItem> query(String chr, int start, int stop) throws IOException, WigFileException;
+	public abstract Iterator<WigItem> query(String chr, int low, int high) throws IOException, WigFileException;
 	
 	public abstract Set<String> chromosomes();
 	

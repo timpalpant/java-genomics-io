@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.broad.igv.bbfile.BBFileReader;
 import org.broad.igv.bbfile.BBTotalSummaryBlock;
+import org.broad.igv.bbfile.BigWigIterator;
 import org.broad.igv.bbfile.RPChromosomeRegion;
 import org.broad.igv.bbfile.WigItem;
 
@@ -42,12 +43,12 @@ public class BigWigFile extends WigFile {
 	public void close() { }
 	
 	@Override
-	public Iterator<WigItem> query(String chr, int start, int stop) throws WigFileException {
-		if (!includes(chr, start, stop)) {
-			throw new WigFileException("BigWigFile does not contain data for region: " + chr + ":" + start + "-" + stop);
+	public Iterator<WigItem> query(String chr, int low, int high) throws WigFileException {
+		if (!includes(chr, low, high)) {
+			throw new WigFileException("BigWigFile does not contain data for region: " + chr + ":" + low + "-" + high);
 		}
 		
-		return reader.getBigWigIterator(chr, start-1, chr, stop-1, false);
+		return new BigWigCoordinateChangeIterator(reader.getBigWigIterator(chr, low-1, chr, high, false));
 	}
 
 	@Override
@@ -66,7 +67,7 @@ public class BigWigFile extends WigFile {
 	public int getChrStop(String chr) {
 		int chrID = reader.getChromosomeID(chr);
 		RPChromosomeRegion region = reader.getChromosomeBounds(chrID, chrID);
-		return region.getEndBase()+1;
+		return region.getEndBase();
 	}
 
 	@Override
@@ -99,7 +100,7 @@ public class BigWigFile extends WigFile {
 
 	@Override
 	public double stdev() {
-		return Math.sqrt((summary.getSumSquares()-Math.pow(mean(), 2))/numBases());
+		return Math.sqrt(summary.getSumSquares()/numBases() - Math.pow(mean(), 2));
 	}
 
 	@Override
@@ -109,7 +110,7 @@ public class BigWigFile extends WigFile {
 
 	@Override
 	public double max() {
-		return summary.getMinVal();
+		return summary.getMaxVal();
 	}
 
 	@Override
@@ -130,6 +131,39 @@ public class BigWigFile extends WigFile {
 		s.append("\tMax value:\t\t").append(max());
 		
 		return s.toString();
+	}
+	
+	/**
+	 * BigWig files are 0-indexed, half-open
+	 * To conform with the rest of the package, 
+	 * wrap and shift the results to 1-indexed, closed
+	 * @author timpalpant
+	 *
+	 */
+	private static class BigWigCoordinateChangeIterator implements Iterator<WigItem> {
+
+		private final BigWigIterator bwIter;
+		
+		private BigWigCoordinateChangeIterator(BigWigIterator bwIter) {
+			this.bwIter = bwIter;
+		}
+		
+		@Override
+		public boolean hasNext() {
+			return bwIter.hasNext();
+		}
+
+		@Override
+		public WigItem next() {
+			WigItem item = bwIter.next();
+			WigItem shifted = new WigItem(item.getItemNumber(), item.getChromosome(), item.getStartBase()+1, item.getEndBase(), item.getWigValue());
+			return shifted;
+		}
+
+		@Override
+		public void remove() {
+			bwIter.remove();
+		}
 	}
 
 }

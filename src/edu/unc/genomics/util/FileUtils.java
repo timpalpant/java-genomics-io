@@ -33,8 +33,8 @@ public class FileUtils {
 		return ((double)binaryCount)/totalCount < threshold;
 	}
 	
-	public static long countLines(Path p) throws IOException {
-		long count = 0;
+	public static int countLines(Path p) throws IOException {
+		int count = 0;
 		try (BufferedReader reader = Files.newBufferedReader(p, Charset.defaultCharset())) {
 			String line;
 			while ((line = reader.readLine()) != null) {

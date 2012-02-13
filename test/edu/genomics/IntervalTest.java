@@ -2,78 +2,90 @@ package edu.genomics;
 
 import static org.junit.Assert.*;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
+import edu.unc.genomics.Interval;
+
 public class IntervalTest {
-
-	@Before
-	public void setUp() throws Exception {
-	}
-
-	@After
-	public void tearDown() throws Exception {
-	}
+	
+	protected final Interval watson = new Interval("chr23", 30, 40);
+	protected final Interval crick = new Interval("chr23", 101, 95);
 
 	@Test
 	public void testToBed() {
-		fail("Not yet implemented");
+		assertEquals("chr23\t29\t40\t.\t.\t+", watson.toBed());
+		assertEquals("chr23\t94\t101\t.\t.\t-", crick.toBed());
 	}
 
 	@Test
 	public void testToBedGraph() {
-		fail("Not yet implemented");
+		assertEquals("chr23\t29\t40", watson.toBedGraph());
+		assertEquals("chr23\t94\t101", crick.toBedGraph());
 	}
 
 	@Test
 	public void testToGFF() {
-		fail("Not yet implemented");
+		assertEquals("chr23\tSpotArray\tfeature\t30\t40\t.\t+\t.\tprobe_id=no_id;count=1", watson.toGFF());
+		assertEquals("chr23\tSpotArray\tfeature\t95\t101\t.\t-\t.\tprobe_id=no_id;count=1", crick.toGFF());
 	}
 
 	@Test
 	public void testCenter() {
-		fail("Not yet implemented");
+		assertEquals(35, watson.center());
+		assertEquals(98, crick.center());
 	}
 
 	@Test
 	public void testLength() {
-		fail("Not yet implemented");
+		assertEquals(11, watson.length());
+		assertEquals(7, crick.length());
 	}
 
 	@Test
 	public void testIncludes() {
-		fail("Not yet implemented");
+		assertFalse(watson.includes(29));
+		for (int i = 30; i <= 40; i++) {
+			assertTrue(watson.includes(i));
+		}
+		assertFalse(watson.includes(41));
+		assertFalse(watson.includes(-35));
+		
+		assertFalse(crick.includes(94));
+		for (int i = 95; i <= 101; i++) {
+			assertTrue(crick.includes(i));
+		}
+		assertFalse(crick.includes(102));
+		assertFalse(crick.includes(-35));
 	}
 
 	@Test
 	public void testLow() {
-		fail("Not yet implemented");
+		assertEquals(30, watson.low());
+		assertEquals(95, crick.low());
 	}
 
 	@Test
 	public void testHigh() {
-		fail("Not yet implemented");
+		assertEquals(40, watson.high());
+		assertEquals(101, crick.high());
 	}
 
 	@Test
 	public void testIsWatson() {
-		fail("Not yet implemented");
+		assertTrue(watson.isWatson());
+		assertFalse(crick.isWatson());
 	}
 
 	@Test
 	public void testIsCrick() {
-		fail("Not yet implemented");
+		assertFalse(watson.isCrick());
+		assertTrue(crick.isCrick());
 	}
 
 	@Test
 	public void testStrand() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testIsValid() {
-		fail("Not yet implemented");
+		assertEquals("+", watson.strand());
+		assertEquals("-", crick.strand());
 	}
 
 }

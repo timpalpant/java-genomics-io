@@ -115,22 +115,22 @@ public class TextWigFile extends WigFile {
 	}
 
 	@Override
-	public Iterator<WigItem> query(String chr, int start, int stop) throws IOException, WigFileException {
-		if (!includes(chr, start, stop)) {
-			throw new WigFileException("WigFile does not contain data for region: " + chr + ":" + start + "-" + stop);
-		} else if (start > stop) {
+	public Iterator<WigItem> query(String chr, int low, int high) throws IOException, WigFileException {
+		if (!includes(chr, low, high)) {
+			throw new WigFileException("WigFile does not contain data for region: " + chr + ":" + low + "-" + high);
+		} else if (low > high) {
 			throw new WigFileException("Query start > stop!");
 		}
 		
-		List<Contig> relevantContigs = getContigsForQuery(chr, start, stop);
-		return new TextWigIterator(raf, relevantContigs.iterator(), chr, start, stop);
+		List<Contig> relevantContigs = getContigsForQuery(chr, low, high);
+		return new TextWigIterator(raf, relevantContigs.iterator(), chr, low, high);
 	}
 	
-	private List<Contig> getContigsForQuery(String chr, int start, int stop) {
+	private List<Contig> getContigsForQuery(String chr, int low, int high) {
 		List<Contig> relevantContigs = new ArrayList<Contig>();
 		
 		for (Contig c : contigs) {
-			if (c.getChr().equals(chr) && c.getStop() >= start && c.getStart() <= stop) {
+			if (c.getChr().equals(chr) && c.getStop() >= low && c.getStart() <= high) {
 				relevantContigs.add(c);
 			}
 		}
@@ -282,11 +282,6 @@ public class TextWigFile extends WigFile {
 		while ((line = raf.readLine()) != null) {
 			lineNum++;
 			
-			// Store the current position for putting in the index
-			if (contigs.size() > 0 && (lineNum-contig.getStartLine()) % KEY_GRANULARITY == 0) {
-				cursor = raf.getFilePointer();
-			}
-			
 			if (line.startsWith(Contig.FIXED_STEP) || line.startsWith(Contig.VARIABLE_STEP)) {
 				// If this is the end of a previous Contig, store the stop info
 				if (contigs.size() > 0) {
@@ -299,15 +294,19 @@ public class TextWigFile extends WigFile {
 				contigs.add(contig);
 				
 				// Set the new Contig's start info
-				cursor = raf.getFilePointer();
 				contig.setStartLine(lineNum+1);
 				if (contig instanceof VariableStepContig) {
+					cursor = raf.getFilePointer();
 					String firstLine = raf.readLine();
 					int delim = firstLine.indexOf('\t');
 					if (delim == -1) {
 						throw new WigFileException("Illegal format in variableStep contig, line " + lineNum);
 					}
-					bp = Integer.parseInt(firstLine.substring(0, delim));
+					try {
+						bp = Integer.parseInt(firstLine.substring(0, delim));
+					} catch (NumberFormatException e) {
+						throw new WigFileException("Illegal format in variableStep contig, line " + lineNum);
+					}
 					contig.setStart(bp);
 					raf.seek(cursor);
 				} else {
@@ -316,15 +315,23 @@ public class TextWigFile extends WigFile {
 			} else {
 				if (contig instanceof FixedStepContig) {
 					bp += ((FixedStepContig)contig).getStep();
-					value = Double.parseDouble(line);
+					try {
+						value = Double.parseDouble(line);
+					} catch (NumberFormatException e) {
+						throw new WigFileException("Illegal format in fixedStep contig, line " + lineNum);
+					}
 				} else {
 					int delim = line.indexOf('\t');
 					if (delim == -1) {
 						throw new WigFileException("Illegal format in variableStep contig, line " + lineNum);
 					}
 					
-					bp = Integer.parseInt(line.substring(0, delim));
-					value = Double.parseDouble(line.substring(delim+1));
+					try {
+						bp = Integer.parseInt(line.substring(0, delim));
+						value = Double.parseDouble(line.substring(delim+1));
+					} catch (NumberFormatException e) {
+						throw new WigFileException("Illegal format in variableStep contig, line " + lineNum);
+					}
 				}
 				
 				if (value < min) {
@@ -343,6 +350,11 @@ public class TextWigFile extends WigFile {
 				if ((lineNum - contig.getStartLine()) % KEY_GRANULARITY == 0) {
 					contig.storeIndex(bp, cursor);
 				}
+			}
+			
+			// Store the cursor position if the next line will be stored in the index
+			if ((lineNum + 1 - contig.getStartLine()) % KEY_GRANULARITY == 0) {
+				cursor = raf.getFilePointer();
 			}
 		}
 		
@@ -411,6 +423,9 @@ public class TextWigFile extends WigFile {
 					Contig contig = (Contig) dis.readObject();
 					contigs.add(contig);
 				}
+				
+				dis.close();
+				bis.close();
 			} catch (ClassNotFoundException e) {
 				log.error("ClassNotFoundException while loading Wig index from file");
 				e.printStackTrace();
@@ -454,6 +469,9 @@ public class TextWigFile extends WigFile {
 			for (Contig c : contigs) {
 				dos.writeObject(c);
 			}
+			
+			dos.close();
+			bos.close();
 		} catch (IOException e) {
 			log.error("Error saving Wig index information to disk!: " + e.getMessage());
 			e.printStackTrace();
