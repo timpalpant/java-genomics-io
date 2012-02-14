@@ -9,16 +9,15 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.unc.genomics.BedEntry;
 import edu.unc.genomics.Interval;
 
 public class GFFFileTest extends AbstractIntervalFileTest {
 
-	public static final Path TEST_BED = Paths.get("test/fixtures/test.bed");
+	public static final Path TEST_GFF = Paths.get("test/fixtures/test.gff");
 
 	@Before
 	public void setUp() throws Exception {
-		test = new BedFile(TEST_BED);
+		test = new GFFFile(TEST_GFF);
 	}
 
 	@Test

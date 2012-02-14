@@ -42,6 +42,9 @@ public class BedEntry extends ValuedInterval {
 		String chr = entry[0];
 		int start = Integer.parseInt(entry[1]) + 1; // Bed is 0-indexed
 		int stop = Integer.parseInt(entry[2]); // and half-open
+		if (start > stop) {
+			throw new IntervalFileFormatException("Invalid Bed entry has start > stop");
+		}
 		BedEntry bed = new BedEntry(chr, start, stop);
 		
 		if (entry.length >= 4) {
@@ -53,7 +56,7 @@ public class BedEntry extends ValuedInterval {
 		}
 		
 		// Reverse start/stop if on the - strand
-		if (entry.length >= 6 && entry[5].equalsIgnoreCase("-") && start < stop) {
+		if (entry.length >= 6 && entry[5].equalsIgnoreCase("-")) {
 			int tmp = bed.getStart();
 			bed.setStart(stop);
 			bed.setStop(tmp);

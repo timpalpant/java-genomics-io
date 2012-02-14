@@ -14,16 +14,16 @@ import edu.unc.genomics.Interval;
 
 public class SAMFileTest extends AbstractIntervalFileTest {
 
-	public static final Path TEST_BED = Paths.get("test/fixtures/test.bed");
+	public static final Path TEST_SAM = Paths.get("test/fixtures/test.sam");
 
 	@Before
 	public void setUp() throws Exception {
-		test = new BedFile(TEST_BED);
+		test = new SAMFile(TEST_SAM);
 	}
 
 	@Test
 	public void testCount() {
-		assertEquals(10, test.count());
+		assertEquals(69, test.count());
 	}
 
 	@Test
@@ -32,7 +32,7 @@ public class SAMFileTest extends AbstractIntervalFileTest {
 		assertTrue(test.chromosomes().contains("chrII"));
 		assertTrue(test.chromosomes().contains("chrIII"));
 		assertTrue(test.chromosomes().contains("chrIV"));
-		assertEquals(4, test.chromosomes().size());
+		assertEquals(18, test.chromosomes().size());
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
@@ -46,13 +46,13 @@ public class SAMFileTest extends AbstractIntervalFileTest {
 		for (Interval entry : test) {
 			count++;
 		}
-		assertEquals(10, count);
+		assertEquals(69, count);
 	}
 
 	@Test
 	public void testLoadAll() {
 		List<? extends Interval> all = test.loadAll();
-		assertEquals(10, all.size());
+		assertEquals(69, all.size());
 	}
 
 }

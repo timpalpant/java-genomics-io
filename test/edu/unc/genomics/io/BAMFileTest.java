@@ -1,58 +1,32 @@
 package edu.unc.genomics.io;
 
-import static org.junit.Assert.*;
-
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.unc.genomics.BedEntry;
-import edu.unc.genomics.Interval;
+import edu.unc.genomics.util.Samtools;
 
-public class BAMFileTest extends AbstractIntervalFileTest {
+public class BAMFileTest extends SAMFileTest {
 
-	public static final Path TEST_BED = Paths.get("test/fixtures/test.bed");
+	public static final Path TEST_BAM = Paths.get("test/fixtures/test.bam");
 
 	@Before
 	public void setUp() throws Exception {
-		test = new BedFile(TEST_BED);
+		test = new SAMFile(TEST_BAM);
 	}
 
+	@AfterClass
+	public static void cleanUp() throws Exception {
+		Files.deleteIfExists(Samtools.findIndexFile(TEST_BAM));
+	}
+	
+	@Override
 	@Test
-	public void testCount() {
-		assertEquals(10, test.count());
-	}
-
-	@Test
-	public void testChromosomes() {
-		assertTrue(test.chromosomes().contains("chrI"));
-		assertTrue(test.chromosomes().contains("chrII"));
-		assertTrue(test.chromosomes().contains("chrIII"));
-		assertTrue(test.chromosomes().contains("chrIV"));
-		assertEquals(4, test.chromosomes().size());
-	}
-
-	@Test(expected = UnsupportedOperationException.class)
 	public void testQuery() {
 		test.query("chrI", 10, 1000);
 	}
-
-	@Test
-	public void testIterator() {
-		int count = 0;
-		for (Interval entry : test) {
-			count++;
-		}
-		assertEquals(10, count);
-	}
-
-	@Test
-	public void testLoadAll() {
-		List<? extends Interval> all = test.loadAll();
-		assertEquals(10, all.size());
-	}
-
 }

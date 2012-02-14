@@ -1,6 +1,3 @@
-/**
- * 
- */
 package edu.unc.genomics.io;
 
 import java.io.IOException;
@@ -9,9 +6,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import net.sf.samtools.BAMIndex;
 import net.sf.samtools.BAMIndexMetaData;
-import net.sf.samtools.SAMFileHeader;
 import net.sf.samtools.SAMFileReader;
 import net.sf.samtools.SAMRecord;
 import net.sf.samtools.SAMRecordIterator;
@@ -19,6 +17,7 @@ import net.sf.samtools.SAMSequenceDictionary;
 import net.sf.samtools.SAMSequenceRecord;
 
 import edu.unc.genomics.SAMEntry;
+import edu.unc.genomics.util.Samtools;
 
 /**
  * @author timpalpant
@@ -26,11 +25,28 @@ import edu.unc.genomics.SAMEntry;
  */
 public class SAMFile extends IntervalFile<SAMEntry> {
 	
+	private static final Logger log = Logger.getLogger(SAMFile.class);
+	
 	private SAMFileReader reader;
+	private Path index;
+	private SAMRecordIterator it;
 	
 	public SAMFile(Path p) {
 		super(p);
 		reader = new SAMFileReader(p.toFile());
+		
+		// Automatically index BAM files that do not have an index
+		if (reader.isBinary()) {
+			if (!reader.hasIndex()) {
+				log.debug("Generating index for BAM file: " + p);
+				index = p.resolveSibling(p.getFileName()+".bai");
+				Samtools.indexBAMFile(reader, index);
+				// Now that we have an index, reset the reader
+				reader = new SAMFileReader(p.toFile());
+			} else {
+				index = Samtools.findIndexFile(p);
+			}
+		}
 	}
 	
 	@Override
@@ -72,25 +88,31 @@ public class SAMFile extends IntervalFile<SAMEntry> {
 
 	@Override
 	public Iterator<SAMEntry> iterator() {
-		return new SAMEntryIterator(reader.iterator());
+		// Close any previous iterators since SAM-JDK only allows one at a time
+		if (it != null) {
+			it.close();
+		}
+
+		it = reader.iterator();
+		return new SAMEntryIterator();
 	}
 
 	@Override
 	public Iterator<SAMEntry> query(String chr, int start, int stop) {
-		return new SAMEntryIterator(reader.query(chr, start, stop, false));
+		// Close any previous iterators since SAM-JDK only allows one at a time
+		if (it != null) {
+			it.close();
+		}
+
+		it = reader.query(chr, start, stop, false);
+		return new SAMEntryIterator();
 	}
 	
 	/**
 	 * @author timpalpant
 	 * Wrapper around Picard's SAMRecordIterator to return SAMEntry's
 	 */
-	class SAMEntryIterator implements Iterator<SAMEntry> {
-
-		private SAMRecordIterator it;
-		
-		public SAMEntryIterator(SAMRecordIterator it) {
-			this.it = it;
-		}
+	private class SAMEntryIterator implements Iterator<SAMEntry> {
 		
 		@Override
 		public boolean hasNext() {

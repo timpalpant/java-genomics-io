@@ -9,16 +9,15 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.unc.genomics.BedEntry;
 import edu.unc.genomics.Interval;
 
 public class BedGraphFileTest extends AbstractIntervalFileTest {
 
-	public static final Path TEST_BED = Paths.get("test/fixtures/test.bed");
+	public static final Path TEST_BEDGRAPH = Paths.get("test/fixtures/test.bedGraph");
 
 	@Before
 	public void setUp() throws Exception {
-		test = new BedFile(TEST_BED);
+		test = new BedGraphFile(TEST_BEDGRAPH);
 	}
 
 	@Test
