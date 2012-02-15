@@ -132,7 +132,7 @@ public class FixedStepContig extends Contig {
 			// Skip to the start line
 			for (currentLine = getLineNumForBasePair(closestUpstream); 
 					currentLine < startLine; currentLine++) {
-				System.out.println(raf.readLine());
+				raf.readLine();
 			}
 			
 			// Set the base pair we are at (may be < start if span > 1)
