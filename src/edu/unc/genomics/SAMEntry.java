@@ -30,11 +30,15 @@ public class SAMEntry extends Interval {
 	public SAMEntry(SAMRecord r) {
 		super(r.getReferenceName(), r.getAlignmentStart(), r.getAlignmentEnd());
 		this.r = r;
-	}
-	
-	@Override
-	public int length() {
-		return r.getReadLength();
+        
+		// Make the SAMEntry conform to standards
+    int extend = (r.getInferredInsertSize() == 0) ? r.getReadLength() : Math.abs(r.getInferredInsertSize());
+		if (r.getReadNegativeStrandFlag()) {
+			start = r.getAlignmentStart() + r.getReadLength() - 1;
+			stop = start - extend + 1;
+		} else {
+			stop = start + extend - 1;
+		}
 	}
 
 	/**

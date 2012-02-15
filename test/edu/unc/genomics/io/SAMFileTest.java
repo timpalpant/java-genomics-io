@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import edu.unc.genomics.BedEntry;
 import edu.unc.genomics.Interval;
+import edu.unc.genomics.SAMEntry;
 
 public class SAMFileTest extends AbstractIntervalFileTest {
 
