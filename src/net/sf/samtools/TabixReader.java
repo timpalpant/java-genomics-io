@@ -45,22 +45,22 @@ public class TabixReader implements LineReader, Iterable<String> {
 	private Path mFn;
 	private BlockCompressedInputStream mFp;
 
-	private int mPreset;
-	private int mSc;
-	private int mBc;
-	private int mEc;
-	private int mMeta;
-	private int mSkip;
-	private String[] mSeq;
+	protected int mPreset;
+	protected int mSc;
+	protected int mBc;
+	protected int mEc;
+	protected int mMeta;
+	protected int mSkip;
+	protected String[] mSeq;
 
-	private HashMap<String, Integer> mChr2tid;
+	protected HashMap<String, Integer> mChr2tid;
 
-	private static final String DEFAULT_INDEX_EXTENSION = ".tbi";
-	private static final int MAX_BIN = 37450;
-	private static final int TAD_MIN_CHUNK_GAP = 32768;
-	private static final int TAD_LIDX_SHIFT = 14;
+	static final String DEFAULT_INDEX_EXTENSION = ".tbi";
+	static final int MAX_BIN = 37450;
+	static final int TAD_MIN_CHUNK_GAP = 32768;
+	static final int TAD_LIDX_SHIFT = 14;
 
-	private class TPair64 implements Comparable<TPair64> {
+	class TPair64 implements Comparable<TPair64> {
 		long u, v;
 
 		public TPair64(final long _u, final long _v) {
@@ -80,15 +80,15 @@ public class TabixReader implements LineReader, Iterable<String> {
 		}
 	};
 
-	private class TIndex {
+	class TIndex {
 		HashMap<Integer, TPair64[]> b; // binning index
 		long[] l; // linear index
 	};
 
 	private TIndex[] mIndex;
 
-	private class TIntv {
-		int tid, beg, end;
+	class TIntv {
+		int tid, beg, end, bin;
 	};
 
 	private static boolean less64(final long u, final long v) { // unsigned 64-bit
@@ -139,6 +139,15 @@ public class TabixReader implements LineReader, Iterable<String> {
 		byte[] buf = new byte[8];
 		is.read(buf);
 		return ByteBuffer.wrap(buf).order(ByteOrder.LITTLE_ENDIAN).getLong();
+	}
+
+	public static String readLine(final InputStream is) throws IOException {
+		StringBuilder buf = new StringBuilder();
+		int c;
+		while ((c = is.read()) >= 0 && c != '\n')
+			buf.append((char)c);
+		if (c < 0) return null;
+		return buf.toString();
 	}
 
 	/**
@@ -223,7 +232,7 @@ public class TabixReader implements LineReader, Iterable<String> {
 		return new LineReaderIterator(this);
 	}
 
-	private int chr2tid(final String chr) {
+	protected int chr2tid(final String chr) {
 		if (mChr2tid.containsKey(chr))
 			return mChr2tid.get(chr);
 		else
@@ -254,7 +263,7 @@ public class TabixReader implements LineReader, Iterable<String> {
 		return ret;
 	}
 
-	private TIntv getIntv(final String s) {
+	protected TIntv getIntv(final String s) {
 		TIntv intv = new TIntv();
 		int col = 0, end = 0, beg = 0;
 		while ((end = s.indexOf('\t', beg)) >= 0 || end == -1) {

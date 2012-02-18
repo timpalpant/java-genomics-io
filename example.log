@@ -1,0 +1,210 @@
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.bam
+DEBUG main edu.unc.genomics.util.Samtools - Indexed 69 records in BAM file
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.bam
+DEBUG main edu.unc.genomics.util.Samtools - Indexed 69 records in BAM file
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.bam
+DEBUG main edu.unc.genomics.util.Samtools - Indexed 69 records in BAM file
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.bam
+DEBUG main edu.unc.genomics.util.Samtools - Indexed 69 records in BAM file
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.bam
+DEBUG main edu.unc.genomics.util.Samtools - Indexed 69 records in BAM file
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.bam
+DEBUG main edu.unc.genomics.util.Samtools - Indexed 69 records in BAM file
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.bam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected BAM filetype for: test.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.bam
+DEBUG main edu.unc.genomics.util.Samtools - Indexed 69 records in BAM file
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.bam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected BAM filetype for: test.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.bam
+DEBUG main edu.unc.genomics.util.Samtools - Indexed 69 records in BAM file
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.bam
+DEBUG main edu.unc.genomics.util.Samtools - Indexed 69 records in BAM file
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.bam
+DEBUG main edu.unc.genomics.util.Samtools - Indexed 69 records in BAM file
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.bam
+DEBUG main edu.unc.genomics.util.Samtools - Indexed 69 records in BAM file
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.bam
+DEBUG main edu.unc.genomics.util.Samtools - Indexed 69 records in BAM file
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.bam
+DEBUG main edu.unc.genomics.util.Samtools - Indexed 69 records in BAM file
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.bam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected BAM filetype for: test.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.bam
+DEBUG main edu.unc.genomics.util.Samtools - Indexed 69 records in BAM file
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.bam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected BAM filetype for: test.bam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+INFO main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+DEBUG main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+DEBUG main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+DEBUG main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+DEBUG main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+DEBUG main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+DEBUG main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Indexed 69 records in BAM file
+DEBUG main edu.unc.genomics.util.Samtools - Converting SAM file test/fixtures/test.sam to BAM file test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Creating BAM index for file: test/fixtures/test.sam.bam
+DEBUG main edu.unc.genomics.util.Samtools - Indexed 69 records in BAM file
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+DEBUG main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam
+DEBUG main org.broad.igv.bbfile.BBFileReader - Opening BBFile source  test/fixtures/test.sam
+DEBUG main edu.unc.genomics.io.IntervalFile - Autodetected SAM filetype for: test.sam

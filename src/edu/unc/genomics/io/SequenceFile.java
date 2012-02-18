@@ -10,7 +10,7 @@ import org.apache.log4j.Logger;
 
 import edu.unc.genomics.Sequence;
 
-public abstract class SequenceFile<T extends Sequence> implements Iterable<T>, Closeable {
+abstract class SequenceFile<T extends Sequence> implements Iterable<T>, Closeable {
 	
 	private static final Logger log = Logger.getLogger(SequenceFile.class);
 	
@@ -24,10 +24,10 @@ public abstract class SequenceFile<T extends Sequence> implements Iterable<T>, C
 		SequenceFileSniffer sniffer = new SequenceFileSniffer(p);
 		
 		if (sniffer.isFasta()) {
-			log.info("Autodetected FASTA filetype for: " + p.getFileName().toString());
+			log.debug("Autodetected FASTA filetype for: " + p.getFileName().toString());
 			return new FastaFile(p);
 		} else if (sniffer.isFastq()) {
-			log.info("Autodetected FASTQ filetype for: " + p.getFileName().toString());
+			log.debug("Autodetected FASTQ filetype for: " + p.getFileName().toString());
 			return new FastqFile(p);
 		} else if (sniffer.isTwoBit()) {
 			throw new SequenceFileSnifferException("TwoBit files are not yet supported");

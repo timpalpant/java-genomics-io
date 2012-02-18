@@ -30,6 +30,10 @@ public abstract class TextIntervalFile<T extends Interval> extends IntervalFile<
 	private final BufferedReader reader;
 	private final Iterator<T> iter;
 	
+	private Path bgzip;
+	private Path tabix;
+	private TabixFile<T> tabixFile;
+	
 	protected TextIntervalFile(Path p, IntervalFactory<T> factory) throws IOException {
 		super(p);
 		this.factory = factory;
@@ -41,15 +45,28 @@ public abstract class TextIntervalFile<T extends Interval> extends IntervalFile<
 	@Override
 	public void close() throws IOException {	
 		reader.close();
+		
+		if (bgzip != null) {
+			Files.deleteIfExists(bgzip);
+		}
+		
+		if (tabix != null) {
+			Files.deleteIfExists(tabix);
+		}
 	}
 	
 	public Set<String> chromosomes() {
 		if (chromosomes == null) {
-			chromosomes = new HashSet<String>();
-			count = 0;
-			for (Interval i : this) {
-				chromosomes.add(i.getChr());
-				count++;
+			// If we've already indexed for Tabix, get the chromosomes from there
+			if (tabixFile != null) {
+				chromosomes = tabixFile.chromosomes();
+			} else {
+				chromosomes = new HashSet<String>();
+				count = 0;
+				for (Interval i : this) {
+					chromosomes.add(i.getChr());
+					count++;
+				}
 			}
 		}
 		
@@ -58,11 +75,15 @@ public abstract class TextIntervalFile<T extends Interval> extends IntervalFile<
 	
 	public int count() {
 		if (count == 0) {
-			try {
-				count = FileUtils.countLines(p);
-			} catch (IOException e) {
-				log.error("Error counting lines in file: " + p);
-				e.printStackTrace();
+			if (tabixFile != null) {
+				count = tabixFile.count();
+			} else {
+				try {
+					count = FileUtils.countLines(p);
+				} catch (IOException e) {
+					log.error("Error counting lines in file: " + p);
+					throw new RuntimeException("Error counting lines in file");
+				}
 			}
 		}
 		
@@ -75,8 +96,23 @@ public abstract class TextIntervalFile<T extends Interval> extends IntervalFile<
 	}
 
 	@Override
-	public Iterator<T> query(String chr, int start, int stop) {
-		throw new UnsupportedOperationException("Cannot randomly query unindexed TextIntervalFiles");
+	public Iterator<T> query(String chr, int start, int stop) {		
+		// Index the file with Tabix to enable querying
+		if (tabixFile == null) {
+			convertToTabix();
+		}
+		
+		return tabixFile.query(chr, start, stop);
+	}
+	
+	private void convertToTabix() {
+		// Sort the input file
+		
+		// BGZip the sorted file
+		
+		// Delete the sorted (uncompressed) file
+		
+		// Index with Tabix
 	}
 	
 }

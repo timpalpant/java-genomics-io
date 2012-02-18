@@ -9,9 +9,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.unc.genomics.BedEntry;
 import edu.unc.genomics.Interval;
-import edu.unc.genomics.SAMEntry;
 
 public class SAMFileTest extends AbstractIntervalFileTest {
 
@@ -36,7 +34,7 @@ public class SAMFileTest extends AbstractIntervalFileTest {
 		assertEquals(18, test.chromosomes().size());
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testQuery() {
 		test.query("chrI", 10, 1000);
 	}

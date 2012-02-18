@@ -9,7 +9,7 @@ import edu.unc.genomics.IntervalFactory;
  * @author timpalpant
  *
  */
-public class SelectiveStringIntervalIterator<T extends Interval> extends StringIntervalIterator<T> {
+class SelectiveStringIntervalIterator<T extends Interval> extends StringIntervalIterator<T> {
 
 	private T nextInterval;
 	private final String chr;

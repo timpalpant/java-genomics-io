@@ -7,7 +7,7 @@ import java.util.Iterator;
 import org.apache.log4j.Logger;
 import org.broad.igv.bbfile.WigItem;
 
-public class VariableStepContig extends Contig {
+class VariableStepContig extends Contig {
 	
 	private static final Logger log = Logger.getLogger(VariableStepContig.class);
 	

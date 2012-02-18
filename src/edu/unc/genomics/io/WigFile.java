@@ -33,8 +33,10 @@ public abstract class WigFile implements Closeable {
 		WigFile wig;
 		
 		if (BigWigFile.isBigWig(p)) {
+			log.debug("Autodetected BigWig file type for: " + p);
 			wig = new BigWigFile(p);
 		} else {
+			log.debug("Autodetected Wiggle file type for: " + p);
 			wig = new TextWigFile(p);
 		}
 		
@@ -42,8 +44,13 @@ public abstract class WigFile implements Closeable {
 	}
 	
 	/**
-	 * @param iter
-	 * @return
+	 * Collect all of the WigItems provided by iter and flatten them into an array
+	 * If start > stop, then the array will be reversed prior to returning
+	 * 
+	 * @param iter an iterator with Wig data
+	 * @param start the start base pair, corresponding to data[0]
+	 * @param stop the stop base pair, corresponding to data[data.length-1]
+	 * @return data a flattened array of the data from iter
 	 */
 	public static float[] flattenData(Iterator<WigItem> iter, int start, int stop) {
 		int low = Math.min(start, stop);

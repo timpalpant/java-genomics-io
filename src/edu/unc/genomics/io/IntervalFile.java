@@ -30,22 +30,22 @@ public abstract class IntervalFile<T extends Interval> implements Iterable<T>, C
 		IntervalFileSniffer sniffer = new IntervalFileSniffer(p);
 		
 		if (sniffer.isBigBed()) {
-			log.info("Autodetected BigBed filetype for: " + p.getFileName().toString());
+			log.debug("Autodetected BigBed filetype for: " + p.getFileName().toString());
 			return new BigBedFile(p);
 		} else if (sniffer.isBAM()) {
-			log.info("Autodetected BAM filetype for: " + p.getFileName().toString());
-			return new SAMFile(p);
+			log.debug("Autodetected BAM filetype for: " + p.getFileName().toString());
+			return new BAMFile(p);
 		} else if (sniffer.isGFF()) {
-			log.info("Autodetected GFF filetype for: " + p.getFileName().toString());
+			log.debug("Autodetected GFF filetype for: " + p.getFileName().toString());
 			return new GFFFile(p);
 		} else if (sniffer.isBedGraph()) {
-			log.info("Autodetected BedGraph filetype for: " + p.getFileName().toString());
+			log.debug("Autodetected BedGraph filetype for: " + p.getFileName().toString());
 			return new BedGraphFile(p);
 		} else if (sniffer.isBed()) {
-			log.info("Autodetected Bed filetype for: " + p.getFileName().toString());
+			log.debug("Autodetected Bed filetype for: " + p.getFileName().toString());
 			return new BedFile(p);
 		} else if (sniffer.isSAM()) {
-			log.info("Autodetected SAM filetype for: " + p.getFileName().toString());
+			log.debug("Autodetected SAM filetype for: " + p.getFileName().toString());
 			return new SAMFile(p);
 		} else {
 			throw new IntervalFileSnifferException("Could not autodetect Interval file format");

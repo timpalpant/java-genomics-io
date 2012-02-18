@@ -13,7 +13,7 @@ import edu.unc.genomics.io.LineReader;
  * @author timpalpant
  *
  */
-public class BufferedLineReader implements LineReader, Iterable<String>, Closeable {
+class BufferedLineReader implements LineReader, Iterable<String>, Closeable {
 
 	private BufferedReader reader;
 	

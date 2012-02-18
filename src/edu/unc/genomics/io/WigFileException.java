@@ -1,6 +1,3 @@
-/**
- * 
- */
 package edu.unc.genomics.io;
 
 import java.util.zip.DataFormatException;

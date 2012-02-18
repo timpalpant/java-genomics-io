@@ -103,12 +103,7 @@ public class IntervalFileSniffer {
 	}
 	
 	public boolean isSAM() throws IOException {
-		if (!isAscii()) { return false; }
-		if (numColumns() < 4) { return false; }
-		if (!StringUtils.isNumeric(column(4))) { return false; }
-		
-		// TODO: Better checking for SAM files
-		/*try {
+		try {
 		SAMFileReader.setDefaultValidationStringency(SAMFileReader.ValidationStringency.STRICT);
 		SAMFileReader reader = new SAMFileReader(p.toFile());
 			return !reader.isBinary();
@@ -116,9 +111,7 @@ public class IntervalFileSniffer {
 			return false;
 		} finally {
 			SAMFileReader.setDefaultValidationStringency(SAMFileReader.ValidationStringency.DEFAULT_STRINGENCY);
-		}*/
-		
-		return true;
+		}
 	}
 	
 	private String getFirstLine() throws IOException {
