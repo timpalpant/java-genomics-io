@@ -1,11 +1,15 @@
 package edu.unc.genomics.util;
 
+import it.unipi.di.util.ExternalSort;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
+import net.sf.samtools.TabixWriter;
 
 /**
  * @author timpalpant
@@ -44,4 +48,5 @@ public class FileUtils {
 		
 		return count;
 	}
+
 }

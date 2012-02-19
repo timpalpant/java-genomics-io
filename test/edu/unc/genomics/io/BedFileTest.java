@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Iterator;
 import java.util.List;
 
 import org.junit.Before;
@@ -35,9 +36,15 @@ public class BedFileTest extends AbstractIntervalFileTest {
 		assertEquals(4, test.chromosomes().size());
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testQuery() {
-		test.query("chrI", 10, 1000);
+		Iterator<? extends Interval> it = test.query("chrI", 10, 97);
+		int count = 0;
+		while (it.hasNext()) {
+			it.next();
+			count++;
+		}
+		assertEquals(3, count);
 	}
 
 	@Test

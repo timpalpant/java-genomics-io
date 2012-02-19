@@ -9,11 +9,15 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import net.sf.samtools.TabixWriter;
+import net.sf.samtools.TabixWriter.TabixException;
+
 import org.apache.log4j.Logger;
 
 import edu.unc.genomics.Interval;
 import edu.unc.genomics.IntervalFactory;
 import edu.unc.genomics.util.FileUtils;
+import edu.unc.genomics.util.Tabix;
 
 /**
  * @author timpalpant
@@ -31,7 +35,7 @@ public abstract class TextIntervalFile<T extends Interval> extends IntervalFile<
 	private final Iterator<T> iter;
 	
 	private Path bgzip;
-	private Path tabix;
+	private Path index;
 	private TabixFile<T> tabixFile;
 	
 	protected TextIntervalFile(Path p, IntervalFactory<T> factory) throws IOException {
@@ -50,8 +54,8 @@ public abstract class TextIntervalFile<T extends Interval> extends IntervalFile<
 			Files.deleteIfExists(bgzip);
 		}
 		
-		if (tabix != null) {
-			Files.deleteIfExists(tabix);
+		if (index != null) {
+			Files.deleteIfExists(index);
 		}
 	}
 	
@@ -107,12 +111,48 @@ public abstract class TextIntervalFile<T extends Interval> extends IntervalFile<
 	
 	private void convertToTabix() {
 		// Sort the input file
+		Path sorted = p.resolveSibling(p.getFileName()+".sorted");
+		try {
+			Tabix.sortFile(p, sorted, factory.tabixConf());
+		} catch (IOException e3) {
+			log.error("Error sorting interval file for Tabix lookup");
+			throw new RuntimeException("Error sorting interval file");
+		}
 		
 		// BGZip the sorted file
+		bgzip = p.resolveSibling(p.getFileName()+".gz");
+		try {
+			Tabix.bgzip(sorted, bgzip);
+		} catch (IOException e2) {
+			log.error("Error BGZipping interval file for Tabix lookup");
+			e2.printStackTrace();
+			throw new RuntimeException("Error initializing Tabix file");
+		}
 		
 		// Delete the sorted (uncompressed) file
+		try {
+			Files.delete(sorted);
+		} catch (IOException e1) {
+			log.warn("Error deleting temporary sorted interval file");
+			e1.printStackTrace();
+		}
 		
 		// Index with Tabix
+		try {
+			index = Tabix.index(bgzip, factory.tabixConf());
+		} catch (IOException | TabixException e1) {
+			log.error("Error indexing with Tabix");
+			e1.printStackTrace();
+			throw new RuntimeException("Error initializing Tabix file");
+		}
+		
+		try {
+			tabixFile = new TabixFile<T>(bgzip, factory);
+		} catch (IOException e) {
+			log.error("Error initializing Tabix file");
+			e.printStackTrace();
+			throw new RuntimeException("Error initializing Tabix file");
+		}
 	}
 	
 }

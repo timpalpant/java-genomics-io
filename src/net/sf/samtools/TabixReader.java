@@ -31,6 +31,7 @@ import net.sf.samtools.util.BlockCompressedInputStream;
 
 import java.io.*;
 import java.nio.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Arrays;
@@ -42,7 +43,7 @@ import edu.unc.genomics.io.LineReader;
 import edu.unc.genomics.io.LineReaderIterator;
 
 public class TabixReader implements LineReader, Iterable<String> {
-	private Path mFn;
+	protected Path mFn;
 	private BlockCompressedInputStream mFp;
 
 	protected int mPreset;
@@ -59,6 +60,8 @@ public class TabixReader implements LineReader, Iterable<String> {
 	static final int MAX_BIN = 37450;
 	static final int TAD_MIN_CHUNK_GAP = 32768;
 	static final int TAD_LIDX_SHIFT = 14;
+	
+	protected static Path index;
 
 	class TPair64 implements Comparable<TPair64> {
 		long u, v;
@@ -105,7 +108,11 @@ public class TabixReader implements LineReader, Iterable<String> {
 	public TabixReader(final Path p) throws IOException {
 		mFn = p;
 		mFp = new BlockCompressedInputStream(p.toFile());
-		readIndex();
+		
+		index = mFn.resolveSibling(mFn.getFileName() + DEFAULT_INDEX_EXTENSION);
+		if (Files.exists(index)) {
+			readIndex();
+		}
 	}
 
 	private static int reg2bins(final int beg, final int _end, final int[] list) {
@@ -213,7 +220,7 @@ public class TabixReader implements LineReader, Iterable<String> {
 	 * Read the Tabix index from the default file.
 	 */
 	private void readIndex() throws IOException {
-		readIndex(mFn.resolveSibling(mFn.getFileName() + DEFAULT_INDEX_EXTENSION));
+		readIndex(index);
 	}
 
 	/**
@@ -282,8 +289,13 @@ public class TabixReader implements LineReader, Iterable<String> {
 					intv.end = 1;
 			} else { // FIXME: SAM supports are not tested yet
 				if ((mPreset & 0xffff) == 0) { // generic
-					if (col == mEc)
-						intv.end = Integer.parseInt(s.substring(beg, end));
+					if (col == mEc) {
+						if (end == -1) {
+							intv.end = Integer.parseInt(s.substring(beg, s.length()));
+						} else {
+							intv.end = Integer.parseInt(s.substring(beg, end));
+						}
+					}
 				} else if ((mPreset & 0xffff) == 1) { // SAM
 					if (col == 6) { // CIGAR
 						int l = 0, i, j;
@@ -413,22 +425,23 @@ public class TabixReader implements LineReader, Iterable<String> {
 	 *
 	 */
 	public class TabixIterator implements Iterator<String> {
-		private int i, n_seeks;
+		private int i;
 		private int tid, beg, end;
 		private TPair64[] off;
 		private long curr_off;
 		private boolean iseof;
+		private String nextLine;
 
 		public TabixIterator(final int _tid, final int _beg, final int _end,
 				final TPair64[] _off) {
 			i = -1;
-			n_seeks = 0;
 			curr_off = 0;
 			iseof = false;
 			off = _off;
 			tid = _tid;
 			beg = _beg;
 			end = _end;
+			advance();
 		}
 		
 		@Override
@@ -442,15 +455,29 @@ public class TabixReader implements LineReader, Iterable<String> {
 		}
 
 		@Override
-		public String next() throws NoSuchElementException {
-			if (iseof)
-				return null;
+		public String next() {
+			String r = nextLine;
+			advance();
+			return r;
+		}
+		
+		private void advance() throws NoSuchElementException {
+			if (iseof) {
+				return;
+			}
+			
+			nextLine = null;
 			for (;;) {
 				if (curr_off == 0 || !less64(curr_off, off[i].v)) { // then jump to the next chunk
-					if (i == off.length - 1)
+					if (i == off.length - 1) {
+						iseof = true;
 						break; // no more chunks
-					if (i >= 0)
+					}
+					
+					if (i >= 0) {
 						assert (curr_off == off[i].v); // otherwise bug
+					}
+					
 					if (i < 0 || off[i].v != off[i + 1].u) { // not adjacent chunks; then seek
 						try {
 							mFp.seek(off[i + 1].u);
@@ -458,8 +485,8 @@ public class TabixReader implements LineReader, Iterable<String> {
 							throw new NoSuchElementException("IOException while trying to get next element");
 						}
 						curr_off = mFp.getFilePointer();
-						++n_seeks;
 					}
+					
 					++i;
 				}
 				
@@ -469,23 +496,25 @@ public class TabixReader implements LineReader, Iterable<String> {
 						TIntv intv;
 						char[] str = s.toCharArray();
 						curr_off = mFp.getFilePointer();
-						if (str.length == 0 || str[0] == mMeta)
+						if (str.length == 0 || str[0] == mMeta) {
 							continue;
+						}
 						intv = getIntv(s);
-						if (intv.tid != tid || intv.beg >= end)
+						if (intv.tid != tid || intv.beg >= end) {
+							iseof = true;
 							break; // no need to proceed
-						else if (intv.end > beg && intv.beg < end)
-							return s; // overlap; return
+						} else if (intv.end > beg && intv.beg < end) {
+							nextLine = s; // overlap; return
+							return;
+						}
 					} else {
-						break; // end of file
+						iseof = true;
+						break;
 					}
 				} catch (IOException e) {
 					throw new NoSuchElementException("IOException while trying to get next element");
 				}
 			}
-			
-			iseof = true;
-			return null;
 		}
 	}
 

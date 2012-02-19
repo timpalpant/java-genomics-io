@@ -82,17 +82,21 @@ public class TabixWriter extends TabixReader {
 		mSkip = conf.linesToSkip;
 	}
 
-	public void createIndex(File fn) throws Exception {
-		BlockCompressedInputStream fp = new BlockCompressedInputStream(fn);
+	public Path createIndex() throws IOException, TabixException {
+		// Make the index
+		BlockCompressedInputStream fp = new BlockCompressedInputStream(mFn.toFile());
 		makeIndex(fp);
 		fp.close();
-		File indexFile = new File(fn + ".tbi");
-		BlockCompressedOutputStream fpidx = new BlockCompressedOutputStream(indexFile);
+		
+		// Save the index to disk
+		BlockCompressedOutputStream fpidx = new BlockCompressedOutputStream(index.toFile());
 		saveIndex(fpidx);
 		fpidx.close();
+		
+		return index;
 	}
 
-	private void makeIndex(BlockCompressedInputStream fp) throws Exception {
+	private void makeIndex(BlockCompressedInputStream fp) throws IOException, TabixException {
 		int last_bin, save_bin;
 		int last_coor, last_tid, save_tid;
 		long save_off, last_off, lineno = 0, offset0 = (long) -1;
@@ -110,18 +114,16 @@ public class TabixWriter extends TabixReader {
 			}
 			TIntv intv = getIntv(str);
 			if (intv.beg < 0 || intv.end < 0) {
-				throw new Exception("The indexes overlap or are out of bounds.");
+				throw new TabixException("The indexes overlap or are out of bounds.");
 			}
 			if (last_tid != intv.tid) { // change of chromosomes
 				if (last_tid > intv.tid) {
-					throw new Exception(
-							String.format("The chromosome blocks are not continuous at line %d, is the file sorted? [pos %d].",
-									lineno, intv.beg + 1));
+					throw new TabixException(String.format("The chromosome blocks are not continuous at line %d, is the file sorted? [pos %d].", lineno, intv.beg + 1));
 				}
 				last_tid = intv.tid;
 				last_bin = 0xffffffff;
 			} else if (last_coor > intv.beg) {
-				throw new Exception(String.format("File out of order at line %d.", lineno));
+				throw new TabixException(String.format("File out of order at line %d.", lineno));
 			}
 			long tmp = insertLinear(linearIndex.get(intv.tid), intv.beg, intv.end, last_off);
 			if (last_off == 0)
@@ -139,8 +141,7 @@ public class TabixWriter extends TabixReader {
 					break;
 			}
 			if (fp.getFilePointer() <= last_off) {
-				throw new Exception(String.format("Bug in BGZF: %x < %x.",
-						fp.getFilePointer(), last_off));
+				throw new TabixException(String.format("Bug in BGZF: %x < %x.", fp.getFilePointer(), last_off));
 			}
 			last_off = fp.getFilePointer();
 			last_coor = intv.beg;
@@ -347,5 +348,40 @@ public class TabixWriter extends TabixReader {
 			this.commentChar = commentChar;
 			this.linesToSkip = linesToSkip;
 		}
+	}
+	
+	public class TabixException extends Exception {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -7503271407068631460L;
+
+		public TabixException() {
+			super();
+			// TODO Auto-generated constructor stub
+		}
+
+		public TabixException(String message, Throwable cause,
+				boolean enableSuppression, boolean writableStackTrace) {
+			super(message, cause, enableSuppression, writableStackTrace);
+			// TODO Auto-generated constructor stub
+		}
+
+		public TabixException(String message, Throwable cause) {
+			super(message, cause);
+			// TODO Auto-generated constructor stub
+		}
+
+		public TabixException(String message) {
+			super(message);
+			// TODO Auto-generated constructor stub
+		}
+
+		public TabixException(Throwable cause) {
+			super(cause);
+			// TODO Auto-generated constructor stub
+		}
+		
 	}
 }

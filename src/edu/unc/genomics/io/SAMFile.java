@@ -91,7 +91,7 @@ public class SAMFile extends IntervalFile<SAMEntry> {
 		}
 
 		it = reader.iterator();
-		return new SAMEntryIterator();
+		return new SAMEntryIterator(it);
 	}
 
 	@Override
@@ -106,7 +106,7 @@ public class SAMFile extends IntervalFile<SAMEntry> {
 		}
 
 		it = reader.query(chr, start, stop, false);
-		return new SAMEntryIterator();
+		return new SAMEntryIterator(it);
 	}
 	
 	private void convertToBAM() {
@@ -128,27 +128,5 @@ public class SAMFile extends IntervalFile<SAMEntry> {
 		reader.enableIndexMemoryMapping(false);
 		// Turn on index caching
 		reader.enableIndexCaching(true);
-	}
-	
-	/**
-	 * @author timpalpant
-	 * Wrapper around Picard's SAMRecordIterator to return SAMEntry's
-	 */
-	private class SAMEntryIterator implements Iterator<SAMEntry> {
-		
-		@Override
-		public boolean hasNext() {
-			return it.hasNext();
-		}
-
-		@Override
-		public SAMEntry next() {
-			return new SAMEntry(it.next());
-		}
-
-		@Override
-		public void remove() {
-			it.remove();
-		}
 	}
 }
