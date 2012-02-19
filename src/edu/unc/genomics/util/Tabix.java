@@ -24,6 +24,7 @@ public class Tabix {
 	private static final Logger log = Logger.getLogger(Tabix.class);
 	
 	public static void sortFile(Path input, Path output, TabixWriter.Conf conf) throws IOException {
+		log.debug("Sorting "+input+" for Tabix indexing");
 		ExternalSort sorter = new ExternalSort();
 		sorter.setInFile(input.toString());
 		sorter.setOutFile(output.toString());
@@ -39,6 +40,7 @@ public class Tabix {
 	}
 	
 	public static void bgzip(Path input, Path output) throws IOException {
+		log.debug("BGZipping "+input+" for Tabix indexing");
 		InputStream is = Files.newInputStream(input);
 		BufferedInputStream bis = new BufferedInputStream(is);
 		
@@ -54,6 +56,7 @@ public class Tabix {
 	}
 	
 	public static Path index(Path file, TabixWriter.Conf conf) throws IOException, TabixException {
+		log.debug("Indexing "+file+" with Tabix");
 		TabixWriter writer = new TabixWriter(file, conf);
 		return writer.createIndex();
 	}

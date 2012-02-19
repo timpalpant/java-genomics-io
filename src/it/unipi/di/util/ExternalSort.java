@@ -37,7 +37,6 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -342,7 +341,7 @@ public class ExternalSort {
 				}
 				
 				String line = buff.toString();
-				String key = Utils.getKey(line, columns, sep, numeric);
+				String key = STUtils.getKey(line, columns, sep, numeric);
 				SortingKey s = new SortingKey(line, key, reverse);
 				chunk.add(s);
 				
@@ -363,8 +362,6 @@ public class ExternalSort {
 
 		fbr.close();
 		
-		long stop = System.currentTimeMillis();
-		
 		// Init the in-memory sorting data structure
 		initDataStructure();
 		
@@ -379,7 +376,6 @@ public class ExternalSort {
 
 		dumpSortedRows();
 		
-		stop = System.currentTimeMillis();
 		for (Reader r : runsMap.values()) r.close();
 	}
 	
@@ -425,7 +421,7 @@ public class ExternalSort {
 			
 			currPageSize += buff.length();
 			
-			key = Utils.getKey(line, columns, sep, numeric);
+			key = STUtils.getKey(line, columns, sep, numeric);
 			
 			Tuple tuple = new Tuple();
 			Tuple oldTuple = (Tuple)map.put(key, tuple);
@@ -453,8 +449,6 @@ public class ExternalSort {
 		// FIXME: synchronized Writer! Use a not synch one to speed up the I/O 
 		BufferedWriter bw = new BufferedWriter(new PrintWriter(out, false), 16384); // 16KB buffer size
 		
-		long start = System.currentTimeMillis();
-
 		// count how many times a sorting key has been seen
 		int freq = 0;
 		
@@ -477,7 +471,7 @@ public class ExternalSort {
 					
 					if (dist) {  // dump the distribution
 						if (!currKey.equals(prevKey)) {
-							String str = (numeric) ? Utils.trimLeftZeros(prevKey) : prevKey;
+							String str = (numeric) ? STUtils.trimLeftZeros(prevKey) : prevKey;
 							bw.write(str);
 							bw.write("\t");
 							bw.write("" + freq);
@@ -491,7 +485,7 @@ public class ExternalSort {
 					}
 					else {
 						if (extract)
-							bw.write((numeric) ? Utils.trimLeftZeros(currKey) : currKey);
+							bw.write((numeric) ? STUtils.trimLeftZeros(currKey) : currKey);
 						else
 							bw.write(lines.get(i));
 						
@@ -514,7 +508,7 @@ public class ExternalSort {
 		}
 		
 		if (dist) {
-			String str = (numeric) ? Utils.trimLeftZeros(prevKey) : prevKey;
+			String str = (numeric) ? STUtils.trimLeftZeros(prevKey) : prevKey;
 			bw.write(str);
 			bw.write("\t");
 			bw.write("" + freq);

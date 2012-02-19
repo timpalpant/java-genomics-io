@@ -17,7 +17,6 @@ import net.sf.samtools.SAMSequenceDictionary;
 import net.sf.samtools.SAMSequenceRecord;
 
 import edu.unc.genomics.SAMEntry;
-import edu.unc.genomics.util.FileUtils;
 import edu.unc.genomics.util.Samtools;
 
 /**
