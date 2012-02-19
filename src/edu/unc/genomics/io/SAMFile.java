@@ -35,9 +35,19 @@ public class SAMFile extends IntervalFile<SAMEntry> {
 	private Path bam;
 	private Path index;
 	
+	/**
+	 * By default, only return mapped reads from iterators for analyses
+	 */
+	private boolean allowUnmappedReads = false;
+	
 	public SAMFile(Path p) {
 		super(p);
 		reader = new SAMFileReader(p.toFile());
+	}
+	
+	public SAMFile(Path p, boolean allowUnmappedReads) {
+		this(p);
+		this.allowUnmappedReads = allowUnmappedReads;
 	}
 	
 	@Override
@@ -90,7 +100,7 @@ public class SAMFile extends IntervalFile<SAMEntry> {
 		}
 
 		it = reader.iterator();
-		return new SAMEntryIterator(it);
+		return new SAMEntryIterator(it, allowUnmappedReads);
 	}
 
 	@Override
@@ -105,7 +115,7 @@ public class SAMFile extends IntervalFile<SAMEntry> {
 		}
 
 		it = reader.query(chr, start, stop, false);
-		return new SAMEntryIterator(it);
+		return new SAMEntryIterator(it, allowUnmappedReads);
 	}
 	
 	private void convertToBAM() {
@@ -127,5 +137,19 @@ public class SAMFile extends IntervalFile<SAMEntry> {
 		reader.enableIndexMemoryMapping(false);
 		// Turn on index caching
 		reader.enableIndexCaching(true);
+	}
+
+	/**
+	 * @return the allowUnmappedReads
+	 */
+	public boolean doesAllowUnmappedReads() {
+		return allowUnmappedReads;
+	}
+
+	/**
+	 * @param allowUnmappedReads the allowUnmappedReads to set
+	 */
+	public void setAllowUnmappedReads(boolean allowUnmappedReads) {
+		this.allowUnmappedReads = allowUnmappedReads;
 	}
 }
