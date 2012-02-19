@@ -41,6 +41,10 @@ public class BedGraphEntry extends ValuedInterval {
 	}
 	
 	public static BedGraphEntry parse(final String line) {
+		if (line.startsWith("#") || line.startsWith("track")) {
+			return null;
+		}
+		
 		String[] entry = line.split("\t");
 		if (entry.length < 3) {
 			throw new IntervalFileFormatException("Invalid BedGraph entry has < 3 columns");

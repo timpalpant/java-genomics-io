@@ -276,9 +276,17 @@ public class TabixReader implements LineReader, Iterable<String> {
 		while ((end = s.indexOf('\t', beg)) >= 0 || end == -1) {
 			++col;
 			if (col == mSc) {
-				intv.tid = chr2tid(s.substring(beg, end));
+				if (end == -1) {
+					intv.tid = chr2tid(s.substring(beg));
+				} else {
+					intv.tid = chr2tid(s.substring(beg, end));
+				}
 			} else if (col == mBc) {
-				intv.beg = intv.end = Integer.parseInt(s.substring(beg, end));
+				if (end == -1) {
+					intv.beg = intv.end = Integer.parseInt(s.substring(beg));
+				} else {
+					intv.beg = intv.end = Integer.parseInt(s.substring(beg, end));
+				}
 				if ((mPreset & 0x10000) != 0)
 					++intv.end;
 				else
@@ -291,7 +299,7 @@ public class TabixReader implements LineReader, Iterable<String> {
 				if ((mPreset & 0xffff) == 0) { // generic
 					if (col == mEc) {
 						if (end == -1) {
-							intv.end = Integer.parseInt(s.substring(beg, s.length()));
+							intv.end = Integer.parseInt(s.substring(beg));
 						} else {
 							intv.end = Integer.parseInt(s.substring(beg, end));
 						}

@@ -91,27 +91,37 @@ public class IntervalFileSniffer {
 	}
 	
 	public boolean isBAM() {
+		boolean isBam = false;
+		
 		try {
 			SAMFileReader.setDefaultValidationStringency(SAMFileReader.ValidationStringency.STRICT);
 			SAMFileReader reader = new SAMFileReader(p.toFile());
-			return reader.isBinary();
+			isBam = reader.isBinary();
+			reader.close();
 		} catch (Exception e) {
 			return false;
 		} finally {
 			SAMFileReader.setDefaultValidationStringency(SAMFileReader.ValidationStringency.DEFAULT_STRINGENCY);
 		}
+		
+		return isBam;
 	}
 	
 	public boolean isSAM() throws IOException {
+		boolean isSAM = false;
+		
 		try {
-		SAMFileReader.setDefaultValidationStringency(SAMFileReader.ValidationStringency.STRICT);
-		SAMFileReader reader = new SAMFileReader(p.toFile());
-			return !reader.isBinary();
+			SAMFileReader.setDefaultValidationStringency(SAMFileReader.ValidationStringency.STRICT);
+			SAMFileReader reader = new SAMFileReader(p.toFile());
+			isSAM = !reader.isBinary();
+			reader.close();
 		} catch (Exception e) {
 			return false;
 		} finally {
 			SAMFileReader.setDefaultValidationStringency(SAMFileReader.ValidationStringency.DEFAULT_STRINGENCY);
 		}
+		
+		return isSAM;
 	}
 	
 	private String getFirstLine() throws IOException {

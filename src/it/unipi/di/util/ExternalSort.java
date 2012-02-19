@@ -341,6 +341,10 @@ public class ExternalSort {
 				}
 				
 				String line = buff.toString();
+				// Skip track and comment lines
+				//if (line.startsWith("#") || line.startsWith("track")) {
+				//	continue;
+				//}
 				String key = STUtils.getKey(line, columns, sep, numeric);
 				SortingKey s = new SortingKey(line, key, reverse);
 				chunk.add(s);

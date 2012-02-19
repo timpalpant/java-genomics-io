@@ -26,6 +26,10 @@ public class GFFEntry extends ValuedInterval {
 	}
 	
 	public static GFFEntry parse(String line) {
+		if (line.startsWith("#") || line.startsWith("track")) {
+			return null;
+		}
+		
 		String[] entry = line.split("\t");
 		if (entry.length < 9) {
 			throw new IntervalFileFormatException("Invalid GFF entry has < 9 columns");
