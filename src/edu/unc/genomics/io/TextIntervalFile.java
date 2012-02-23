@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import net.sf.samtools.TabixWriter;
 import net.sf.samtools.TabixWriter.TabixException;
 
 import org.apache.log4j.Logger;
@@ -61,17 +60,11 @@ public abstract class TextIntervalFile<T extends Interval> extends IntervalFile<
 	
 	public Set<String> chromosomes() {
 		if (chromosomes == null) {
-			// If we've already indexed for Tabix, get the chromosomes from there
-			if (tabixFile != null) {
-				chromosomes = tabixFile.chromosomes();
-			} else {
-				chromosomes = new HashSet<String>();
-				count = 0;
-				for (Interval i : this) {
-					chromosomes.add(i.getChr());
-					count++;
-				}
+			if (tabixFile == null) {
+				convertToTabix();
 			}
+			
+			chromosomes = tabixFile.chromosomes();
 		}
 		
 		return chromosomes;
@@ -79,16 +72,11 @@ public abstract class TextIntervalFile<T extends Interval> extends IntervalFile<
 	
 	public int count() {
 		if (count == 0) {
-			if (tabixFile != null) {
-				count = tabixFile.count();
-			} else {
-				try {
-					count = FileUtils.countLines(p);
-				} catch (IOException e) {
-					log.error("Error counting lines in file: " + p);
-					throw new RuntimeException("Error counting lines in file");
-				}
+			if (tabixFile == null) {
+				convertToTabix();
 			}
+			
+			count = tabixFile.count();
 		}
 		
 		return count;
