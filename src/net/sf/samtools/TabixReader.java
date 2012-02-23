@@ -412,8 +412,13 @@ public class TabixReader implements LineReader, Iterable<String> {
 	 * @param end
 	 * @return
 	 */
-	public TabixIterator query(final String chr, final int beg, final int end) {
-		return query(chr2tid(chr), beg, end);
+	public Iterator<String> query(final String chr, final int beg, final int end) {
+		int tid = chr2tid(chr);
+		if (tid == -1) {
+			return new TabixReader.EmptyIterator();
+		}
+		
+		return query(tid, beg, end);
 	}
 
 	/**
@@ -421,7 +426,7 @@ public class TabixReader implements LineReader, Iterable<String> {
 	 * @param reg the query string region
 	 * @return
 	 */
-	public TabixIterator query(final String reg) {
+	public Iterator<String> query(final String reg) {
 		int[] x = parseReg(reg);
 		return query(x[0], x[1], x[2]);
 	}
@@ -440,8 +445,7 @@ public class TabixReader implements LineReader, Iterable<String> {
 		private boolean iseof;
 		private String nextLine;
 
-		public TabixIterator(final int _tid, final int _beg, final int _end,
-				final TPair64[] _off) {
+		public TabixIterator(final int _tid, final int _beg, final int _end, final TPair64[] _off) {
 			i = -1;
 			curr_off = 0;
 			iseof = false;
@@ -524,6 +528,28 @@ public class TabixReader implements LineReader, Iterable<String> {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Dummy iterator for returning no results
+	 * @author timpalpant
+	 *
+	 */
+	public class EmptyIterator implements Iterator<String> {
+
+		@Override
+		public boolean hasNext() {
+			return false;
+		}
+
+		@Override
+		public String next() {
+			return null;
+		}
+
+		@Override
+		public void remove() { }
+		
 	}
 
 }
