@@ -34,7 +34,7 @@ public class TabixFile<T extends Interval> extends IntervalFile<T> {
 	public void close() throws IOException { }
 
 	@Override
-	public Iterator<T> query(String chr, int start, int stop) throws UnsupportedOperationException {
+	public Iterator<T> query(String chr, int start, int stop) {
 		return new StringIntervalIterator<T>(reader.query(chr, start, stop), factory);
 	}
 

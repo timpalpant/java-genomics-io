@@ -347,7 +347,7 @@ public class TabixReader implements LineReader, Iterable<String> {
 		return intv;
 	}
 	
-	private TabixIterator query(final int tid, final int beg, final int end) {
+	private Iterator<String> query(final int tid, final int beg, final int end) {
 		TPair64[] off, chunks;
 		long min_off;
 		TIndex idx = mIndex[tid];
@@ -363,7 +363,7 @@ public class TabixReader implements LineReader, Iterable<String> {
 				n_off += chunks.length;
 		}
 		if (n_off == 0)
-			return null;
+			return new TabixReader.EmptyIterator();
 		off = new TPair64[n_off];
 		for (i = n_off = 0; i < n_bins; ++i)
 			if ((chunks = idx.b.get(bins[i])) != null)
@@ -371,7 +371,7 @@ public class TabixReader implements LineReader, Iterable<String> {
 					if (less64(min_off, chunks[j].v))
 						off[n_off++] = new TPair64(chunks[j]);
 		if (n_off == 0)
-			return null;
+			return new TabixReader.EmptyIterator();
 		Arrays.sort(off, 0, n_off);
 		// resolve completely contained adjacent blocks
 		for (i = 1, l = 0; i < n_off; ++i) {
