@@ -54,13 +54,13 @@ public class SAMFile extends IntervalFile<SAMEntry> {
 	public void close() throws IOException {
 		reader.close();
 		
-		if (bam != null) {
+/*		if (bam != null) {
 			Files.deleteIfExists(bam);
 		}
 		
 		if (index != null) {
 			Files.deleteIfExists(index);
-		}
+		}*/
 	}
 	
 	@Override
@@ -119,15 +119,24 @@ public class SAMFile extends IntervalFile<SAMEntry> {
 	}
 	
 	private void convertToBAM() {
-		// Have to convert the SAM file to BAM to do queries
-		bam = p.resolveSibling(p.getFileName()+".bam");
+		// Convert the SAM file to BAM to do queries
+		try {
+			bam = Files.createTempFile(p.getFileName().toString(), ".bam");
+		} catch (IOException e) {
+			log.error("Error creating temporary BAM file from SAM: " + p.getFileName());
+			e.printStackTrace();
+			throw new RuntimeException("Error creating temporary BAM file from SAM: " + p.getFileName());
+		}
+		// Hook for automatically deleting the BAM file when the JVM terminates
+		bam.toFile().deleteOnExit();
 		Samtools.samToBam(p, bam);
 		
 		// Index the BAM file
-		index = p.resolveSibling(bam.getFileName()+".bai");
+		index = bam.resolveSibling(bam.getFileName()+BAMIndex.BAMIndexSuffix);
+		index.toFile().deleteOnExit();
 		Samtools.indexBAMFile(bam, index);
 				
-		reader = new SAMFileReader(bam.toFile());
+		reader = new SAMFileReader(bam.toFile(), index.toFile());
 		// Ensure that we have an index
 		if (!reader.hasIndex()) {
 			throw new IntervalFileFormatException("Error indexing BAM file: "+bam);

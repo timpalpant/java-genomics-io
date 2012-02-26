@@ -80,9 +80,7 @@ public class Samtools {
 		Path indexFile;
 		final String fileName = bamFile.toString();
 		if (fileName.endsWith(bamExtension)) {
-			final String bai = fileName.substring(0,
-					fileName.length() - bamExtension.length())
-					+ BAMIndex.BAMIndexSuffix;
+			final String bai = fileName.substring(0, fileName.length() - bamExtension.length()) + BAMIndex.BAMIndexSuffix;
 			indexFile = bamFile.resolveSibling(bai);
 			if (Files.exists(indexFile)) {
 				return indexFile;

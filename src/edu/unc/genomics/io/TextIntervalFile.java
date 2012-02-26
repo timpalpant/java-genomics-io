@@ -99,39 +99,27 @@ public abstract class TextIntervalFile<T extends Interval> extends IntervalFile<
 	
 	private void convertToTabix() {
 		// Sort the input file
-		Path sorted = p.resolveSibling(p.getFileName()+".sorted");
 		try {
+			Path sorted = Files.createTempFile(p.getFileName().toString(), ".sorted");
+			log.debug("Sorting interval file to temp: " + sorted);
+			sorted.toFile().deleteOnExit();
 			Tabix.sortFile(p, sorted, factory.tabixConf());
-		} catch (IOException e3) {
-			log.error("Error sorting interval file for Tabix lookup");
-			throw new RuntimeException("Error sorting interval file");
-		}
-		
-		// BGZip the sorted file
-		bgzip = p.resolveSibling(p.getFileName()+".gz");
-		try {
+			
+			// BGZip the sorted file
+			bgzip = p.resolveSibling(sorted.getFileName()+".gz");
+			bgzip.toFile().deleteOnExit();
+			
 			Tabix.bgzip(sorted, bgzip);
-		} catch (IOException e2) {
-			log.error("Error BGZipping interval file for Tabix lookup");
-			e2.printStackTrace();
-			throw new RuntimeException("Error initializing Tabix file");
-		}
-		
-		// Delete the sorted (uncompressed) file
-		try {
-			Files.delete(sorted);
-		} catch (IOException e1) {
-			log.warn("Error deleting temporary sorted interval file");
-			e1.printStackTrace();
-		}
-		
-		// Index with Tabix
-		try {
+			
 			index = Tabix.index(bgzip, factory.tabixConf());
-		} catch (IOException | TabixException e1) {
+			index.toFile().deleteOnExit();
+		} catch (IOException e3) {
+			log.error("Error sorting and compressing interval file");
+			throw new RuntimeException("Error sorting and compressing interval file");
+		} catch (TabixException e1) {
 			log.error("Error indexing with Tabix");
 			e1.printStackTrace();
-			throw new RuntimeException("Error initializing Tabix file");
+			throw new RuntimeException("Error indexing Tabix file");
 		}
 		
 		try {
