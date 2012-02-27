@@ -17,6 +17,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import net.sf.samtools.SAMFileReader;
+import net.sf.samtools.SAMFileReader.ValidationStringency;
+import net.sf.samtools.SAMRecord;
 
 public class IntervalFileSniffer {
 	
@@ -93,15 +95,18 @@ public class IntervalFileSniffer {
 	public boolean isBAM() {
 		boolean isBam = false;
 		
+		ValidationStringency stringency = SAMFileReader.getDefaultValidationStringency();
 		try {
 			SAMFileReader.setDefaultValidationStringency(SAMFileReader.ValidationStringency.STRICT);
 			SAMFileReader reader = new SAMFileReader(p.toFile());
+			// Ensure that the first record loads correctly
+			SAMRecord r = reader.iterator().next();
 			isBam = reader.isBinary();
 			reader.close();
 		} catch (Exception e) {
 			return false;
 		} finally {
-			SAMFileReader.setDefaultValidationStringency(SAMFileReader.ValidationStringency.DEFAULT_STRINGENCY);
+			SAMFileReader.setDefaultValidationStringency(stringency);
 		}
 		
 		return isBam;
@@ -110,15 +115,18 @@ public class IntervalFileSniffer {
 	public boolean isSAM() throws IOException {
 		boolean isSAM = false;
 		
+		ValidationStringency stringency = SAMFileReader.getDefaultValidationStringency();
 		try {
 			SAMFileReader.setDefaultValidationStringency(SAMFileReader.ValidationStringency.STRICT);
 			SAMFileReader reader = new SAMFileReader(p.toFile());
+			// Ensure that the first record loads correctly
+			SAMRecord r = reader.iterator().next();
 			isSAM = !reader.isBinary();
 			reader.close();
 		} catch (Exception e) {
 			return false;
 		} finally {
-			SAMFileReader.setDefaultValidationStringency(SAMFileReader.ValidationStringency.DEFAULT_STRINGENCY);
+			SAMFileReader.setDefaultValidationStringency(stringency);
 		}
 		
 		return isSAM;
