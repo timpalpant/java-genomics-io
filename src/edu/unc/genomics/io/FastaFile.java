@@ -17,7 +17,7 @@ public class FastaFile extends SequenceFile<FastaEntry> {
 	private final BufferedReader reader;
 	private final FastaIterator iter;
 	
-	protected FastaFile(Path p) throws IOException {
+	public FastaFile(Path p) throws IOException {
 		super(p);
 		reader = Files.newBufferedReader(p, Charset.defaultCharset());
 		iter = new FastaIterator();
@@ -72,7 +72,7 @@ public class FastaFile extends SequenceFile<FastaEntry> {
 		}
 
 		@Override
-		public void remove() {
+		public void remove() throws UnsupportedOperationException {
 			throw new UnsupportedOperationException("Cannot delete entries in FASTA file");
 		}
 		

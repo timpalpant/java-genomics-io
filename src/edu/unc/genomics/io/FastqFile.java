@@ -17,7 +17,7 @@ public class FastqFile extends SequenceFile<FastqEntry> {
 	private final BufferedReader reader;
 	private final FastqIterator iter;
 	
-	protected FastqFile(Path p) throws IOException {
+	public FastqFile(Path p) throws IOException {
 		super(p);
 		reader = Files.newBufferedReader(p, Charset.defaultCharset());
 		iter = new FastqIterator();
