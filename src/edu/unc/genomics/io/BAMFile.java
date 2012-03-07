@@ -41,11 +41,22 @@ public class BAMFile extends IntervalFile<SAMEntry> {
 		// Automatically index BAM files that do not have an index
 		reader = new SAMFileReader(p.toFile());
 		if (!reader.hasIndex()) {
-			index = p.resolveSibling(p.getFileName()+".bai");
+			try {
+				index = Files.createTempFile(p.getFileName().toString(), ".bai");
+			} catch (IOException e) {
+				log.error("Error creating temporary BAM index for: " + p.getFileName());
+				e.printStackTrace();
+				throw new RuntimeException("Error creating temporary BAM index for: " + p.getFileName());
+			}
+			
+			// Hook for automatically deleting the BAM index when the JVM terminates
+			index.toFile().deleteOnExit();
+			
+			// Create the index
 			Samtools.indexBAMFile(p, index);
 			
 			// Now that we have an index, reset the reader
-			reader = new SAMFileReader(p.toFile());
+			reader = new SAMFileReader(p.toFile(), index.toFile());
 			// and ensure that we now have an index
 			if (!reader.hasIndex()) {
 				throw new IntervalFileFormatException("Error indexing BAM file: "+p);
@@ -66,11 +77,6 @@ public class BAMFile extends IntervalFile<SAMEntry> {
 	@Override
 	public void close() throws IOException {
 		reader.close();
-		
-		// Delete the index if we silently created it to enable querying
-		if (index != null) {
-			Files.deleteIfExists(index);
-		}
 	}
 
 	@Override
