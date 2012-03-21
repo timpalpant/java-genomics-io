@@ -53,14 +53,6 @@ public class SAMFile extends IntervalFile<SAMEntry> {
 	@Override
 	public void close() throws IOException {
 		reader.close();
-		
-/*		if (bam != null) {
-			Files.deleteIfExists(bam);
-		}
-		
-		if (index != null) {
-			Files.deleteIfExists(index);
-		}*/
 	}
 	
 	@Override

@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -15,7 +14,6 @@ import org.apache.log4j.Logger;
 
 import edu.unc.genomics.Interval;
 import edu.unc.genomics.IntervalFactory;
-import edu.unc.genomics.util.FileUtils;
 import edu.unc.genomics.util.Tabix;
 
 /**
@@ -48,14 +46,6 @@ public abstract class TextIntervalFile<T extends Interval> extends IntervalFile<
 	@Override
 	public void close() throws IOException {	
 		reader.close();
-		
-		if (bgzip != null) {
-			Files.deleteIfExists(bgzip);
-		}
-		
-		if (index != null) {
-			Files.deleteIfExists(index);
-		}
 	}
 	
 	public Set<String> chromosomes() {

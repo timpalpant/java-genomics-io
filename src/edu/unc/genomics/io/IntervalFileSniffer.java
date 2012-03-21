@@ -52,7 +52,7 @@ public class IntervalFileSniffer {
 		if (!isAscii()) { return false; }
 		if (numColumns() < 3 || numColumns() > 12) { return false; }
 		if (!StringUtils.isNumeric(column(2)) || !StringUtils.isNumeric(column(3))) { return false; }
-		if (numColumns() == 4 && StringUtils.isNumeric(column(4))) { return false; }
+		if (isBedGraph()) { return false; }
 		
 		try { 
 			BedEntry.parse(getFirstLine());
@@ -67,7 +67,11 @@ public class IntervalFileSniffer {
 		if (!isAscii()) { return false; }
 		if (numColumns() != 4) { return false; }
 		if (!StringUtils.isNumeric(column(2)) || !StringUtils.isNumeric(column(3))) { return false; }
-		if (!StringUtils.isNumeric(column(4))) { return false; }
+		try {
+			Float.parseFloat(column(4));
+		} catch (Exception e) {
+			return false;
+		}
 		
 		try { 
 			BedGraphEntry.parse(getFirstLine());
