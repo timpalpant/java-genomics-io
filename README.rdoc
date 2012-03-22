@@ -2,9 +2,9 @@
 
 This library provides a simple and performant API for working with many genomic file formats in a consistent fashion. It was prototyped in Ruby (https://github.com/timpalpant/bioruby-genomic-file). The library requires JDK7 since it makes use of switches on Strings and the new File/Path classes.
 
-The library is mainly a wrapper to pull together multiple existing libraries, including Picard (http://picard.sourceforge.net) for reading SAM/BAM files and the BigWig/BigBed readers provided by the Broad Institute (http://code.google.com/p/bigwig). The complete list of file formats currently supported is: Bed, BigBed, BedGraph, SAM, BAM, Wiggle, BigWig, Tabix (all formats, but format cannot be auto detected yet). Coming soon: GFF, TwoBit, Fasta, Fastq.
+The library is mainly a wrapper to pull together multiple existing libraries, including Picard (http://picard.sourceforge.net) for reading SAM/BAM files and the BigWig/BigBed readers provided by the Broad Institute (http://code.google.com/p/bigwig). The complete list of file formats currently supported is: Bed, BigBed, BedGraph, GFF, SAM, BAM, Wiggle, BigWig, Tabix, Fasta, Fastq.
 
-Currently, only Tabix, BigBed, BAM, Wiggle, and BigWig files may be queried randomly. Crude random querying may be implemented for other ASCII-text formats, but for now it is recommended that you first convert the files into Tabix format since this is highly performant. In addition, the library is mostly for reading files (input). Output functionality may be added in the future, but is less of a priority.
+Auto-indexing is implemented for randomly querying files by genomic region. Line-based interval files are indexed as needed with Tabix. Built-in indexes are used for BAM, BigWig, and BigBed files. ASCII Wiggle files are indexed using a custom implementation.
 
 == Examples
 
@@ -48,19 +48,10 @@ Similar abstraction is provided for Wig/BigWig files:
   $ }
   $ 
   $ Iterator<WigItem> result2 = wig.query("chr23", 1, 10_000);
-  $ float[] data = WigFile.flattenData(result, 1, 10_000);
+  $ float[] data = WigFile.flattenData(result2, 1, 10_000);
 
 Rudimentary indexing is provided for text-Wig files, while BigWig files are accessed using the R-tree information. This means that performance is somewhat better for BigWig files. However, in some cases it is inconvenient or impossible to convert Wig files to BigWig since the wigToBigWig tool consumes ~4 x (file size) memory. The indexing scheme used for text-Wig files requires relatively modest memory, even for human-scale genomes, yet ensures an upper bound for seek times in random queries.
 
 With all readers, data is buffered and lazy-parsed to minimize memory requirements and maximize disk performance.
-
-Tabix can be used if you wish to make random queries against interval files, but you must specify the type of data in the file and pass the appropriate factory for parsing the results:
-
-  $ TabixFile<BedGraphEntry> t = new TabixFile<BedGraphEntry>(tabixedBedGraphFile, new BedGraphFile.BedGraphEntryFactory());
-  $ Iterator<BedGraphEntry> result = t.query("chr22", 1, 100_000);
-  $ while (result.hasNext()) {
-  $   BedGraphEntry entry = result.next();
-  $   System.out.println(result.getValue());
-  $ }
 
 See also https://github.com/timpalpant/java-genomics-toolkit for some full implementations using this library.
