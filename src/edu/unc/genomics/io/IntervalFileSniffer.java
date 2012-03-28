@@ -96,6 +96,17 @@ public class IntervalFileSniffer {
 		return true;
 	}
 	
+	public boolean isGeneTrack() throws IOException {
+		if (!isAscii()) { return false; }
+		if (numColumns() != 4) { return false; }
+		if (column(1).equalsIgnoreCase("chrom") && column(2).equalsIgnoreCase("index")
+				&& column(3).equalsIgnoreCase("forward") && column(4).equalsIgnoreCase("reverse")) {
+			return true;
+		}
+		
+		return false;
+	}
+	
 	public boolean isBAM() {
 		boolean isBam = false;
 		

@@ -1,6 +1,7 @@
 package edu.unc.genomics.io;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -88,12 +89,29 @@ public abstract class TextIntervalFile<T extends Interval> extends IntervalFile<
 	}
 	
 	private void convertToTabix() {
-		// Sort the input file
 		try {
+			// Filter the input file
+			Path filtered = Files.createTempFile(p.getFileName().toString(), ".filtered");
+			filtered.toFile().deleteOnExit();
+			log.debug("Filtering interval file to temp: " + filtered);
+			try (BufferedWriter writer = Files.newBufferedWriter(filtered, Charset.defaultCharset());
+					BufferedReader reader = Files.newBufferedReader(p, Charset.defaultCharset())) {
+				String line;
+				T interval;
+				while ((line = reader.readLine()) != null) {
+					interval = factory.parse(line);
+					if (interval != null) {
+						writer.write(line);
+						writer.newLine();
+					}
+				}
+			}
+			
+			// Sort the input file
 			Path sorted = Files.createTempFile(p.getFileName().toString(), ".sorted");
 			log.debug("Sorting interval file to temp: " + sorted);
 			sorted.toFile().deleteOnExit();
-			Tabix.sortFile(p, sorted, factory.tabixConf());
+			Tabix.sortFile(filtered, sorted, factory.tabixConf());
 			
 			// BGZip the sorted file
 			bgzip = p.resolveSibling(sorted.getFileName()+".gz");

@@ -47,6 +47,9 @@ public abstract class IntervalFile<T extends Interval> implements Iterable<T>, C
 		} else if (sniffer.isSAM()) {
 			log.debug("Autodetected SAM filetype for: " + p.getFileName().toString());
 			return new SAMFile(p);
+		} else if (sniffer.isGeneTrack()) {
+			log.debug("Autodetected GeneTrack filetype for: " + p.getFileName().toString());
+			return new GeneTrackFile(p);
 		} else {
 			throw new IntervalFileSnifferException("Could not autodetect Interval file format");
 		}

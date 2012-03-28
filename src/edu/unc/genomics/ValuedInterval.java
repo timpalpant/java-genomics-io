@@ -34,23 +34,23 @@ public class ValuedInterval extends Interval {
 	@Override
 	public String toBed() {
 		String idStr = (id == null) ? "." : id;
-		String valueStr = (value == null) ? "." : value.toString();
+		String valueStr = (getValue() == null) ? "." : getValue().toString();
 		return getChr() + "\t" + (low()-1) + "\t" + high() + "\t" + idStr + "\t" + valueStr + "\t" + strand();
 	}
 	
 	@Override
 	public String toBedGraph() {
-		if (value == null) {
+		if (getValue() == null) {
 			return super.toBedGraph();
 		} else {
-			return super.toBedGraph() + "\t" + value.toString();
+			return super.toBedGraph() + "\t" + getValue().toString();
 		}
 	}
 	
 	@Override
 	public String toGFF() {
 		String idStr = (id == null) ? "no_id" : id;
-		String valueStr = (value == null) ? "." : value.toString();
+		String valueStr = (getValue() == null) ? "." : getValue().toString();
 		return getChr() + "\tSpotArray\tfeature\t" + low() + "\t" + high() + "\t" + valueStr + "\t" + strand() + "\t.\tprobe_id=" + idStr + ";count=1";
 	}
 
