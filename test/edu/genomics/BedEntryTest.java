@@ -9,7 +9,7 @@ import edu.unc.genomics.BedEntry;
 
 public class BedEntryTest {
 	
-	private final String TEST_BED_ENTRY = "chrIV\t0\t10\tSpot8\t1.0\t-";
+	private final String TEST_BED_ENTRY = "chrIV\t0\t10\tSpot8\t1\t-";
 	private BedEntry test;
 
 	@Before
@@ -23,7 +23,7 @@ public class BedEntryTest {
 		assertEquals(10, test.getStart());
 		assertEquals(1, test.getStop());
 		assertEquals("Spot8", test.getId());
-		assertEquals(1.0, test.getValue().doubleValue(), 1e-15);
+		assertEquals(1, test.getValue());
 		assertEquals("-", test.strand());
 	}
 

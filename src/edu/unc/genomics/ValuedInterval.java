@@ -3,9 +3,9 @@ package edu.unc.genomics;
 public class ValuedInterval extends Interval {
 	private static final long serialVersionUID = 2976113135643438146L;
 	protected String id;
-	protected Double value;
+	protected Number value;
 	
-	public ValuedInterval(String chr, int start, int stop, String id, Double value) {
+	public ValuedInterval(String chr, int start, int stop, String id, Number value) {
 		super(chr, start, stop);
 		this.id = id;
 		this.value = value;
@@ -73,7 +73,7 @@ public class ValuedInterval extends Interval {
 	/**
 	 * @return the value
 	 */
-	public Double getValue() {
+	public Number getValue() {
 		return value;
 	}
 	
@@ -81,7 +81,7 @@ public class ValuedInterval extends Interval {
 	/**
 	 * @param value the value to set
 	 */
-	public void setValue(final Double value) {
+	public void setValue(final Number value) {
 		this.value = value;
 	}
 }

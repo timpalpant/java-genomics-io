@@ -43,7 +43,7 @@ public class BedEntry extends ValuedInterval {
 		int start = Integer.parseInt(entry[1]) + 1; // Bed is 0-indexed
 		int stop = Integer.parseInt(entry[2]); // and half-open
 		if (start > stop) {
-			throw new IntervalFileFormatException("Invalid Bed entry has start > stop");
+			throw new IntervalFileFormatException("Invalid Bed entry has start > stop. Use strand column 6 (+/-) for Crick intervals");
 		}
 		BedEntry bed = new BedEntry(chr, start, stop);
 		
@@ -52,7 +52,11 @@ public class BedEntry extends ValuedInterval {
 		}
 		
 		if (entry.length >= 5 && !entry[4].equalsIgnoreCase(".")) {
-			bed.setValue(Double.valueOf(entry[4]));
+			try {
+				bed.setValue(Integer.valueOf(entry[4]));
+			} catch (NumberFormatException e) {
+				throw new IntervalFileFormatException("Invalid Bed value column (must be integer): "+entry[4]);
+			}
 		}
 		
 		// Reverse start/stop if on the - strand

@@ -48,8 +48,8 @@ public class GeneTrackEntry extends ValuedInterval {
 	}
 	
 	@Override
-	public void setValue(final Double value) {
-		this.forward = value;
+	public void setValue(final Number value) {
+		this.forward = value.doubleValue();
 		this.reverse = 0;
 	}
 	
