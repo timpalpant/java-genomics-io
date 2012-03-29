@@ -342,9 +342,11 @@ public class TextWigFile extends WigFile {
 					max = value;
 				}
 				
-				numBases += contig.getSpan();
-				total += contig.getSpan() * value;
-				sumOfSquares += contig.getSpan() * value * value;
+				if (value != Float.NaN) {
+					numBases += contig.getSpan();
+					total += contig.getSpan() * value;
+					sumOfSquares += contig.getSpan() * value * value;
+				}
 				
 				// Store this line in the index
 				if ((lineNum - contig.getStartLine()) % KEY_GRANULARITY == 0) {
