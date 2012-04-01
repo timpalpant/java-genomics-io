@@ -1,6 +1,6 @@
 = Java Genomics IO API
 
-This library provides a simple and performant API for working with many genomic file formats in a consistent fashion. It was prototyped in Ruby (https://github.com/timpalpant/bioruby-genomic-file). The library requires JDK7 since it makes use of switches on Strings and the new File/Path classes.
+This library provides a simple and performant API for working with many genomic file formats in a consistent fashion. It was prototyped in Ruby (https://github.com/timpalpant/bioruby-genomic-file). The library requires JDK7 (http://www.oracle.com/technetwork/java/javase/downloads/index.html) since it makes use of switches on Strings and the new File/Path classes.
 
 The library is mainly a wrapper to pull together multiple existing libraries, including Picard (http://picard.sourceforge.net) for reading SAM/BAM files and the BigWig/BigBed readers provided by the Broad Institute (http://code.google.com/p/bigwig). The complete list of file formats currently supported is: Bed, BigBed, BedGraph, GFF, SAM, BAM, Wiggle, BigWig, Tabix, Fasta, Fastq.
 
