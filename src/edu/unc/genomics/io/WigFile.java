@@ -43,21 +43,12 @@ public abstract class WigFile implements Closeable {
 		return wig;
 	}
 	
-	/**
-	 * Collect all of the WigItems provided by iter and flatten them into an array
-	 * If start > stop, then the array will be reversed prior to returning
-	 * 
-	 * @param iter an iterator with Wig data
-	 * @param start the start base pair, corresponding to data[0]
-	 * @param stop the stop base pair, corresponding to data[data.length-1]
-	 * @return data a flattened array of the data from iter
-	 */
-	public static float[] flattenData(Iterator<WigItem> iter, int start, int stop) {
+	public static float[] flattenData(Iterator<WigItem> iter, int start, int stop, float defaultValue) {
 		int low = Math.min(start, stop);
 		int high = Math.max(start, stop);
 		int length = high - low + 1;
 		float[] data = new float[length];
-		Arrays.fill(data, Float.NaN);
+		Arrays.fill(data, defaultValue);
 		
 		while (iter.hasNext()) {
 			WigItem item = iter.next();
@@ -73,6 +64,19 @@ public abstract class WigFile implements Closeable {
 		}
 		
 		return data;
+	}
+	
+	/**
+	 * Collect all of the WigItems provided by iter and flatten them into an array
+	 * If start > stop, then the array will be reversed prior to returning
+	 * 
+	 * @param iter an iterator with Wig data
+	 * @param start the start base pair, corresponding to data[0]
+	 * @param stop the stop base pair, corresponding to data[data.length-1]
+	 * @return data a flattened array of the data from iter
+	 */
+	public static float[] flattenData(Iterator<WigItem> iter, int start, int stop) {
+		return flattenData(iter, start, stop, Float.NaN);
 	}
 	
 	public Path getPath() {
