@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.log4j.Logger;
 import org.broad.igv.bbfile.WigItem;
 
@@ -26,7 +27,7 @@ import edu.ucsc.genome.TrackHeaderException;
 import edu.unc.genomics.util.ChecksumUtils;
 
 public class TextWigFile extends WigFile {
-	private static final long serialVersionUID = -1092879147867842796L;
+	private static final long serialVersionUID = 2L;
 	public static final String INDEX_EXTENSION = ".wIdx";
 	public static final int KEY_GRANULARITY = 10_000;
 	
@@ -40,12 +41,7 @@ public class TextWigFile extends WigFile {
 	
 	private long checksum;
 	
-	private long numBases = 0;
-	private double total = 0;
-	private double mean = Double.NaN;
-	private double stdev = Double.NaN;
-	private double min = Double.MAX_VALUE;
-	private double max = Double.MIN_VALUE;
+	private SummaryStatistics stats;
 
 	/**
 	 * @param p the Path to the Wig file
@@ -211,7 +207,7 @@ public class TextWigFile extends WigFile {
 	 */
 	@Override
 	public long numBases() {
-		return numBases;
+		return stats.getN();
 	}
 	
 	/**
@@ -219,7 +215,7 @@ public class TextWigFile extends WigFile {
 	 */
 	@Override
 	public double total() {
-		return total;
+		return stats.getSum();
 	}
 	
 	/**
@@ -227,7 +223,7 @@ public class TextWigFile extends WigFile {
 	 */
 	@Override
 	public double mean() {
-		return mean;
+		return stats.getMean();
 	}
 	
 	/**
@@ -235,7 +231,7 @@ public class TextWigFile extends WigFile {
 	 */
 	@Override
 	public double stdev() {
-		return stdev;
+		return Math.sqrt(stats.getPopulationVariance());
 	}
 	
 	/**
@@ -243,7 +239,7 @@ public class TextWigFile extends WigFile {
 	 */
 	@Override
 	public double min() {
-		return min;
+		return stats.getMin();
 	}
 	
 	/**
@@ -251,7 +247,7 @@ public class TextWigFile extends WigFile {
 	 */
 	@Override
 	public double max() {
-		return max;
+		return stats.getMax();
 	}
 	
 	/**
@@ -273,11 +269,11 @@ public class TextWigFile extends WigFile {
 		}
 
 		// Index the Contigs and data in the Wig File by going through it once
+		stats = new SummaryStatistics();
 		contigs = new ArrayList<Contig>();
 		Contig contig = null;
 		int bp = 0;
 		double value;
-		double sumOfSquares = 0;
 		long cursor = raf.getFilePointer();
 		while ((line = raf.readLine()) != null) {
 			lineNum++;
@@ -334,18 +330,10 @@ public class TextWigFile extends WigFile {
 					}
 				}
 				
-				if (value < min) {
-					min = value;
-				}
-				
-				if (value > max) {
-					max = value;
-				}
-				
-				if (value != Float.NaN) {
-					numBases += contig.getSpan();
-					total += contig.getSpan() * value;
-					sumOfSquares += contig.getSpan() * value * value;
+				if (!Double.isNaN(value) && !Double.isInfinite(value)) {
+					for (int i = 0; i < contig.getSpan(); i++) {
+						stats.addValue(value);
+					}
 				}
 				
 				// Store this line in the index
@@ -365,11 +353,6 @@ public class TextWigFile extends WigFile {
 			contig.setStopLine(lineNum);
 			contig.setStop(bp + contig.getSpan() - 1);
 		}
-		
-		// Set the stats info
-		mean = total / numBases;
-		double variance = (sumOfSquares - total*mean) / numBases;
-		stdev = Math.sqrt(variance);
 
 		// Set the Set of chromosomes
 		chromosomes = new HashSet<String>();
@@ -402,12 +385,13 @@ public class TextWigFile extends WigFile {
 			}
 			
 			// Load statistics
-			numBases = dis.readLong();
-			total = dis.readDouble();
-			mean = dis.readDouble();
-			stdev = dis.readDouble();
-			min = dis.readDouble();
-			max = dis.readDouble();
+			try {
+				stats = (SummaryStatistics) dis.readObject();
+			} catch (ClassNotFoundException e) {
+				log.error("ClassNotFoundException while loading Wig statistics from index file");
+				e.printStackTrace();
+				throw new WigFileException("ClassNotFoundException while trying to load Wig statistics from index file");
+			}
 			
 			try {
 				// Load chromosomes
@@ -453,12 +437,7 @@ public class TextWigFile extends WigFile {
 			dos.writeLong(checksum);
 			
 			// Write statistics
-			dos.writeLong(numBases);
-			dos.writeDouble(total);
-			dos.writeDouble(mean);
-			dos.writeDouble(stdev);
-			dos.writeDouble(min);
-			dos.writeDouble(max);	
+			dos.writeObject(stats);
 			
 			// Write chromosomes
 			dos.writeInt(chromosomes.size());

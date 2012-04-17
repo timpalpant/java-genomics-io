@@ -61,9 +61,8 @@ public class BedEntry extends ValuedInterval {
 		
 		// Reverse start/stop if on the - strand
 		if (entry.length >= 6 && entry[5].equalsIgnoreCase("-")) {
-			int tmp = bed.getStart();
 			bed.setStart(stop);
-			bed.setStop(tmp);
+			bed.setStop(start);
 		}
 		
 		if (entry.length >= 8) {

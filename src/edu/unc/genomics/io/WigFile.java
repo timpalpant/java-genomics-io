@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.log4j.Logger;
 import org.broad.igv.bbfile.WigItem;
 
@@ -43,6 +44,16 @@ public abstract class WigFile implements Closeable {
 		return wig;
 	}
 	
+	/**
+	 * Collect all of the WigItems provided by iter and flatten them into an array
+	 * If start > stop, then the array will be reversed prior to returning
+	 * 
+	 * @param iter an iterator with Wig data
+	 * @param start the start base pair, corresponding to data[0]
+	 * @param stop the stop base pair, corresponding to data[data.length-1]
+	 * @param defaultValue the value to use where there is no data
+	 * @return data a flattened array of the data from iter
+	 */
 	public static float[] flattenData(Iterator<WigItem> iter, int start, int stop, float defaultValue) {
 		int low = Math.min(start, stop);
 		int high = Math.max(start, stop);
@@ -77,6 +88,37 @@ public abstract class WigFile implements Closeable {
 	 */
 	public static float[] flattenData(Iterator<WigItem> iter, int start, int stop) {
 		return flattenData(iter, start, stop, Float.NaN);
+	}
+	
+	public static SummaryStatistics stats(Iterator<WigItem> iter) {
+		SummaryStatistics stats = new SummaryStatistics();
+		while (iter.hasNext()) {
+			WigItem item = iter.next();
+			float value = item.getWigValue();
+			if (!Float.isNaN(value) && !Float.isInfinite(value)) {
+				for (int i = item.getStartBase(); i <= item.getEndBase(); i++) {
+					stats.addValue(value);
+				}
+			}
+		}
+		
+		return stats;
+	}
+	
+	public static float mean(Iterator<WigItem> iter) {
+		return (float) stats(iter).getMean();
+	}
+	
+	public static float stdev(Iterator<WigItem> iter) {
+		return (float) Math.sqrt(stats(iter).getPopulationVariance());
+	}
+	
+	public static float min(Iterator<WigItem> iter) {
+		return (float) stats(iter).getMin();
+	}
+	
+	public static float max(Iterator<WigItem> iter) {
+		return (float) stats(iter).getMax();
 	}
 	
 	public Path getPath() {

@@ -45,6 +45,45 @@ public abstract class AbstractWigFileTest {
 		float[] expected = {5.0f, 6.0f, 7.0f, 8.0f};
 		assertArrayEquals(expected, data, 1e-7f);
 	}
+	
+	@Test
+	public void testMeanQuery() throws WigFileException, IOException {
+		Iterator<WigItem> result = test.query("chrI", 5, 8);
+		assertEquals(6.5, WigFile.mean(result), 1e-7);
+	}
+
+	/**
+	 * Test method for {@link edu.unc.genomics.io.WigFile#stdev(java.util.Iterator)}.
+	 * @throws IOException 
+	 * @throws WigFileException 
+	 */
+	@Test
+	public void testStdevQuery() throws WigFileException, IOException {
+		Iterator<WigItem> result = test.query("chrI", 5, 8);
+		assertEquals(1.1180340051651, WigFile.stdev(result), 1e-7);
+	}
+
+	/**
+	 * Test method for {@link edu.unc.genomics.io.WigFile#min(java.util.Iterator)}.
+	 * @throws IOException 
+	 * @throws WigFileException 
+	 */
+	@Test
+	public void testMinQuery() throws WigFileException, IOException {
+		Iterator<WigItem> result = test.query("chrI", 5, 8);
+		assertEquals(5, WigFile.min(result), 1e-7);
+	}
+
+	/**
+	 * Test method for {@link edu.unc.genomics.io.WigFile#max(java.util.Iterator)}.
+	 * @throws IOException 
+	 * @throws WigFileException 
+	 */
+	@Test
+	public void testMaxQuery() throws WigFileException, IOException {
+		Iterator<WigItem> result = test.query("chrI", 5, 8);
+		assertEquals(8, WigFile.max(result), 1e-7);
+	}
 
 	@Test
 	public void testQueryCount() throws WigFileException, IOException {
