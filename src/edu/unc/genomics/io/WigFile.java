@@ -90,14 +90,18 @@ public abstract class WigFile implements Closeable {
 		return flattenData(iter, start, stop, Float.NaN);
 	}
 	
-	public static SummaryStatistics stats(Iterator<WigItem> iter) {
+	public static SummaryStatistics stats(Iterator<WigItem> iter, int start, int stop) {
+		int low = Math.min(start, stop);
+		int high = Math.max(start, stop);
 		SummaryStatistics stats = new SummaryStatistics();
 		while (iter.hasNext()) {
 			WigItem item = iter.next();
 			float value = item.getWigValue();
 			if (!Float.isNaN(value) && !Float.isInfinite(value)) {
 				for (int i = item.getStartBase(); i <= item.getEndBase(); i++) {
-					stats.addValue(value);
+					if (i >= low && i <= high) {
+						stats.addValue(value);
+					}
 				}
 			}
 		}
@@ -105,20 +109,20 @@ public abstract class WigFile implements Closeable {
 		return stats;
 	}
 	
-	public static float mean(Iterator<WigItem> iter) {
-		return (float) stats(iter).getMean();
+	public static float mean(Iterator<WigItem> iter, int start, int stop) {
+		return (float) stats(iter, start, stop).getMean();
 	}
 	
-	public static float stdev(Iterator<WigItem> iter) {
-		return (float) Math.sqrt(stats(iter).getPopulationVariance());
+	public static float stdev(Iterator<WigItem> iter, int start, int stop) {
+		return (float) Math.sqrt(stats(iter, start, stop).getPopulationVariance());
 	}
 	
-	public static float min(Iterator<WigItem> iter) {
-		return (float) stats(iter).getMin();
+	public static float min(Iterator<WigItem> iter, int start, int stop) {
+		return (float) stats(iter, start, stop).getMin();
 	}
 	
-	public static float max(Iterator<WigItem> iter) {
-		return (float) stats(iter).getMax();
+	public static float max(Iterator<WigItem> iter, int start, int stop) {
+		return (float) stats(iter, start, stop).getMax();
 	}
 	
 	public Path getPath() {

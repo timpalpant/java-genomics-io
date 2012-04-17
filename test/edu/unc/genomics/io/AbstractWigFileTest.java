@@ -49,7 +49,7 @@ public abstract class AbstractWigFileTest {
 	@Test
 	public void testMeanQuery() throws WigFileException, IOException {
 		Iterator<WigItem> result = test.query("chrI", 5, 8);
-		assertEquals(6.5, WigFile.mean(result), 1e-7);
+		assertEquals(6.5, WigFile.mean(result, 5, 8), 1e-7);
 	}
 
 	/**
@@ -60,7 +60,7 @@ public abstract class AbstractWigFileTest {
 	@Test
 	public void testStdevQuery() throws WigFileException, IOException {
 		Iterator<WigItem> result = test.query("chrI", 5, 8);
-		assertEquals(1.1180340051651, WigFile.stdev(result), 1e-7);
+		assertEquals(1.1180340051651, WigFile.stdev(result, 5, 8), 1e-7);
 	}
 
 	/**
@@ -71,7 +71,7 @@ public abstract class AbstractWigFileTest {
 	@Test
 	public void testMinQuery() throws WigFileException, IOException {
 		Iterator<WigItem> result = test.query("chrI", 5, 8);
-		assertEquals(5, WigFile.min(result), 1e-7);
+		assertEquals(5, WigFile.min(result, 5, 8), 1e-7);
 	}
 
 	/**
@@ -82,7 +82,7 @@ public abstract class AbstractWigFileTest {
 	@Test
 	public void testMaxQuery() throws WigFileException, IOException {
 		Iterator<WigItem> result = test.query("chrI", 5, 8);
-		assertEquals(8, WigFile.max(result), 1e-7);
+		assertEquals(8, WigFile.max(result, 5, 8), 1e-7);
 	}
 
 	@Test
