@@ -34,10 +34,10 @@ public abstract class WigFile implements Closeable {
 		WigFile wig;
 		
 		if (BigWigFile.isBigWig(p)) {
-			log.debug("Autodetected BigWig file type for: " + p);
+			log.debug("Autodetected BigWig file type for: " + p.getFileName());
 			wig = new BigWigFile(p);
 		} else {
-			log.debug("Autodetected Wiggle file type for: " + p);
+			log.debug("Autodetected Wiggle file type for: " + p.getFileName());
 			wig = new TextWigFile(p);
 		}
 		
