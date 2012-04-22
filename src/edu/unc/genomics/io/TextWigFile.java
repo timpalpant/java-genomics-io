@@ -376,11 +376,13 @@ public class TextWigFile extends WigFile {
 			// Load and match version
 			long version = dis.readLong();
 			if (version != serialVersionUID) {
+				log.error("Version of index does not match version of Wig file!");
 				throw new WigFileException("Cannot load index from older version!");
 			}
 			// Load and optionally match checksum
 			long indexChecksum = dis.readLong();
 			if (matchChecksum && indexChecksum != checksum) {
+				log.error("Index does not match checksum of Wig file!");
 				throw new WigFileException("Index does not match checksum of Wig file!");
 			}
 			

@@ -46,13 +46,13 @@
     <!-- Put everything in ${build} into the BigWig.jar file -->
     <jar jarfile="${dist}/java-genomics-io.jar" manifest="META-INF/MANIFEST.MF">
       <fileset dir="${build}">
-				<!--
-					Include all the application classes, but
-					don't include the test classes.
-				-->
-				<include name="**/*.class" />
-				<exclude name="**/*Test.class" />
-			</fileset>
+		<!--
+			Include all the application classes, but
+			don't include the test classes.
+		-->
+		<include name="**/*.class" />
+		<exclude name="**/*Test.class" />
+	  </fileset>
       <fileset dir="." includes="log4j.properties"/>
     </jar>
   </target>

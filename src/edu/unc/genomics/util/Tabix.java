@@ -1,7 +1,5 @@
 package edu.unc.genomics.util;
 
-import it.unipi.di.util.ExternalSort;
-
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,22 +21,12 @@ public class Tabix {
 	
 	private static final Logger log = Logger.getLogger(Tabix.class);
 	
-	public static void sortFile(Path input, Path output, TabixWriter.Conf conf) throws IOException {
-		log.debug("Sorting "+input+" for Tabix indexing");
-		ExternalSort sorter = new ExternalSort();
-		sorter.setInFile(input.toString());
-		sorter.setOutFile(output.toString());
-		sorter.setNumeric(true);
-		
-		int[] columns = new int[3];
-		columns[0] = conf.chrColumn-1;
-		columns[1] = conf.startColumn-1;
-		columns[2] = conf.endColumn-1;
-		sorter.setColumns(columns);
-		
-		sorter.run();
-	}
-	
+	/**
+	 * BGZip an interval file for use with Tabix
+	 * @param input the input interval file in ASCII text format
+	 * @param output the bgzipped output file
+	 * @throws IOException
+	 */
 	public static void bgzip(Path input, Path output) throws IOException {
 		log.debug("BGZipping "+input+" for Tabix indexing");
 		InputStream is = Files.newInputStream(input);
@@ -55,6 +43,14 @@ public class Tabix {
 		is.close();
 	}
 	
+	/** 
+	 * Index a file with Tabix for random lookups
+	 * @param file the bgzipped, sorted file to index
+	 * @param conf the configuration to use (specifying the chr, start, stop cols)
+	 * @return the path to the Tabix index file
+	 * @throws IOException
+	 * @throws TabixException
+	 */
 	public static Path index(Path file, TabixWriter.Conf conf) throws IOException, TabixException {
 		log.debug("Indexing "+file+" with Tabix");
 		TabixWriter writer = new TabixWriter(file, conf);
