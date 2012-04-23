@@ -79,6 +79,9 @@ public class TrackHeader {
 			}
 			String key = token.substring(0, delim);
 			String value = token.substring(delim+1);
+			if (key.length() == 0 || value.length() == 0) { 
+				throw new TrackHeaderException("Invalid token: '" + token + "' in UCSC track header"); 
+			}
 			char firstChar = value.charAt(0);
 			if (firstChar == '\"' || firstChar == '\'') { 
 				value = value.substring(1); 
