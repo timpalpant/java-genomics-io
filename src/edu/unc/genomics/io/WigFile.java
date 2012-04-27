@@ -109,6 +109,14 @@ public abstract class WigFile implements Closeable {
 		return stats;
 	}
 	
+	public static long numBases(Iterator<WigItem> iter, int start, int stop) {
+		return stats(iter, start, stop).getN();
+	}
+	
+	public static float total(Iterator<WigItem> iter, int start, int stop) {
+		return (float) stats(iter, start, stop).getSum();
+	}
+	
 	public static float mean(Iterator<WigItem> iter, int start, int stop) {
 		return (float) stats(iter, start, stop).getMean();
 	}

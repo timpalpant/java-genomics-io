@@ -135,7 +135,7 @@ public class BigWigFile extends WigFile {
 	
 	/**
 	 * BigWig files are 0-indexed, half-open
-	 * To conform with the rest of the package, 
+	 * To conform with the rest of the java-genomics-io package, 
 	 * wrap and shift the results to 1-indexed, closed
 	 * @author timpalpant
 	 *

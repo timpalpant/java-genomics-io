@@ -27,8 +27,8 @@ import edu.ucsc.genome.TrackHeaderException;
 import edu.unc.genomics.util.ChecksumUtils;
 
 public class TextWigFile extends WigFile {
-	private static final long serialVersionUID = 2L;
-	public static final String INDEX_EXTENSION = ".wIdx";
+	private static final long serialVersionUID = 3L;
+	public static final String INDEX_EXTENSION = ".idx";
 	public static final int KEY_GRANULARITY = 10_000;
 	
 	private static Logger log = Logger.getLogger(TextWigFile.class);
