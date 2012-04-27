@@ -37,11 +37,11 @@ abstract class Contig extends Interval implements Serializable {
 	 * @return
 	 * @throws WigFileException 
 	 */
-	public static Contig parse(String headerLine) throws WigFileException {
+	public static Contig parseHeader(String headerLine) throws WigFileException {
 		if (headerLine.startsWith(FIXED_STEP)) {
-			return FixedStepContig.parse(headerLine);
+			return FixedStepContig.parseHeader(headerLine);
 		} else if (headerLine.startsWith(VARIABLE_STEP)) {
-			return VariableStepContig.parse(headerLine);
+			return VariableStepContig.parseHeader(headerLine);
 		} else {
 			throw new WigFileException("Unknown Contig type: " + headerLine);
 		}

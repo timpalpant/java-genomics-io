@@ -16,6 +16,27 @@ public class Interval implements Serializable {
 		this.stop = stop;
 	}
 	
+	public static Interval parse(String s) throws IntervalException {
+		int colon = s.indexOf(':');
+		if (colon == -1) {
+			throw new IntervalException("Cannot parse invalid interval string " + s);
+		}
+		
+		int dash = s.indexOf('-');
+		if (dash == -1) {
+			throw new IntervalException("Cannot parse invalid interval string " + s);
+		}
+		
+		try {
+			String chr = s.substring(0, colon);
+			int start = Integer.parseInt(s.substring(colon+1, dash));
+			int stop = Integer.parseInt(s.substring(dash+1));
+			return new Interval(chr, start, stop);
+		} catch (NumberFormatException e) {
+			throw new IntervalException("Cannot parse invalid interval string " + s);
+		}
+	}
+	
 	public String toBed() {
 		return chr + "\t" + (low()-1) + "\t" + high() + "\t.\t.\t" + strand();
 	}

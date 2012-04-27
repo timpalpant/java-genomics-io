@@ -17,7 +17,7 @@ class VariableStepContig extends Contig {
 		super(chr, start, stop, span);
 	}
 	
-	public static VariableStepContig parse(String headerLine) throws WigFileException {
+	public static VariableStepContig parseHeader(String headerLine) throws WigFileException {
 		String[] tokens = headerLine.split(" ");
 		if (tokens.length == 0 || !tokens[0].equals(Contig.VARIABLE_STEP)) {
 			throw new WigFileException("Not a valid variableStep header line: " + headerLine);

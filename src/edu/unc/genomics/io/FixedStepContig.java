@@ -20,7 +20,7 @@ class FixedStepContig extends Contig {
 		this.step = step;
 	}
 	
-	public static FixedStepContig parse(String headerLine) throws WigFileException {
+	public static FixedStepContig parseHeader(String headerLine) throws WigFileException {
 		String[] tokens = headerLine.split(" ");
 		if (tokens.length == 0 || !tokens[0].equals(Contig.FIXED_STEP)) {
 			throw new WigFileException("Not a valid fixedStep header line: " + headerLine);

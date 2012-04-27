@@ -5,12 +5,36 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import edu.unc.genomics.Interval;
+import edu.unc.genomics.IntervalException;
 
 public class IntervalTest {
 	
 	protected final Interval watson = new Interval("chr23", 30, 40);
 	protected final Interval crick = new Interval("chr23", 101, 95);
 
+	@Test
+	public void testParse() throws IntervalException {
+		Interval test = Interval.parse("chr23:30-40");
+		assertEquals("chr23", test.getChr());
+		assertEquals(30, test.getStart());
+		assertEquals(40, test.getStop());
+	}
+	
+	@Test(expected = IntervalException.class)
+	public void testParseInvalid() throws IntervalException {
+		Interval test = Interval.parse("chr23:3040");
+	}
+	
+	@Test(expected = IntervalException.class)
+	public void testParseInvalid2() throws IntervalException {
+		Interval test = Interval.parse("chr23:a-b");
+	}
+	
+	@Test(expected = IntervalException.class)
+	public void testParseInvalid3() throws IntervalException {
+		Interval test = Interval.parse("2340-50");
+	}
+	
 	@Test
 	public void testToBed() {
 		assertEquals("chr23\t29\t40\t.\t.\t+", watson.toBed());

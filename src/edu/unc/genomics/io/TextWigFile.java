@@ -286,7 +286,7 @@ public class TextWigFile extends WigFile {
 				}
 				
 				// Now parse the new Contig
-				contig = Contig.parse(line);
+				contig = Contig.parseHeader(line);
 				contigs.add(contig);
 				
 				// Set the new Contig's start info
