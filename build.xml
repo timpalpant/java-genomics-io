@@ -6,8 +6,9 @@
   <property name="src" location="src"/>
   <property name="test" location="test"/>
   <property name="build" location="build"/>
-  <property name="dist"  location="dist"/>
-  <property name="lib"   location="lib"/>
+  <property name="dist" location="dist"/>
+  <property name="lib" location="lib"/>
+  <property name="doc" location="doc"/>
   <property name="reports"   location="reports"/>
   <property name="reports.junit"   location="${reports}/junit"/>
   <property name="reports.junit.xml"   location="${reports.junit}/xml"/>
@@ -56,8 +57,15 @@
       <fileset dir="." includes="log4j.properties"/>
     </jar>
   </target>
+  
+  <target name="javadoc" description="create JavaDocs for the library">
+    <mkdir dir="${doc}"/>
+    <javadoc destdir="${doc}">
+      <fileset dir="${src}" includes="**/*.java" />
+    </javadoc>
+  </target>
    
-	<target name="test" depends="compile">
+	<target name="test" depends="compile" description="run the unit tests">
 	  <mkdir dir="${reports}" />
 	  <mkdir dir="${reports.junit}" />
 	  <mkdir dir="${reports.junit.xml}" />
@@ -83,7 +91,7 @@
 		</junitreport>
 	</target>
 	
-	<target name="coverage" depends="compile">
+	<target name="coverage" depends="compile" description="analyze test code coverage">
 	  <delete file="jacoco.exec" />
 	  <mkdir dir="${reports}" />
 	  <mkdir dir="${reports.jacoco}" />
@@ -127,6 +135,7 @@
     <!-- Delete the ${build} and ${dist} directory trees -->
     <delete dir="${build}"/>
     <delete dir="${dist}"/>
+    <delete dir="${doc}"/>
     <delete dir="${reports}"/>
     <delete file="jacoco.exec" />
   </target>

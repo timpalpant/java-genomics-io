@@ -1,6 +1,7 @@
 build
 dist
 bin
+doc
 reports
 *.class
 jacoco.exec

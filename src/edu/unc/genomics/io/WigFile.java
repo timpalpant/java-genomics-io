@@ -20,7 +20,6 @@ public abstract class WigFile implements Closeable {
 	protected final Path p;
 	
 	protected WigFile(Path p) {
-		log.debug("Initializing wig file: " + p.getFileName());
 		this.p = p;
 	}
 	

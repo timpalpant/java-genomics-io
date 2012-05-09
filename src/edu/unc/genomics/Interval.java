@@ -29,8 +29,8 @@ public class Interval implements Serializable {
 		
 		try {
 			String chr = s.substring(0, colon);
-			int start = Integer.parseInt(s.substring(colon+1, dash));
-			int stop = Integer.parseInt(s.substring(dash+1));
+			int start = Integer.parseInt(s.substring(colon+1, dash).replaceAll(",", ""));
+			int stop = Integer.parseInt(s.substring(dash+1).replaceAll(",", ""));
 			return new Interval(chr, start, stop);
 		} catch (NumberFormatException e) {
 			throw new IntervalException("Cannot parse invalid interval string " + s);
