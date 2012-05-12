@@ -42,6 +42,12 @@ import java.util.Set;
 import edu.unc.genomics.io.LineReader;
 import edu.unc.genomics.io.LineReaderIterator;
 
+/**
+ * Class adapted from the Broad Institute for reading from files indexed with Tabix
+ * 
+ * @author timpalpant
+ *
+ */
 public class TabixReader implements LineReader, Iterable<String> {
 	protected Path mFn;
 	private BlockCompressedInputStream mFp;

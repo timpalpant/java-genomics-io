@@ -7,7 +7,7 @@ import net.sf.samtools.TabixWriter;
  * 
  * @author timpalpant
  *
- * @param <T>
+ * @param <T> the type of Interval that this IntervalFactory produces
  */
 public interface IntervalFactory<T extends Interval> {
 	

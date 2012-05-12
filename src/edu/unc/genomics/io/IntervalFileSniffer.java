@@ -20,6 +20,12 @@ import net.sf.samtools.SAMFileReader;
 import net.sf.samtools.SAMFileReader.ValidationStringency;
 import net.sf.samtools.SAMRecord;
 
+/**
+ * Methods for "sniffing" file types to try to guess what format a file is
+ * 
+ * @author timpalpant
+ *
+ */
 public class IntervalFileSniffer {
 	
 	private static final Logger log = Logger.getLogger(IntervalFileSniffer.class);
@@ -31,14 +37,25 @@ public class IntervalFileSniffer {
 		this.p = p;
 	}
 	
+	/**
+	 * @return true if this file is ASCII-text, false otherwise
+	 * @throws IOException
+	 */
 	public boolean isAscii() throws IOException {
 		return FileUtils.isAsciiText(p);
 	}
 	
+	/**
+	 * @return true if this file is not ASCII-text
+	 * @throws IOException
+	 */
 	public boolean isBinary() throws IOException {
 		return !isAscii();
 	}
 	
+	/**
+	 * @return true if this file is a BigBed file
+	 */
 	public boolean isBigBed() {
 		try {
 			BBFileReader reader = new BBFileReader(p.toString());
@@ -48,6 +65,10 @@ public class IntervalFileSniffer {
 		}
 	}
 	
+	/**
+	 * @return true if this file is Bed format, but not BedGraph format
+	 * @throws IOException
+	 */
 	public boolean isBed() throws IOException {
 		if (!isAscii()) { return false; }
 		if (numColumns() < 3 || numColumns() > 12) { return false; }
@@ -63,6 +84,10 @@ public class IntervalFileSniffer {
 		return true;
 	}
 	
+	/**
+	 * @return true if this file is BedGraph format
+	 * @throws IOException
+	 */
 	public boolean isBedGraph() throws IOException {
 		if (!isAscii()) { return false; }
 		if (numColumns() != 4) { return false; }
@@ -82,6 +107,10 @@ public class IntervalFileSniffer {
 		return true;
 	}
 	
+	/**
+	 * @return true if this file is GFF format
+	 * @throws IOException
+	 */
 	public boolean isGFF() throws IOException {
 		if (!isAscii()) { return false; }
 		if (numColumns() < 9) { return false; }
@@ -96,6 +125,10 @@ public class IntervalFileSniffer {
 		return true;
 	}
 	
+	/**
+	 * @return true if this file is GeneTrack format (which is detected by the header line)
+	 * @throws IOException
+	 */
 	public boolean isGeneTrack() throws IOException {
 		if (!isAscii()) { return false; }
 		if (numColumns() != 4) { return false; }
@@ -107,6 +140,9 @@ public class IntervalFileSniffer {
 		return false;
 	}
 	
+	/**
+	 * @return true if this file is BAM format (with STRICT validation)
+	 */
 	public boolean isBAM() {
 		boolean isBam = false;
 		
@@ -127,6 +163,10 @@ public class IntervalFileSniffer {
 		return isBam;
 	}
 	
+	/**
+	 * @return true if this file is SAM format (with STRICT validation)
+	 * @throws IOException
+	 */
 	public boolean isSAM() throws IOException {
 		boolean isSAM = false;
 		
@@ -147,6 +187,10 @@ public class IntervalFileSniffer {
 		return isSAM;
 	}
 	
+	/**
+	 * @return the first non-comment line of an ASCII text file (comments = track, #, @)
+	 * @throws IOException
+	 */
 	private String getFirstLine() throws IOException {
 		if (firstLine == null) {
 			try (BufferedReader reader = Files.newBufferedReader(p, Charset.defaultCharset())) {
@@ -162,10 +206,19 @@ public class IntervalFileSniffer {
 		return firstLine;
 	}
 	
+	/**
+	 * @return the number of tab-delimited columns in this ASCII-text file
+	 * @throws IOException
+	 */
 	private int numColumns() throws IOException {
 		return getFirstLine().split("\t").length;
 	}
 	
+	/**
+	 * @param n the column to return
+	 * @return the value of the nth column of the first line in this file
+	 * @throws IOException
+	 */
 	private String column(int n) throws IOException {
 		return getFirstLine().split("\t")[n-1];
 	}

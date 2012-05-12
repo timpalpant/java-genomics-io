@@ -13,6 +13,9 @@ import net.sf.samtools.SAMRecord.SAMTagAndValue;
 import net.sf.samtools.SAMValidationError;
 
 /**
+ * Wrapper for SAM-JDK's SAMRecord class that conforms to the specifications
+ * of all other java-genomics-io classes and is a subclass of Interval
+ * 
  * @author timpalpant
  *
  */

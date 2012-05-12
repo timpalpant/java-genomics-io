@@ -1,5 +1,11 @@
 package edu.unc.genomics;
 
+/**
+ * An Interval that can optionally have an ID and a numerical value associated with it
+ * 
+ * @author timpalpant
+ *
+ */
 public class ValuedInterval extends Interval {
 	private static final long serialVersionUID = 2976113135643438146L;
 	protected String id;
@@ -11,24 +17,25 @@ public class ValuedInterval extends Interval {
 		this.value = value;
 	}
 	
+	/**
+	 * Initialize a new ValuedInterval with default value (null)
+	 * @param chr
+	 * @param start
+	 * @param stop
+	 * @param id
+	 */
 	public ValuedInterval(String chr, int start, int stop, String id) {
 		this(chr, start, stop, id, null);
 	}
 	
+	/**
+	 * Initialize a ValuedInterval with default value (null) and no id (null)
+	 * @param chr
+	 * @param start
+	 * @param stop
+	 */
 	public ValuedInterval(String chr, int start, int stop) {
 		this(chr, start, stop, null);
-	}
-	
-	public ValuedInterval(String chr, int start) {
-		this(chr, start, 0);
-	}
-
-	public ValuedInterval(String chr) {
-		this(chr, 0);
-	}
-	
-	public ValuedInterval() {
-		this(null);
 	}
 	
 	@Override

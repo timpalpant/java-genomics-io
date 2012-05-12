@@ -1,6 +1,3 @@
-/**
- * 
- */
 package edu.unc.genomics.io;
 
 import java.io.IOException;
@@ -13,6 +10,7 @@ import edu.unc.genomics.GFFEntry;
 import edu.unc.genomics.IntervalFactory;
 
 /**
+ * A GFF file. For more information, see: http://genome.ucsc.edu/FAQ/FAQformat
  * @author timpalpant
  *
  */

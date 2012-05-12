@@ -20,7 +20,9 @@ import edu.unc.genomics.SAMEntry;
 import edu.unc.genomics.util.Samtools;
 
 /**
- * Text SAM files. Will passively convert to BAM if random queries are attempted.
+ * Text SAM files. Will passively convert to BAM and index if random queries are attempted.
+ * For more information about SAM files, see: http://samtools.sourceforge.net
+ * 
  * @author timpalpant
  *
  */

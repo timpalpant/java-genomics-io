@@ -13,6 +13,9 @@ import org.apache.log4j.Logger;
 import edu.unc.genomics.Interval;
 
 /**
+ * Base class for working with files of Interval information, including Bed, BigBed, BedGraph, GFF, GeneTrack, SAM, and BAM files
+ * Subclasses will provide type-specific information, but this class may be used when only Interval info (chr:start-stop) is needed
+ * 
  * @author timpalpant
  *
  */
@@ -26,6 +29,13 @@ public abstract class IntervalFile<T extends Interval> implements Iterable<T>, C
 		this.p = p;
 	}
 	
+	/**
+	 * Attempt to autodetect file type and return the appropriate parser
+	 * @param p the file to initialize
+	 * @return an IntervalFile that will parse the data in p correctly
+	 * @throws IntervalFileSnifferException if the file type cannot be autodetected (this may be thrown if the file has an invalid format)
+	 * @throws IOException if a disk read error occurs
+	 */
 	public static IntervalFile<? extends Interval> autodetect(Path p) throws IntervalFileSnifferException, IOException {
 		IntervalFileSniffer sniffer = new IntervalFileSniffer(p);
 		
@@ -55,6 +65,13 @@ public abstract class IntervalFile<T extends Interval> implements Iterable<T>, C
 		}
 	}
 	
+	/**
+	 * Load all of the intervals from a file. WARN: this may consume a lot of memory if the source file is large
+	 * @param p the file to load intervals from
+	 * @return a List of intervals from p
+	 * @throws IntervalFileSnifferException
+	 * @throws IOException
+	 */
 	public static List<Interval> loadAll(Path p) throws IntervalFileSnifferException, IOException {
 		List<Interval> intervals = new ArrayList<Interval>();
 		try (IntervalFile<? extends Interval> intervalFile = autodetect(p)) {
@@ -66,6 +83,9 @@ public abstract class IntervalFile<T extends Interval> implements Iterable<T>, C
 		return intervals;
 	}
 	
+	/**
+	 * @return all of the intervals in this IntervalFile
+	 */
 	public List<T> loadAll() {
 		List<T> intervals = new ArrayList<>();
 		for (T interval : this) {
@@ -74,14 +94,34 @@ public abstract class IntervalFile<T extends Interval> implements Iterable<T>, C
 		return intervals;
 	}
 	
+	/**
+	 * @return the number of intervals in this file
+	 */
 	public abstract int count();
 	
+	/**
+	 * @return the set of all chromosomes that have intervals in this file
+	 */
 	public abstract Set<String> chromosomes();
 	
+	/**
+	 * Query for intervals that overlap a given interval
+	 * @param i the interval to query for
+	 * @return an Iterator over the intervals in this file that overlap i
+	 * @throws UnsupportedOperationException if the subclass does not support random queries
+	 */
 	public Iterator<T> query(Interval i) throws UnsupportedOperationException {
 		return query(i.getChr(), i.low(), i.high());
 	}
 	
+	/**
+	 * Query for intervals that overlap a given interval
+	 * @param chr the chromosome of the interval to query for
+	 * @param start the start of the interval to query for
+	 * @param stop the stop of the interval to query for
+	 * @return an Iterator over intervals in this file that overlap chr:start-stop
+	 * @throws UnsupportedOperationException if the subclass does not support random queries
+	 */
 	public abstract Iterator<T> query(String chr, int start, int stop) throws UnsupportedOperationException;
 	
 	public Path getPath() {

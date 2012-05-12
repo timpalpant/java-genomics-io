@@ -11,6 +11,7 @@ import edu.unc.genomics.Interval;
 import edu.unc.genomics.IntervalFactory;
 
 /**
+ * For reading from Tabix-indexed files
  * @author timpalpant
  *
  */

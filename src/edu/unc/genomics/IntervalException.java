@@ -1,5 +1,11 @@
 package edu.unc.genomics;
 
+/**
+ * Exception thrown when there is an error parsing an Interval format
+ * 
+ * @author timpalpant
+ *
+ */
 public class IntervalException extends Exception {
 
 	private static final long serialVersionUID = -737639032486179789L;

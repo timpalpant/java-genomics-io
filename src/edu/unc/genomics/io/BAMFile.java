@@ -23,6 +23,8 @@ import edu.unc.genomics.util.Samtools;
  * A binary BAM file. Will passively index if an index is not available and random
  * queries are attempted.
  * 
+ * For more information about BAM files, see: http://samtools.sourceforge.net
+ * 
  * @author timpalpant
  *
  */

@@ -1,10 +1,34 @@
 = Java Genomics IO API
 
-This library provides a simple and performant API for working with many genomic file formats in a consistent fashion. It was prototyped in Ruby (https://github.com/timpalpant/bioruby-genomic-file). The library requires JDK7 (http://www.oracle.com/technetwork/java/javase/downloads/index.html) since it makes use of switches on Strings and the new File/Path classes.
+This library provides a simple and performant API for working with many genomic file formats in a consistent fashion. The library requires JDK7 (http://www.oracle.com/technetwork/java/javase/downloads/index.html) since it makes use of switches on Strings and the new File/Path classes.
 
 The library is mainly a wrapper to pull together multiple existing libraries, including Picard (http://picard.sourceforge.net) for reading SAM/BAM files and the BigWig/BigBed readers provided by the Broad Institute (http://code.google.com/p/bigwig). The complete list of file formats currently supported is: Bed, BigBed, BedGraph, GFF, SAM, BAM, Wiggle, BigWig, Tabix, Fasta, Fastq.
 
 Auto-indexing is implemented for randomly querying files by genomic region. Line-based interval files are indexed as needed with Tabix. Built-in indexes are used for BAM, BigWig, and BigBed files. ASCII Wiggle files are indexed using a custom implementation.
+
+Complete JavaDocs are available at: http://palpant.us/java-genomics-io and may also be generated with the ant task "javadoc"
+
+This library was prototyped in Ruby (https://github.com/timpalpant/bioruby-genomic-file).
+
+== Compilation
+
+An ant build script is provided for easy compilation. To see available ant tasks, call
+  
+  $ ant -p
+  
+To build the distribution as a jar file, call
+
+  $ ant dist
+  
+To run the unit tests, call
+
+  $ ant test
+  
+and to analyze the unit test code coverage, call
+
+  $ ant coverage
+  
+Reports for the unit test results and code coverage are output in the reports subdirectory.
 
 == Examples
 

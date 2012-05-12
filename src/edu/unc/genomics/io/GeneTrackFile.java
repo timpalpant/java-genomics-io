@@ -10,6 +10,8 @@ import edu.unc.genomics.GeneTrackEntry;
 import edu.unc.genomics.IntervalFactory;
 
 /**
+ * A GeneTrack formatted file. For more information, see: http://atlas.bx.psu.edu/genetrack/docs/genetrack.html
+ * 
  * @author timpalpant
  *
  */

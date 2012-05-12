@@ -7,6 +7,11 @@ import java.util.Iterator;
 import org.apache.log4j.Logger;
 import org.broad.igv.bbfile.WigItem;
 
+/**
+ * Holds index information about variableStep contigs in a TextWigFile
+ * @author timpalpant
+ *
+ */
 class VariableStepContig extends Contig {
 	
 	private static final Logger log = Logger.getLogger(VariableStepContig.class);

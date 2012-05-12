@@ -10,6 +10,8 @@ import edu.unc.genomics.BedGraphEntry;
 import edu.unc.genomics.IntervalFactory;
 
 /**
+ * A BedGraph file. For the format see http://genome.ucsc.edu/FAQ/FAQformat
+ * 
  * @author timpalpant
  *
  */

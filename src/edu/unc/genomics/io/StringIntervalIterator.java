@@ -6,9 +6,11 @@ import edu.unc.genomics.Interval;
 import edu.unc.genomics.IntervalFactory;
 
 /**
- * @author timpalpant
  * Iterator that iterates over lines in a text file and returns each line
  * as a parsed interval using an IntervalFactory
+ * 
+ * @author timpalpant
+ * 
  */
 class StringIntervalIterator<T extends Interval> implements Iterator<T> {
 

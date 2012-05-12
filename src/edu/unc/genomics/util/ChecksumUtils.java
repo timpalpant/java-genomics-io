@@ -1,6 +1,9 @@
 package edu.unc.genomics.util;
 
 /**
+ * Helper utilities for calculating checksums of files
+ * including Adler32 and CRC32
+ * 
  * @author timpalpant
  *
  */

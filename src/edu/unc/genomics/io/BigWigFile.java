@@ -13,6 +13,11 @@ import org.broad.igv.bbfile.RPChromosomeRegion;
 import org.broad.igv.bbfile.WigItem;
 
 /**
+ * A BigWig file. For more information, see: http://genome.ucsc.edu/goldenPath/help/bigWig.html
+ * 
+ * BigWig and regular ASCII-text Wig files may be used interchangeably as the base class WigFile,
+ * and the correct format (Wig/BigWig) can be autodetected by calling WigFile.autodetect()
+ * 
  * Wrapper for Broad Institute BigWig classes
  * See: http://code.google.com/p/bigwig/
  * 

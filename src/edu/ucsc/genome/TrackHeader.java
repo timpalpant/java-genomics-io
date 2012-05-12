@@ -67,6 +67,12 @@ public class TrackHeader {
 		this(null);
 	}
 	
+	/**
+	 * Parse a UCSC track line into a TrackHeader object
+	 * @param line a UCSC track line
+	 * @return a TrackHeader object parsed from line
+	 * @throws TrackHeaderException if there is a formatting error in the track line
+	 */
 	public static TrackHeader parse(String line) throws TrackHeaderException {
 		TrackHeader header = new TrackHeader();
 		
@@ -181,6 +187,7 @@ public class TrackHeader {
 		return header;
 	}
 	
+	@Override
 	public String toString() {
 		StringBuilder s = new StringBuilder("track");
 		
@@ -205,6 +212,11 @@ public class TrackHeader {
     return s.toString();
 	}
 	
+	/**
+	 * Parse a boolean value that may be on/off, yes/no, or true/false
+	 * @param value a boolean flag of the form on/off, yes/no, or true/false
+	 * @return the boolean value of the flag
+	 */
 	private static boolean parseBoolean(String value) {
 		if (value.equalsIgnoreCase("on") || value.equalsIgnoreCase("yes") || value.equalsIgnoreCase("true")) {
 			return true;

@@ -1,9 +1,8 @@
-/**
- * 
- */
 package edu.unc.genomics.util;
 
 /**
+ * Helper utilities for vector operations on arrays
+ * 
  * @author timpalpant
  *
  */

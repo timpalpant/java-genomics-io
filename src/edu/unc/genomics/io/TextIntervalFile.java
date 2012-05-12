@@ -21,10 +21,12 @@ import edu.unc.genomics.util.FileUtils;
 import edu.unc.genomics.util.Tabix;
 
 /**
+ * Base class for all ASCII-text, line-based, tab-delimited interval files, such as Bed, BedGraph, GFF, etc.
+ * 
  * @author timpalpant
  *
  */
-public abstract class TextIntervalFile<T extends Interval> extends IntervalFile<T> {
+abstract class TextIntervalFile<T extends Interval> extends IntervalFile<T> {
 	
 	private static final Logger log = Logger.getLogger(TextIntervalFile.class);
 	
@@ -52,6 +54,7 @@ public abstract class TextIntervalFile<T extends Interval> extends IntervalFile<
 		reader.close();
 	}
 	
+	@Override
 	public Set<String> chromosomes() {
 		if (chromosomes == null) {
 			if (tabixFile == null) {
@@ -64,6 +67,7 @@ public abstract class TextIntervalFile<T extends Interval> extends IntervalFile<
 		return chromosomes;
 	}
 	
+	@Override
 	public int count() {
 		if (count == 0) {
 			if (tabixFile == null) {
@@ -91,6 +95,9 @@ public abstract class TextIntervalFile<T extends Interval> extends IntervalFile<
 		return tabixFile.query(chr, start, stop);
 	}
 	
+	/**
+	 * Filter, sort, BGZip, and index this file with Tabix for random querying
+	 */
 	private void convertToTabix() {
 		try {
 			// Filter the input file

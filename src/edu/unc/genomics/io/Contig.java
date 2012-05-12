@@ -12,8 +12,10 @@ import org.broad.igv.bbfile.WigItem;
 import edu.unc.genomics.Interval;
 
 /**
- * @author timpalpant
  * Holds information about a Contig in a WigFile
+ * 
+ * @author timpalpant
+ * 
  */
 abstract class Contig extends Interval implements Serializable {
 	private static final long serialVersionUID = 7665673936467048945L;

@@ -25,6 +25,12 @@ public class GFFEntry extends ValuedInterval {
 		super(chr, start, stop);
 	}
 	
+	/**
+	 * Parse a GFFEntry from a line in a GFF file
+	 * or null, if the line passed is a comment (#)
+	 * @param line a record in a GFF file
+	 * @return a GFFEntry object parsed from line
+	 */
 	public static GFFEntry parse(String line) {
 		if (line.startsWith("#") || line.startsWith("track")) {
 			return null;

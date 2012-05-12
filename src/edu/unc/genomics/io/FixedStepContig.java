@@ -7,6 +7,12 @@ import java.util.Iterator;
 import org.apache.log4j.Logger;
 import org.broad.igv.bbfile.WigItem;
 
+/**
+ * Hold index information about a fixedStep contig in a TextWigFile
+ * 
+ * @author timpalpant
+ *
+ */
 class FixedStepContig extends Contig {
 	
 	private static final Logger log = Logger.getLogger(FixedStepContigIterator.class);

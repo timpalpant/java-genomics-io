@@ -26,6 +26,15 @@ import edu.ucsc.genome.TrackHeader;
 import edu.ucsc.genome.TrackHeaderException;
 import edu.unc.genomics.util.ChecksumUtils;
 
+/**
+ * An ASCII-text Wiggle file. For more information, see: http://genome.ucsc.edu/goldenPath/help/wiggle.html
+ * 
+ * BigWig and regular ASCII-text Wig files may be used interchangeably as the base class WigFile,
+ * and the correct format (Wig/BigWig) can be autodetected by calling WigFile.autodetect()
+ * 
+ * @author timpalpant
+ *
+ */
 public class TextWigFile extends WigFile {
 	private static final long serialVersionUID = 3L;
 	public static final String INDEX_EXTENSION = ".idx";

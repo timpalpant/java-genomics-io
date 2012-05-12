@@ -10,6 +10,8 @@ import edu.unc.genomics.BedEntry;
 import edu.unc.genomics.IntervalFactory;
 
 /**
+ * A Bed file. For the format, see http://genome.ucsc.edu/FAQ/FAQformat
+ * 
  * @author timpalpant
  *
  */

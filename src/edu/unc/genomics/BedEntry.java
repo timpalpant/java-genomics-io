@@ -29,6 +29,12 @@ public class BedEntry extends ValuedInterval {
 		super(chr, start, stop);
 	}
 	
+	/**
+	 * Parse a BedEntry from a line in a Bed file
+	 * or return null, if the line passed is a comment (#)
+	 * @param line a record in a Bed file
+	 * @return a BedEntry object parsed from line
+	 */
 	public static BedEntry parse(String line) {
 		if (line.startsWith("#") || line.startsWith("track")) {
 			return null;

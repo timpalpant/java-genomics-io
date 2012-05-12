@@ -1,6 +1,3 @@
-/**
- * 
- */
 package edu.unc.genomics.io;
 
 import java.io.IOException;
@@ -15,6 +12,8 @@ import org.broad.igv.bbfile.BedFeature;
 import edu.unc.genomics.BedEntry;
 
 /**
+ * A BigBed file. For more information, see: http://genome.ucsc.edu/goldenPath/help/bigBed.html
+ * 
  * @author timpalpant
  *
  */

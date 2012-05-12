@@ -1,8 +1,10 @@
 package edu.ucsc.genome;
 
 /**
- * @author timpalpant
  * Exception thrown when a parsing error occurs in a UCSC TrackHeader
+ * 
+ * @author timpalpant
+ * 
  */
 public class TrackHeaderException extends Exception {
 
