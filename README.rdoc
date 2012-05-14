@@ -2,7 +2,7 @@
 
 This library provides a simple and performant API for working with many genomic file formats in a consistent fashion. The library requires JDK7 (http://www.oracle.com/technetwork/java/javase/downloads/index.html) since it makes use of switches on Strings and the new File/Path classes.
 
-The library is mainly a wrapper to pull together multiple existing libraries, including Picard (http://picard.sourceforge.net) for reading SAM/BAM files and the BigWig/BigBed readers provided by the Broad Institute (http://code.google.com/p/bigwig). The complete list of file formats currently supported is: Bed, BigBed, BedGraph, GFF, SAM, BAM, Wiggle, BigWig, Tabix, Fasta, Fastq.
+The library is mainly a wrapper to pull together multiple existing libraries, including Picard (http://picard.sourceforge.net) for reading SAM/BAM files and the BigWig/BigBed readers provided by the Broad Institute (http://code.google.com/p/bigwig). The complete list of file formats currently supported is: Bed, BigBed, BedGraph, GFF, GeneTrac, SAM, BAM, Wiggle, BigWig, Tabix.
 
 Auto-indexing is implemented for randomly querying files by genomic region. Line-based interval files are indexed as needed with Tabix. Built-in indexes are used for BAM, BigWig, and BigBed files. ASCII Wiggle files are indexed using a custom implementation.
 
@@ -78,4 +78,4 @@ Rudimentary indexing is provided for text-Wig files, while BigWig files are acce
 
 With all readers, data is buffered and lazy-parsed to minimize memory requirements and maximize disk performance.
 
-See also https://github.com/timpalpant/java-genomics-toolkit for some full implementations using this library.
+See also https://github.com/timpalpant/java-genomics-toolkit for some full implementations using this library. A good starting point is: https://github.com/timpalpant/java-genomics-toolkit/blob/master/src/edu/unc/genomics/ngs/IntervalStats.java which demonstrates querying for data from Wig files based on a list of intervals in a Bed/BedGraph/GFF file.

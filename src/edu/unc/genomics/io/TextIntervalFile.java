@@ -26,7 +26,7 @@ import edu.unc.genomics.util.Tabix;
  * @author timpalpant
  *
  */
-abstract class TextIntervalFile<T extends Interval> extends IntervalFile<T> {
+public abstract class TextIntervalFile<T extends Interval> extends IntervalFile<T> {
 	
 	private static final Logger log = Logger.getLogger(TextIntervalFile.class);
 	

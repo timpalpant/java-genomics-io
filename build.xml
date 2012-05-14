@@ -8,7 +8,7 @@
   <property name="build" location="build"/>
   <property name="dist" location="dist"/>
   <property name="lib" location="lib"/>
-  <property name="doc" location="doc"/>
+  <property name="docs" location="docs"/>
   <property name="reports"   location="reports"/>
   <property name="reports.junit"   location="${reports}/junit"/>
   <property name="reports.junit.xml"   location="${reports.junit}/xml"/>
@@ -59,8 +59,8 @@
   </target>
   
   <target name="javadoc" description="create JavaDocs for the library">
-    <mkdir dir="${doc}"/>
-    <javadoc destdir="${doc}">
+    <mkdir dir="${docs}"/>
+    <javadoc destdir="${docs}">
       <fileset dir="${src}" includes="**/*.java" />
     </javadoc>
   </target>
@@ -135,7 +135,7 @@
     <!-- Delete the ${build} and ${dist} directory trees -->
     <delete dir="${build}"/>
     <delete dir="${dist}"/>
-    <delete dir="${doc}"/>
+    <delete dir="${docs}"/>
     <delete dir="${reports}"/>
     <delete file="jacoco.exec" />
   </target>
