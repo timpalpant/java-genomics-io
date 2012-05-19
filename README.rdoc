@@ -2,9 +2,7 @@
 
 This library provides a simple and performant API for working with many genomic file formats in a consistent fashion. The library requires JDK7 (http://www.oracle.com/technetwork/java/javase/downloads/index.html) since it makes use of switches on Strings and the new File/Path classes.
 
-The library is mainly a wrapper to pull together multiple existing libraries, including Picard (http://picard.sourceforge.net) for reading SAM/BAM files and the BigWig/BigBed readers provided by the Broad Institute (http://code.google.com/p/bigwig). The complete list of file formats currently supported is: Bed, BigBed, BedGraph, GFF, GeneTrac, SAM, BAM, Wiggle, BigWig, Tabix.
-
-Auto-indexing is implemented for randomly querying files by genomic region. Line-based interval files are indexed as needed with Tabix. Built-in indexes are used for BAM, BigWig, and BigBed files. ASCII Wiggle files are indexed using a custom implementation.
+The library is mainly a wrapper to pull together multiple existing libraries, including Picard (http://picard.sourceforge.net) for reading SAM/BAM files and the BigWig/BigBed readers provided by the Broad Institute (http://code.google.com/p/bigwig). The complete list of file formats currently supported is: Bed, BigBed, BedGraph, GFF, GeneTrack, SAM, BAM, Wiggle, BigWig, Tabix. It seeks to accomplish two major tasks: 1) Allow many different formats to be accessed and manipulated in a consistent way without needing to worry about parsing implementation. For example, all line-based interval formats inherit from the Interval class so that tools can be agnostic to the specific format of input files. 2) Make random-access to information in large genomic datasets efficient by using indexing schemes. In this way, your tools can randomly pull information from specific genomic intervals without the major performance cost incurred by seeking through ASCII text files line-by-line. Line-based interval files are indexed as needed using a pure-Java reimplementation of  Tabix (http://samtools.sourceforge.net/tabix.shtml). Built-in indexes are used for BAM, BigWig, and BigBed files. ASCII Wiggle files are indexed using a custom implementation.
 
 Complete JavaDocs are available at: http://palpant.us/java-genomics-io and may also be generated with the ant task "javadoc"
 
@@ -73,6 +71,7 @@ Similar abstraction is provided for Wig/BigWig files:
   $ 
   $ Iterator<WigItem> result2 = wig.query("chr23", 1, 10_000);
   $ float[] data = WigFile.flattenData(result2, 1, 10_000);
+  $ float meanValueOnInterval = WigFile.mean(result2, 1, 10_000);
 
 Rudimentary indexing is provided for text-Wig files, while BigWig files are accessed using the R-tree information. This means that performance is somewhat better for BigWig files. However, in some cases it is inconvenient or impossible to convert Wig files to BigWig since the wigToBigWig tool consumes ~4 x (file size) memory. The indexing scheme used for text-Wig files requires relatively modest memory, even for human-scale genomes, yet ensures an upper bound for seek times in random queries.
 
