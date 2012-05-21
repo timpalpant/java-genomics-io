@@ -36,6 +36,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -61,6 +62,7 @@ public class TabixReader implements LineReader, Iterable<String> {
 	protected String[] mSeq;
 
 	protected HashMap<String, Integer> mChr2tid;
+	protected Set<String> chromosomes;
 
 	static final String DEFAULT_INDEX_EXTENSION = ".tbi";
 	static final int MAX_BIN = 37450;
@@ -174,6 +176,7 @@ public class TabixReader implements LineReader, Iterable<String> {
 		byte[] buf = new byte[4];
 
 		is.read(buf, 0, 4); // read "TBI\1"
+		chromosomes = new LinkedHashSet<String>();
 		mSeq = new String[readInt(is)]; // # sequences
 		mChr2tid = new HashMap<String, Integer>();
 		mPreset = readInt(is);
@@ -192,6 +195,7 @@ public class TabixReader implements LineReader, Iterable<String> {
 				System.arraycopy(buf, j, b, 0, b.length);
 				String s = new String(b);
 				mChr2tid.put(s, k);
+				chromosomes.add(s);
 				mSeq[k++] = s;
 				j = i + 1;
 			}
@@ -237,7 +241,7 @@ public class TabixReader implements LineReader, Iterable<String> {
 	}
 	
 	public Set<String> chromosomes() {
-		return mChr2tid.keySet();
+		return chromosomes;
 	}
 
 	@Override
