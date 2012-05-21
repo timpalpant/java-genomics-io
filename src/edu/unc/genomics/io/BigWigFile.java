@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.broad.igv.bbfile.BBFileReader;
@@ -58,7 +59,7 @@ public class BigWigFile extends WigFile {
 
 	@Override
 	public Set<String> chromosomes() {
-		return new HashSet<String>(reader.getChromosomeNames());
+		return new LinkedHashSet<String>(reader.getChromosomeNames());
 	}
 
 	@Override

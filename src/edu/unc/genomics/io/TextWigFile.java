@@ -11,8 +11,8 @@ import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -36,7 +36,7 @@ import edu.unc.genomics.util.ChecksumUtils;
  *
  */
 public class TextWigFile extends WigFile {
-	private static final long serialVersionUID = 3L;
+	private static final long serialVersionUID = 4L;
 	public static final String INDEX_EXTENSION = ".idx";
 	public static final int KEY_GRANULARITY = 10_000;
 	
@@ -46,7 +46,7 @@ public class TextWigFile extends WigFile {
 	private TrackHeader header = new TrackHeader("wiggle_0");
 	
 	private List<Contig> contigs = new ArrayList<Contig>();
-	private Set<String> chromosomes = new HashSet<String>();
+	private Set<String> chromosomes = new LinkedHashSet<String>();
 	
 	private long checksum;
 	
@@ -364,7 +364,7 @@ public class TextWigFile extends WigFile {
 		}
 
 		// Set the Set of chromosomes
-		chromosomes = new HashSet<String>();
+		chromosomes = new LinkedHashSet<String>();
 		for (Contig c : contigs) {
 			chromosomes.add(c.getChr());
 		}
@@ -407,7 +407,7 @@ public class TextWigFile extends WigFile {
 			try {
 				// Load chromosomes
 				int numChromosomes = dis.readInt();
-				chromosomes = new HashSet<String>(numChromosomes);
+				chromosomes = new LinkedHashSet<String>(numChromosomes);
 				for (int i = 0; i < numChromosomes; i++) {
 					String chr = (String) dis.readObject();
 					chromosomes.add(chr);

@@ -3,8 +3,8 @@ package edu.unc.genomics.io;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -32,6 +32,7 @@ public class BAMFile extends IntervalFile<SAMEntry> {
 	
 	private static final Logger log = Logger.getLogger(BAMFile.class);
 	
+	private Set<String> chromosomes;
 	private SAMFileReader reader;
 	private Path index;
 	private SAMRecordIterator it;
@@ -96,11 +97,14 @@ public class BAMFile extends IntervalFile<SAMEntry> {
 
 	@Override
 	public Set<String> chromosomes() {
-		Set<String> chromosomes = new HashSet<String>();
-		SAMSequenceDictionary dict = reader.getFileHeader().getSequenceDictionary();
-		for (SAMSequenceRecord seqRec : dict.getSequences()) {
-			chromosomes.add(seqRec.getSequenceName());
+		if (chromosomes == null) {
+			chromosomes = new LinkedHashSet<String>();
+			SAMSequenceDictionary dict = reader.getFileHeader().getSequenceDictionary();
+			for (SAMSequenceRecord seqRec : dict.getSequences()) {
+				chromosomes.add(seqRec.getSequenceName());
+			}
 		}
+		
 		return chromosomes;
 	}
 	
