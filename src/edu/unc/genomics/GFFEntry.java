@@ -69,6 +69,11 @@ public class GFFEntry extends ValuedInterval {
 		
 		return gff;
 	}
+	
+	@Override
+	public String toOutput() {
+		return toGFF();
+	}
 
 	/**
 	 * @return the source

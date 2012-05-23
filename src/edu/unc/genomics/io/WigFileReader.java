@@ -3,12 +3,9 @@ package edu.unc.genomics.io;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.log4j.Logger;
 import org.broad.igv.bbfile.WigItem;
 
@@ -61,19 +58,42 @@ public abstract class WigFileReader implements Closeable {
 	}
 	
 	/**
+	 * Return an iterator over the items (data values) in this Wig file that overlap an interval
+	 * @param interval the Interval of data to get overlapping WigItems for
+	 * @return an Iterator over the WigItems in this file that overlap the interval
+	 * @throws IOException if a disk read error occurs
+	 * @throws WigFileException if the Wig file does not contain data for this Interval
+	 */
+	public abstract Iterator<WigItem> getOverlappingItems(Interval interval) throws IOException, WigFileException;
+	
+	/**
+	 * Return an iterator over the items (data values) in this Wig file that overlap an interval
+	 * @param chr the chromosome of the interval
+	 * @param start the start base pair of the interval
+	 * @param stop the stop base pair of the interval
+	 * @returnan Iterator over the WigItems in this file that overlap the interval
+	 * @throws IOException if a disk read error occurs
+	 * @throws WigFileException if the Wig file does not contain data for this Interval
+	 */
+	public Iterator<WigItem> getOverlappingItems(String chr, int start, int stop) throws IOException, WigFileException {
+		Interval interval = new Interval(chr, start, stop);
+		return getOverlappingItems(interval);
+	}
+	
+	/**
 	 * Query for data in this Wig file that overlaps a specific interval
-	 * @param i the Interval of data to query for
+	 * @param interval the Interval of data to query for
 	 * @return an Iterator of WigItems that overlap the Interval i
 	 * @throws IOException if a disk read error occurs
 	 * @throws WigFileException if the Wig file does not contain data for this Interval
 	 */
-	public abstract WigQueryResult query(Interval i) throws IOException, WigFileException;
+	public abstract WigQueryResult query(Interval interval) throws IOException, WigFileException;
 	
 	/**
 	 * Query for data in this Wig file that overlaps a specific interval
 	 * @param chr the chromosome of the interval
-	 * @param low the lowest base pair of the interval
-	 * @param high the highest base pair of the interval
+	 * @param start the start base pair of the interval
+	 * @param stop the stop base pair of the interval
 	 * @return an Iterator of WigItems that overlap the specified interval
 	 * @throws IOException if a disk read error occurs
 	 * @throws WigFileException if the Wig file does not contain data for this Interval

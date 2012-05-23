@@ -64,7 +64,7 @@ public class TabixReader implements LineReader, Iterable<String> {
 	protected HashMap<String, Integer> mChr2tid;
 	protected Set<String> chromosomes;
 
-	static final String DEFAULT_INDEX_EXTENSION = ".tbi";
+	public static final String DEFAULT_INDEX_EXTENSION = ".tbi";
 	static final int MAX_BIN = 37450;
 	static final int TAD_MIN_CHUNK_GAP = 32768;
 	static final int TAD_LIDX_SHIFT = 14;
@@ -256,30 +256,6 @@ public class TabixReader implements LineReader, Iterable<String> {
 			return -1;
 	}
 
-	/**
-	 * Parse a region in the format of "chr1", "chr1:100" or "chr1:100-1000"
-	 * 
-	 * @param reg
-	 *          Region string
-	 * @return An array where the three elements are sequence_id, region_begin and
-	 *         region_end. On failure, sequence_id==-1.
-	 */
-	private int[] parseReg(final String reg) { // FIXME: NOT working when the
-																						// sequence name contains : or -.
-		String chr;
-		int colon, hyphen;
-		int[] ret = new int[3];
-		colon = reg.indexOf(':');
-		hyphen = reg.indexOf('-');
-		chr = colon >= 0 ? reg.substring(0, colon) : reg;
-		ret[1] = colon >= 0 ? Integer.parseInt(reg.substring(colon + 1,
-				hyphen >= 0 ? hyphen : reg.length())) - 1 : 0;
-		ret[2] = hyphen >= 0 ? Integer.parseInt(reg.substring(hyphen + 1))
-				: 0x7fffffff;
-		ret[0] = chr2tid(chr);
-		return ret;
-	}
-
 	protected TIntv getIntv(final String s) {
 		TIntv intv = new TIntv();
 		int col = 0, end = 0, beg = 0;
@@ -429,16 +405,6 @@ public class TabixReader implements LineReader, Iterable<String> {
 		}
 		
 		return query(tid, beg, end);
-	}
-
-	/**
-	 * Parse a query string of the form chrVI:1-1000
-	 * @param reg the query string region
-	 * @return
-	 */
-	public Iterator<String> query(final String reg) {
-		int[] x = parseReg(reg);
-		return query(x[0], x[1], x[2]);
 	}
 	
 	

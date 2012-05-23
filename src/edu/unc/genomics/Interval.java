@@ -68,6 +68,15 @@ public class Interval implements Serializable {
 	}
 	
 	/**
+	 * Return this Interval as an entry in a file
+	 * This method should be overridden by subclasses to produce filetype-specific formats
+	 * @return this Interval in an output format
+	 */
+	public String toOutput() {
+		return toString();
+	}
+	
+	/**
 	 * The center of this interval, equal to (start+stop)/2
 	 * If the interval does not have a perfect center (even length intervals)
 	 * then the center is rounded down (floor)
@@ -101,7 +110,7 @@ public class Interval implements Serializable {
 	 * @return
 	 */
 	public boolean includes(final int bp) {
-		return low() <= bp && high() >= bp;
+		return low() <= bp && bp <= high();
 	}
 	
 	/**

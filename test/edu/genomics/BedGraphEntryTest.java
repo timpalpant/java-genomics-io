@@ -24,5 +24,10 @@ public class BedGraphEntryTest {
 		assertEquals(10, test.getStop());
 		assertEquals(1.0, test.getValue().doubleValue(), 1e-15);
 	}
+	
+	@Test
+	public void testOutput() {
+		assertEquals(TEST_BEDGRAPH_ENTRY, test.toOutput());
+	}
 
 }

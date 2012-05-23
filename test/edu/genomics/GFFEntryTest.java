@@ -27,5 +27,10 @@ public class GFFEntryTest {
 		assertEquals(10.0, test.getValue().doubleValue(), 1e-15);
 		assertEquals(Strand.CRICK, test.strand());
 	}
+	
+	@Test
+	public void testOutput() {
+		assertEquals(TEST_GFF_ENTRY, test.toOutput());
+	}
 
 }

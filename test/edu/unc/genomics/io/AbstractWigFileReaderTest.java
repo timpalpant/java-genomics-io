@@ -4,10 +4,14 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Iterator;
 
+import org.broad.igv.bbfile.WigItem;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
+
+import edu.unc.genomics.Interval;
 
 public abstract class AbstractWigFileReaderTest {
 	
@@ -34,56 +38,82 @@ public abstract class AbstractWigFileReaderTest {
 		WigFileReader bw = WigFileReader.autodetect(BigWigFileReaderTest.TEST_BIGWIG);
 		bw.close();
 	}
+	
+	@Test
+	public void testGetOverlappingItems() throws WigFileException, IOException {
+		Iterator<WigItem> iter = test.getOverlappingItems("chrI", 5, 8);
+		int count = 0;
+		while (iter.hasNext()) {
+			iter.next();
+			count++;
+		}
+		assertEquals(4, count);
+	}
 
 	@Test
-	public void testFlattenData() throws WigFileException, IOException {
+	public void testGetFlattened() throws WigFileException, IOException {
 		WigQueryResult result = test.query("chrI", 5, 8);
-		float[] data = result.flattened();
+		float[] data = result.getFlattened();
 		assertEquals(4, data.length);
 		float[] expected = {5.0f, 6.0f, 7.0f, 8.0f};
 		assertArrayEquals(expected, data, 1e-7f);
 	}
 	
 	@Test
-	public void testFlattenDataCrick() throws WigFileException, IOException {
+	public void testGetFlattenedCrick() throws WigFileException, IOException {
 		WigQueryResult result = test.query("chrI", 8, 5);
-		float[] data = result.flattened();
+		float[] data = result.getFlattened();
 		assertEquals(4, data.length);
 		float[] expected = {8.0f, 7.0f, 6.0f, 5.0f};
 		assertArrayEquals(expected, data, 1e-7f);
 	}
 	
 	@Test
-	public void testGetSubset() throws WigFileException, IOException {
+	public void testGetRange() throws WigFileException, IOException {
 		WigQueryResult result = test.query("chrI", 5, 8);
-		float[] subset = result.getSubset(6, 7);
+		float[] subset = result.get(6, 7);
 		assertEquals(2, subset.length);
 		float[] expected = {6.0f, 7.0f};
 		assertArrayEquals(expected, subset, 1e-7f);
 	}
 	
 	@Test
-	public void testGetSubsetCrick() throws WigFileException, IOException {
+	public void testGetRangeCrick() throws WigFileException, IOException {
 		WigQueryResult result = test.query("chrI", 5, 8);
-		float[] subset = result.getSubset(7, 6);
+		float[] subset = result.get(7, 6);
 		assertEquals(2, subset.length);
 		float[] expected = {7.0f, 6.0f};
 		assertArrayEquals(expected, subset, 1e-7f);
 	}
 	
 	@Test
-	public void testGetSubsetDoubleCrick() throws WigFileException, IOException {
+	public void testGetRangeDoubleCrick() throws WigFileException, IOException {
 		WigQueryResult result = test.query("chrI", 8, 5);
-		float[] subset = result.getSubset(6, 7);
+		float[] subset = result.get(6, 7);
 		assertEquals(2, subset.length);
 		float[] expected = {6.0f, 7.0f};
 		assertArrayEquals(expected, subset, 1e-7f);
 	}
 	
-	@Test(expected = WigFileException.class)
-	public void testGetSubsetException() throws WigFileException, IOException {
+	@Test
+	public void testGetRangeOutside() throws WigFileException, IOException {
 		WigQueryResult result = test.query("chrI", 5, 8);
-		float[] subset = result.getSubset(4, 7);
+		float[] data = result.get(4, 7);
+		float[] expected = {Float.NaN, 5.0f, 6.0f, 7.0f};
+		assertArrayEquals(expected, data, 1e-7f);
+	}
+	
+	@Test
+	public void testGet() throws WigFileException, IOException {
+		WigQueryResult result = test.query("chrI", 5, 8);
+		assertEquals(5.0f, result.get(5), 1e-7f);
+		assertEquals(6.0f, result.get(6), 1e-7f);
+		assertEquals(7.0f, result.get(7), 1e-7f);
+		assertEquals(8.0f, result.get(8), 1e-7f);
+		
+		assertEquals(Float.NaN, result.get(4), 1e-7f);
+		assertEquals(Float.NaN, result.get(9), 1e-7f);
+		assertEquals(Float.NaN, result.get(-1), 1e-7f);
 	}
 	
 	@Test

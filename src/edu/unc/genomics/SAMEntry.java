@@ -840,5 +840,10 @@ public class SAMEntry extends Interval {
 	public String getSAMString() {
 		return r.getSAMString();
 	}
+	
+	@Override
+	public String toOutput() {
+		return getSAMString();
+	}
 
 }

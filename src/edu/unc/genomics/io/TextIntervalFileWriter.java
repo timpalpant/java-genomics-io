@@ -28,5 +28,10 @@ public abstract class TextIntervalFileWriter<T extends Interval> extends Interva
 	public void close() {
 		writer.close();
 	}
+	
+	@Override
+	public void add(T entry) {
+		writer.println(entry.toOutput());
+	}
 
 }

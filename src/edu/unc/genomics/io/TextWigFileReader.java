@@ -119,16 +119,20 @@ public class TextWigFileReader extends WigFileReader {
 			throw new RuntimeException("Error closing TextWigFile");
 		}
 	}
-
+	
 	@Override
-	public WigQueryResult query(Interval interval) throws IOException, WigFileException {
+	public Iterator<WigItem> getOverlappingItems(Interval interval) throws IOException, WigFileException {
 		if (!includes(interval)) {
-			throw new WigFileException("WigFile does not contain data for region: "+interval.toString());
+			throw new WigFileException("WigFile does not contain data for region: "+interval);
 		}
 		
 		List<Contig> relevantContigs = getContigsForInterval(interval);
-		TextWigIterator iter = new TextWigIterator(raf, relevantContigs.iterator(), interval);
-		return new WigQueryResult(iter, interval);
+		return new TextWigIterator(raf, relevantContigs.iterator(), interval);
+	}
+
+	@Override
+	public WigQueryResult query(Interval interval) throws IOException, WigFileException {
+		return new WigQueryResult(getOverlappingItems(interval), interval);
 	}
 	
 	private List<Contig> getContigsForInterval(Interval interval) {

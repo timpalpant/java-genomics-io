@@ -27,5 +27,10 @@ public class BedEntryTest {
 		assertEquals(1, test.getValue());
 		assertEquals(Strand.CRICK, test.strand());
 	}
+	
+	@Test
+	public void testOutput() {
+		assertEquals(TEST_BED_ENTRY, test.toOutput());
+	}
 
 }

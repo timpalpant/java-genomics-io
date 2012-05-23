@@ -65,5 +65,10 @@ public class BedGraphEntry extends ValuedInterval {
 		
 		return bedGraph;
 	}
+	
+	@Override
+	public String toOutput() {
+		return toBedGraph();
+	}
 
 }

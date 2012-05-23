@@ -50,13 +50,17 @@ public class BigWigFileReader extends WigFileReader {
 	public void close() { }
 	
 	@Override
-	public WigQueryResult query(Interval interval) throws WigFileException {
+	public Iterator<WigItem>  getOverlappingItems(Interval interval) throws WigFileException {
 		if (!includes(interval)) {
-			throw new WigFileException("BigWigFile does not contain data for region: "+interval.toString());
+			throw new WigFileException("BigWigFile does not contain data for region: "+interval);
 		}
 		
-		BigWigCoordinateChangeIterator iter = new BigWigCoordinateChangeIterator(reader.getBigWigIterator(interval.getChr(), interval.low()-1, interval.getChr(), interval.high(), false));
-		return new WigQueryResult(iter, interval);
+		return new BigWigCoordinateChangeIterator(reader.getBigWigIterator(interval.getChr(), interval.low()-1, interval.getChr(), interval.high(), false));
+	}
+	
+	@Override
+	public WigQueryResult query(Interval interval) throws WigFileException {
+		return new WigQueryResult(getOverlappingItems(interval), interval);
 	}
 
 	@Override
@@ -164,8 +168,9 @@ public class BigWigFileReader extends WigFileReader {
 		@Override
 		public WigItem next() {
 			WigItem item = bwIter.next();
-			WigItem shifted = new WigItem(item.getItemNumber(), item.getChromosome(), item.getStartBase()+1, item.getEndBase(), item.getWigValue());
-			return shifted;
+			// Make the result a closed (inclusive) interval
+			WigItem closed = new WigItem(item.getItemNumber(), item.getChromosome(), item.getStartBase()+1, item.getEndBase(), item.getWigValue());
+			return closed;
 		}
 
 		@Override

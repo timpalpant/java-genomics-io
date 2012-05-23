@@ -89,6 +89,11 @@ public class BedEntry extends ValuedInterval {
 		return bed;
 	}
 
+	@Override
+	public String toOutput() {
+		return toBed();
+	}
+	
 	/**
 	 * @return the itemRgb
 	 */

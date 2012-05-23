@@ -41,7 +41,7 @@ public class TabixFileReader<T extends Interval> extends IntervalFileReader<T> {
 
 	@Override
 	public int count() {
-		// FIXME: Efficiently count Tabix entries
+		// FIXME Efficiently count Tabix entries
 		int count = 0;
 		for (Interval i : this) {
 			count++;

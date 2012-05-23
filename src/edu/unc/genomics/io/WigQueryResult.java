@@ -10,8 +10,9 @@ import org.broad.igv.bbfile.WigItem;
 import edu.unc.genomics.Interval;
 
 /**
- * Wraps the result of a query from a Wig file. Data is lazy-loaded from the 
- * supplied iterator.
+ * Wraps the result of a query from a Wig file
+ * TODO Consider rewriting this class to have custom subclasses for BigWig/TextWig files
+ * and do away with Iterator<WigItem> that probably has unnecessary overhead
  * 
  * @author timpalpant
  *
@@ -24,20 +25,20 @@ public class WigQueryResult {
 	private float[] flattened;
 	private SummaryStatistics stats;
 	
-	public WigQueryResult(Iterator<WigItem> iter, Interval interval) {
+	WigQueryResult(Iterator<WigItem> iter, Interval interval) {
 		this.iter = iter;
 		this.interval = interval;
 	}
 	
 	/**
-	 * Collect all of the results from the query and return them flattened into an array
+	 * Collect all of the results from the query and return them flattened into an array with single base pair resolution
 	 * If the query interval was Crick (start > stop), then the array will be reversed prior to returning
 	 * NOTE: A reference is returned to a single copy of the flattened results. Modifications to the returned
 	 * array will be permanent. Clone the array if you wish to preserve the original values.
 	 * 
 	 * @return data a flattened array of the data
 	 */
-	public float[] flattened() {
+	public float[] getFlattened() {
 		if (flattened == null) {
 			collect();
 		}
@@ -45,27 +46,36 @@ public class WigQueryResult {
 		return flattened;
 	}
 	
-	public float[] getSubset(int start, int stop) throws WigFileException {
-		int low = Math.min(start, stop);
-		int high = Math.max(start, stop);
-		if (low < interval.low() || high > interval.high()) {
-			throw new WigFileException("WigQueryResult does not contain data for base pairs "+start+"-"+stop);
+	/**
+	 * Get data from this result. If the specified start-stop are outside the original query range,
+	 * then the returned array will be padded with NaNs.
+	 * @param start the first base pair
+	 * @param stop the last base pair
+	 * @return the data from start-stop, or NaN where data is not available
+	 */
+	public float[] get(int start, int stop) {
+		int length = Math.abs(stop-start) + 1;
+		float[] result = new float[length];
+		int dir = (start <= stop) ? 1 : -1;
+		int bp = start;
+		for (int i = 0; i < result.length; i++) {
+			result[i] = get(bp+dir*i);
+		}
+		return result;
+	}
+	
+	/**
+	 * Get a single value from this query, or NaN if there is no data for the base pair
+	 * @param bp a base pair to get data for
+	 * @return the value of this base pair
+	 */
+	public float get(int bp) {
+		if (!interval.includes(bp)) {
+			return Float.NaN;
 		}
 		
-		// We have the data in flattened() from interval.getStart() - interval.getStop()
-		// Need to extract the subset from start-stop and reverse as necessary
-		int distToStart = Math.abs(start-interval.getStart());
-		int distToStop = Math.abs(stop-interval.getStart());
-		int from = Math.min(distToStart, distToStop);
-		int to = Math.max(distToStart, distToStop);
-		float[] subset = Arrays.copyOfRange(flattened(), from, to+1);
-		
-		// If this subset query is in the opposite direction of the original query
-		if (distToStart > distToStop) {
-			ArrayUtils.reverse(subset);
-		}
-		
-		return subset;
+		int i = Math.abs(bp-interval.getStart());
+		return getFlattened()[i];
 	}
 	
 	/**
@@ -157,9 +167,9 @@ public class WigQueryResult {
 			WigItem item = iter.next();
 			float value = item.getWigValue();
 			if (!Float.isNaN(value)) {
-				for (int i = item.getStartBase(); i <= item.getEndBase(); i++) {
-					if (i >= interval.low() && i <= interval.high()) {
-						flattened[i-interval.low()] = value;
+				for (int bp = item.getStartBase(); bp <= item.getEndBase(); bp++) {
+					if (interval.includes(bp)) {
+						flattened[bp-interval.low()] = value;
 						stats.addValue(value);
 					}
 				}
