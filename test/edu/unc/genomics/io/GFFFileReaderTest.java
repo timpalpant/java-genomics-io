@@ -12,13 +12,13 @@ import org.junit.Test;
 
 import edu.unc.genomics.Interval;
 
-public class GFFFileTest extends AbstractIntervalFileTest {
+public class GFFFileReaderTest extends AbstractIntervalFileReaderTest {
 
 	public static final Path TEST_GFF = Paths.get("test/fixtures/test.gff");
 
 	@Before
 	public void setUp() throws Exception {
-		test = new GFFFile(TEST_GFF);
+		test = new GFFFileReader(TEST_GFF);
 	}
 
 	@Test

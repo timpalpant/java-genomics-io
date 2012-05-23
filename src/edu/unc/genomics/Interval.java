@@ -140,8 +140,8 @@ public class Interval implements Serializable {
 	 * The strand of this Interval, either "+" or "-"
 	 * @return "+" if this Interval is Watson, "-" if this Inteval is Crick
 	 */
-	public final String strand() {
-		return isWatson() ? "+" : "-";
+	public final Strand strand() {
+		return isWatson() ? Strand.WATSON : Strand.CRICK;
 	}
 	
   /* (non-Javadoc)

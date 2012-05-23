@@ -15,9 +15,9 @@ import edu.unc.genomics.IntervalFactory;
  * @author timpalpant
  *
  */
-public class GeneTrackFile extends TextIntervalFile<GeneTrackEntry> {
+public class GeneTrackFileReader extends TextIntervalFileReader<GeneTrackEntry> {
 
-	public GeneTrackFile(Path p) throws IOException {
+	public GeneTrackFileReader(Path p) throws IOException {
 		super(p, new GeneTrackEntryFactory());
 	}
 	

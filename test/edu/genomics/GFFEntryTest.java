@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edu.unc.genomics.GFFEntry;
+import edu.unc.genomics.Strand;
 
 public class GFFEntryTest {
 
@@ -24,7 +25,7 @@ public class GFFEntryTest {
 		assertEquals(11, test.getStop());
 		assertEquals("Spot1", test.getId());
 		assertEquals(10.0, test.getValue().doubleValue(), 1e-15);
-		assertEquals("-", test.strand());
+		assertEquals(Strand.CRICK, test.strand());
 	}
 
 }

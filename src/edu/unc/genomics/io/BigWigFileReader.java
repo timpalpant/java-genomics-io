@@ -2,7 +2,6 @@ package edu.unc.genomics.io;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -12,6 +11,8 @@ import org.broad.igv.bbfile.BBTotalSummaryBlock;
 import org.broad.igv.bbfile.BigWigIterator;
 import org.broad.igv.bbfile.RPChromosomeRegion;
 import org.broad.igv.bbfile.WigItem;
+
+import edu.unc.genomics.Interval;
 
 /**
  * A BigWig file. For more information, see: http://genome.ucsc.edu/goldenPath/help/bigWig.html
@@ -25,11 +26,11 @@ import org.broad.igv.bbfile.WigItem;
  * @author timpalpant
  *
  */
-public class BigWigFile extends WigFile {
+public class BigWigFileReader extends WigFileReader {
 	private BBFileReader reader;
 	private BBTotalSummaryBlock summary;
 
-	public BigWigFile(Path p) throws IOException {
+	public BigWigFileReader(Path p) throws IOException {
 		super(p);
 		
 		reader = new BBFileReader(p.toString());
@@ -49,12 +50,13 @@ public class BigWigFile extends WigFile {
 	public void close() { }
 	
 	@Override
-	public Iterator<WigItem> query(String chr, int low, int high) throws WigFileException {
-		if (!includes(chr, low, high)) {
-			throw new WigFileException("BigWigFile does not contain data for region: " + chr + ":" + low + "-" + high);
+	public WigQueryResult query(Interval interval) throws WigFileException {
+		if (!includes(interval)) {
+			throw new WigFileException("BigWigFile does not contain data for region: "+interval.toString());
 		}
 		
-		return new BigWigCoordinateChangeIterator(reader.getBigWigIterator(chr, low-1, chr, high, false));
+		BigWigCoordinateChangeIterator iter = new BigWigCoordinateChangeIterator(reader.getBigWigIterator(interval.getChr(), interval.low()-1, interval.getChr(), interval.high(), false));
+		return new WigQueryResult(iter, interval);
 	}
 
 	@Override

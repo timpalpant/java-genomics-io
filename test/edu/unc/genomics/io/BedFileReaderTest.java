@@ -12,13 +12,13 @@ import org.junit.Test;
 
 import edu.unc.genomics.Interval;
 
-public class GeneTrackFileTest extends AbstractIntervalFileTest {
+public class BedFileReaderTest extends AbstractIntervalFileReaderTest {
 
-	public static final Path TEST_GENETRACK = Paths.get("test/fixtures/test.genetrack");
+	public static final Path TEST_BED = Paths.get("test/fixtures/test.bed");
 
 	@Before
 	public void setUp() throws Exception {
-		test = new GeneTrackFile(TEST_GENETRACK);
+		test = new BedFileReader(TEST_BED);
 	}
 
 	@Test
@@ -37,13 +37,13 @@ public class GeneTrackFileTest extends AbstractIntervalFileTest {
 
 	@Test
 	public void testQuery() {
-		Iterator<? extends Interval> it = test.query("chrI", 10, 20);
+		Iterator<? extends Interval> it = test.query("chrI", 10, 97);
 		int count = 0;
 		while (it.hasNext()) {
-			System.out.println(it.next());
+			it.next();
 			count++;
 		}
-		assertEquals(2, count);
+		assertEquals(3, count);
 	}
 
 	@Test

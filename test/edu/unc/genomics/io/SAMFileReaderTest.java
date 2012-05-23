@@ -11,13 +11,13 @@ import org.junit.Test;
 
 import edu.unc.genomics.Interval;
 
-public class SAMFileTest extends AbstractIntervalFileTest {
+public class SAMFileReaderTest extends AbstractIntervalFileReaderTest {
 
 	public static final Path TEST_SAM = Paths.get("test/fixtures/test.sam");
 
 	@Before
 	public void setUp() throws Exception {
-		test = new SAMFile(TEST_SAM);
+		test = new SAMFileReader(TEST_SAM);
 	}
 
 	@Test

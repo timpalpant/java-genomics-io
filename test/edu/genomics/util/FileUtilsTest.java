@@ -12,21 +12,23 @@ import edu.unc.genomics.util.FileUtils;
 
 public class FileUtilsTest {
 	
-	private Path test = Paths.get("test/fixtures/test.fa");
+	private Path testAscii = Paths.get("test/fixtures/test.fa");
+	private Path testBinary = Paths.get("test/fixtures/test.bam");
 
 	@Test
 	public void testIsAsciiText() throws IOException {
-		assertTrue(FileUtils.isAsciiText(test));
+		assertTrue(FileUtils.isAsciiText(testAscii));
+		assertFalse(FileUtils.isAsciiText(testBinary));
 	}
 
 	@Test
 	public void testIsAsciiTextWithThreshold() throws IOException {
-		assertTrue(FileUtils.isAsciiText(test, 1.0));
+		assertTrue(FileUtils.isAsciiText(testAscii, 1.0));
 	}
 
 	@Test
 	public void testCountLines() throws IOException {
-		assertEquals(122, FileUtils.countLines(test));
+		assertEquals(122, FileUtils.countLines(testAscii));
 	}
 
 }

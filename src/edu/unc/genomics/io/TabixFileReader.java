@@ -15,12 +15,12 @@ import edu.unc.genomics.IntervalFactory;
  * @author timpalpant
  *
  */
-public class TabixFile<T extends Interval> extends IntervalFile<T> {
+public class TabixFileReader<T extends Interval> extends IntervalFileReader<T> {
 
 	private TabixReader reader;
 	private IntervalFactory<T> factory;
 	
-	protected TabixFile(Path p, IntervalFactory<T> factory) throws IOException {
+	protected TabixFileReader(Path p, IntervalFactory<T> factory) throws IOException {
 		super(p);
 		this.factory = factory;
 		reader = new TabixReader(p);

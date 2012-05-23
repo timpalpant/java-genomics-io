@@ -49,8 +49,7 @@ abstract class Contig extends Interval implements Serializable {
 		}
 	}
 	
-	public abstract Iterator<WigItem> query(RandomAccessFile raf, String chr, 
-			int start, int stop) throws IOException, WigFileException;
+	public abstract Iterator<WigItem> query(RandomAccessFile raf, Interval interval) throws IOException, WigFileException;
 	
 	public void storeIndex(int bp, long pos) {
 		index.put(bp, pos);

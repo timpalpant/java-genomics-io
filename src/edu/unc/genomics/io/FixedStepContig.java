@@ -7,6 +7,8 @@ import java.util.Iterator;
 import org.apache.log4j.Logger;
 import org.broad.igv.bbfile.WigItem;
 
+import edu.unc.genomics.Interval;
+
 /**
  * Hold index information about a fixedStep contig in a TextWigFile
  * 
@@ -100,16 +102,14 @@ class FixedStepContig extends Contig {
 	}
 
 	@Override
-	public FixedStepContigIterator query(RandomAccessFile raf, String chr, int start, int stop) 
-			throws IOException, WigFileException {
-		
-		return new FixedStepContigIterator(raf, chr, start, stop);
+	public FixedStepContigIterator query(RandomAccessFile raf, Interval interval) throws IOException, WigFileException {
+		return new FixedStepContigIterator(raf, interval);
 	}
 	
 	private class FixedStepContigIterator implements Iterator<WigItem> {
 
 		private final RandomAccessFile raf;
-		private final String chr;
+		private final Interval interval;
 		private final int low;
 		private final int high;
 		private final long startLine;
@@ -118,14 +118,13 @@ class FixedStepContig extends Contig {
 		private int bp;
 		private int itemIndex = 0;
 		
-		public FixedStepContigIterator(final RandomAccessFile raf, final String chr, 
-				final int start, final int stop) throws IOException, WigFileException {
+		public FixedStepContigIterator(final RandomAccessFile raf, final Interval interval) throws IOException, WigFileException {
 			this.raf = raf;
-			this.chr = chr;
+			this.interval = interval;
 			
 			// Clamp to bases that are covered by this Contig
-			low = Math.max(getStart(), start);
-			high = Math.min(getStop(), stop);
+			low = Math.max(start, interval.low());
+			high = Math.min(stop, interval.high());
 			
 			// Figure out what lines we need
 			startLine = getLineNumForBasePair(low);

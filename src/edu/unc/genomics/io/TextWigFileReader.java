@@ -24,6 +24,7 @@ import org.broad.igv.bbfile.WigItem;
 import ed.javatools.BufferedRandomAccessFile;
 import edu.ucsc.genome.TrackHeader;
 import edu.ucsc.genome.TrackHeaderException;
+import edu.unc.genomics.Interval;
 import edu.unc.genomics.util.ChecksumUtils;
 
 /**
@@ -35,12 +36,12 @@ import edu.unc.genomics.util.ChecksumUtils;
  * @author timpalpant
  *
  */
-public class TextWigFile extends WigFile {
+public class TextWigFileReader extends WigFileReader {
 	private static final long serialVersionUID = 4L;
 	public static final String INDEX_EXTENSION = ".idx";
 	public static final int KEY_GRANULARITY = 10_000;
 	
-	private static Logger log = Logger.getLogger(TextWigFile.class);
+	private static Logger log = Logger.getLogger(TextWigFileReader.class);
 	
 	private BufferedRandomAccessFile raf;
 	private TrackHeader header = new TrackHeader("wiggle_0");
@@ -57,7 +58,7 @@ public class TextWigFile extends WigFile {
 	 * @throws IOException if an error occurs while opening or reading from the Wig file
 	 * @throws WigFileException if an error occurs while indexing the Wig file
 	 */
-	public TextWigFile(Path p) throws IOException, WigFileException {
+	public TextWigFileReader(Path p) throws IOException, WigFileException {
 		super(p);
 		raf = new BufferedRandomAccessFile(p.toFile(), "r");
 
@@ -93,7 +94,7 @@ public class TextWigFile extends WigFile {
 	 * @throws IOException if an error occurs opening the Wig file or its index
 	 * @throws WigFileException if an error ocurs while loading the index
 	 */
-	public TextWigFile(Path p, Path index) throws IOException, WigFileException {
+	public TextWigFileReader(Path p, Path index) throws IOException, WigFileException {
 		super(p);
 		raf = new BufferedRandomAccessFile(p.toFile(), "r");
 
@@ -120,22 +121,21 @@ public class TextWigFile extends WigFile {
 	}
 
 	@Override
-	public Iterator<WigItem> query(String chr, int low, int high) throws IOException, WigFileException {
-		if (!includes(chr, low, high)) {
-			throw new WigFileException("WigFile does not contain data for region: " + chr + ":" + low + "-" + high);
-		} else if (low > high) {
-			throw new WigFileException("Query start > stop!");
+	public WigQueryResult query(Interval interval) throws IOException, WigFileException {
+		if (!includes(interval)) {
+			throw new WigFileException("WigFile does not contain data for region: "+interval.toString());
 		}
 		
-		List<Contig> relevantContigs = getContigsForQuery(chr, low, high);
-		return new TextWigIterator(raf, relevantContigs.iterator(), chr, low, high);
+		List<Contig> relevantContigs = getContigsForInterval(interval);
+		TextWigIterator iter = new TextWigIterator(raf, relevantContigs.iterator(), interval);
+		return new WigQueryResult(iter, interval);
 	}
 	
-	private List<Contig> getContigsForQuery(String chr, int low, int high) {
+	private List<Contig> getContigsForInterval(Interval interval) {
 		List<Contig> relevantContigs = new ArrayList<Contig>();
 		
 		for (Contig c : contigs) {
-			if (c.getChr().equals(chr) && c.getStop() >= low && c.getStart() <= high) {
+			if (c.getChr().equals(interval.getChr()) && c.getStop() >= interval.low() && c.getStart() <= interval.high()) {
 				relevantContigs.add(c);
 			}
 		}
@@ -483,19 +483,14 @@ public class TextWigFile extends WigFile {
 	private static class TextWigIterator implements Iterator<WigItem> {
 
 		private final RandomAccessFile raf;
-		private final String chr;
-		private final int start;
-		private final int stop;
+		private final Interval interval;
 		private final Iterator<Contig> relevantContigsIter;
 		private Iterator<WigItem> currentContigIter;
 		
-		public TextWigIterator(final RandomAccessFile raf, final Iterator<Contig> relevantContigsIter, 
-				final String chr, final int start, final int stop) {
+		public TextWigIterator(final RandomAccessFile raf, final Iterator<Contig> relevantContigsIter, final Interval interval) {
 			this.raf = raf;
-			this.chr = chr;
 			this.relevantContigsIter = relevantContigsIter;
-			this.start = start;
-			this.stop = stop;
+			this.interval = interval;
 		}
 		
 		@Override
@@ -527,7 +522,7 @@ public class TextWigFile extends WigFile {
 			while (relevantContigsIter.hasNext()) {
 				Contig currentContig = relevantContigsIter.next();
 				try {
-					currentContigIter = currentContig.query(raf, chr, start, stop);
+					currentContigIter = currentContig.query(raf, interval);
 					if (currentContigIter.hasNext()) {
 						return true;
 					}

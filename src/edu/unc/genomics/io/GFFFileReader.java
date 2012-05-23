@@ -14,9 +14,9 @@ import edu.unc.genomics.IntervalFactory;
  * @author timpalpant
  *
  */
-public class GFFFile extends TextIntervalFile<GFFEntry> {
+public class GFFFileReader extends TextIntervalFileReader<GFFEntry> {
 
-	public GFFFile(Path p) throws IOException {
+	public GFFFileReader(Path p) throws IOException {
 		super(p, new GFFEntryFactory());
 	}
 	

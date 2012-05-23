@@ -26,9 +26,9 @@ import edu.unc.genomics.util.Tabix;
  * @author timpalpant
  *
  */
-public abstract class TextIntervalFile<T extends Interval> extends IntervalFile<T> {
+public abstract class TextIntervalFileReader<T extends Interval> extends IntervalFileReader<T> {
 	
-	private static final Logger log = Logger.getLogger(TextIntervalFile.class);
+	private static final Logger log = Logger.getLogger(TextIntervalFileReader.class);
 	
 	protected IntervalFactory<T> factory;
 	private Set<String> chromosomes;
@@ -39,9 +39,9 @@ public abstract class TextIntervalFile<T extends Interval> extends IntervalFile<
 	
 	private Path bgzip;
 	private Path index;
-	private TabixFile<T> tabixFile;
+	private TabixFileReader<T> tabixFile;
 	
-	protected TextIntervalFile(Path p, IntervalFactory<T> factory) throws IOException {
+	protected TextIntervalFileReader(Path p, IntervalFactory<T> factory) throws IOException {
 		super(p);
 		this.factory = factory;
 		reader = Files.newBufferedReader(p, Charset.defaultCharset());
@@ -143,7 +143,7 @@ public abstract class TextIntervalFile<T extends Interval> extends IntervalFile<
 		
 		// Open the file with a new TabixFile reader
 		try {
-			tabixFile = new TabixFile<T>(bgzip, factory);
+			tabixFile = new TabixFileReader<T>(bgzip, factory);
 		} catch (IOException e) {
 			log.error("Error initializing Tabix file");
 			e.printStackTrace();

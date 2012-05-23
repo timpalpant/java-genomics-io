@@ -11,7 +11,6 @@ import org.apache.log4j.Logger;
 
 import net.sf.samtools.BAMIndex;
 import net.sf.samtools.BAMIndexMetaData;
-import net.sf.samtools.SAMFileReader;
 import net.sf.samtools.SAMRecordIterator;
 import net.sf.samtools.SAMSequenceDictionary;
 import net.sf.samtools.SAMSequenceRecord;
@@ -26,28 +25,29 @@ import edu.unc.genomics.util.Samtools;
  * @author timpalpant
  *
  */
-public class SAMFile extends IntervalFile<SAMEntry> {
+public class SAMFileReader extends IntervalFileReader<SAMEntry> {
 	
-	private static final Logger log = Logger.getLogger(SAMFile.class);
+	private static final Logger log = Logger.getLogger(SAMFileReader.class);
 	
-	private SAMFileReader reader;
+	private net.sf.samtools.SAMFileReader reader;
 	private SAMRecordIterator it;
+	private Set<String> chromosomes;
 	private int count = 0;
 	
 	private Path bam;
 	private Path index;
 	
 	/**
-	 * By default, only return mapped reads from iterators for analyses
+	 * By default, consider all alignments from iterators for analyses (mapped or unmapped)
 	 */
-	private boolean allowUnmappedReads = false;
+	private boolean allowUnmappedReads = true;
 	
-	public SAMFile(Path p) {
+	public SAMFileReader(Path p) {
 		super(p);
-		reader = new SAMFileReader(p.toFile());
+		reader = new net.sf.samtools.SAMFileReader(p.toFile());
 	}
 	
-	public SAMFile(Path p, boolean allowUnmappedReads) {
+	public SAMFileReader(Path p, boolean allowUnmappedReads) {
 		this(p);
 		this.allowUnmappedReads = allowUnmappedReads;
 	}
@@ -78,11 +78,14 @@ public class SAMFile extends IntervalFile<SAMEntry> {
 
 	@Override
 	public Set<String> chromosomes() {
-		Set<String> chromosomes = new LinkedHashSet<String>();
-		SAMSequenceDictionary dict = reader.getFileHeader().getSequenceDictionary();
-		for (SAMSequenceRecord seqRec : dict.getSequences()) {
-			chromosomes.add(seqRec.getSequenceName());
+		if (chromosomes == null) {
+			chromosomes = new LinkedHashSet<String>();
+			SAMSequenceDictionary dict = reader.getFileHeader().getSequenceDictionary();
+			for (SAMSequenceRecord seqRec : dict.getSequences()) {
+				chromosomes.add(seqRec.getSequenceName());
+			}
 		}
+		
 		return chromosomes;
 	}
 
@@ -130,7 +133,7 @@ public class SAMFile extends IntervalFile<SAMEntry> {
 		index.toFile().deleteOnExit();
 		Samtools.indexBAMFile(bam, index);
 				
-		reader = new SAMFileReader(bam.toFile(), index.toFile());
+		reader = new net.sf.samtools.SAMFileReader(bam.toFile(), index.toFile());
 		// Ensure that we have an index
 		if (!reader.hasIndex()) {
 			throw new IntervalFileFormatException("Error indexing BAM file: "+bam);

@@ -5,13 +5,13 @@ import java.nio.file.Paths;
 
 import org.junit.Before;
 
-public class TextWigFileTest extends AbstractWigFileTest {
+public class TextWigFileReaderTest extends AbstractWigFileReaderTest {
 
 	public static final Path TEST_WIG = Paths.get("test/fixtures/test.wig");
 	
 	@Before
 	public void setUp() throws Exception {
-		test = new TextWigFile(TEST_WIG);
+		test = new TextWigFileReader(TEST_WIG);
 	}
 	
 }

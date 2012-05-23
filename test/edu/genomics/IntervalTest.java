@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import edu.unc.genomics.Interval;
 import edu.unc.genomics.IntervalException;
+import edu.unc.genomics.Strand;
 
 public class IntervalTest {
 	
@@ -108,8 +109,8 @@ public class IntervalTest {
 
 	@Test
 	public void testStrand() {
-		assertEquals("+", watson.strand());
-		assertEquals("-", crick.strand());
+		assertEquals(Strand.WATSON, watson.strand());
+		assertEquals(Strand.CRICK, crick.strand());
 	}
 
 }

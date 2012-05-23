@@ -13,19 +13,19 @@ import org.apache.log4j.Logger;
 import edu.unc.genomics.Interval;
 
 /**
- * Base class for working with files of Interval information, including Bed, BigBed, BedGraph, GFF, GeneTrack, SAM, and BAM files
+ * Base class for reading files of Interval information, including Bed, BigBed, BedGraph, GFF, GeneTrack, SAM, and BAM files
  * Subclasses will provide type-specific information, but this class may be used when only Interval info (chr:start-stop) is needed
  * 
  * @author timpalpant
  *
  */
-public abstract class IntervalFile<T extends Interval> implements Iterable<T>, Closeable {
+public abstract class IntervalFileReader<T extends Interval> implements Iterable<T>, Closeable {
 	
-	private static final Logger log = Logger.getLogger(IntervalFile.class);
+	private static final Logger log = Logger.getLogger(IntervalFileReader.class);
 	
 	protected Path p;
 	
-	protected IntervalFile(Path p) {
+	protected IntervalFileReader(Path p) {
 		this.p = p;
 	}
 	
@@ -36,30 +36,30 @@ public abstract class IntervalFile<T extends Interval> implements Iterable<T>, C
 	 * @throws IntervalFileSnifferException if the file type cannot be autodetected (this may be thrown if the file has an invalid format)
 	 * @throws IOException if a disk read error occurs
 	 */
-	public static IntervalFile<? extends Interval> autodetect(Path p) throws IntervalFileSnifferException, IOException {
+	public static IntervalFileReader<? extends Interval> autodetect(Path p) throws IntervalFileSnifferException, IOException {
 		IntervalFileSniffer sniffer = new IntervalFileSniffer(p);
 		
 		if (sniffer.isBigBed()) {
 			log.debug("Autodetected BigBed filetype for: " + p.getFileName().toString());
-			return new BigBedFile(p);
+			return new BigBedFileReader(p);
 		} else if (sniffer.isBAM()) {
 			log.debug("Autodetected BAM filetype for: " + p.getFileName().toString());
-			return new BAMFile(p);
+			return new BAMFileReader(p);
 		} else if (sniffer.isGFF()) {
 			log.debug("Autodetected GFF filetype for: " + p.getFileName().toString());
-			return new GFFFile(p);
+			return new GFFFileReader(p);
 		} else if (sniffer.isBedGraph()) {
 			log.debug("Autodetected BedGraph filetype for: " + p.getFileName().toString());
-			return new BedGraphFile(p);
+			return new BedGraphFileReader(p);
 		} else if (sniffer.isBed()) {
 			log.debug("Autodetected Bed filetype for: " + p.getFileName().toString());
-			return new BedFile(p);
+			return new BedFileReader(p);
 		} else if (sniffer.isSAM()) {
 			log.debug("Autodetected SAM filetype for: " + p.getFileName().toString());
-			return new SAMFile(p);
+			return new SAMFileReader(p);
 		} else if (sniffer.isGeneTrack()) {
 			log.debug("Autodetected GeneTrack filetype for: " + p.getFileName().toString());
-			return new GeneTrackFile(p);
+			return new GeneTrackFileReader(p);
 		} else {
 			throw new IntervalFileSnifferException("Could not autodetect Interval file format");
 		}
@@ -74,7 +74,7 @@ public abstract class IntervalFile<T extends Interval> implements Iterable<T>, C
 	 */
 	public static List<Interval> loadAll(Path p) throws IntervalFileSnifferException, IOException {
 		List<Interval> intervals = new ArrayList<Interval>();
-		try (IntervalFile<? extends Interval> intervalFile = autodetect(p)) {
+		try (IntervalFileReader<? extends Interval> intervalFile = autodetect(p)) {
 			for (Interval interval : intervalFile) {
 				intervals.add(interval);
 			}

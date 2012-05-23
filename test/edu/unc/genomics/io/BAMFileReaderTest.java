@@ -5,12 +5,12 @@ import java.nio.file.Paths;
 
 import org.junit.Before;
 
-public class BAMFileTest extends SAMFileTest {
+public class BAMFileReaderTest extends SAMFileReaderTest {
 
 	public static final Path TEST_BAM = Paths.get("test/fixtures/test.bam");
 
 	@Before
 	public void setUp() throws Exception {
-		test = new BAMFile(TEST_BAM);
+		test = new BAMFileReader(TEST_BAM);
 	}
 }

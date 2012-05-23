@@ -15,9 +15,9 @@ import edu.unc.genomics.IntervalFactory;
  * @author timpalpant
  *
  */
-public class BedGraphFile extends TextIntervalFile<BedGraphEntry> {
+public class BedGraphFileReader extends TextIntervalFileReader<BedGraphEntry> {
 
-	public BedGraphFile(Path p) throws IOException {
+	public BedGraphFileReader(Path p) throws IOException {
 		super(p, new BedGraphEntryFactory());
 	}
 

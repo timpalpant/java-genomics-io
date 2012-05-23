@@ -28,24 +28,28 @@ import edu.unc.genomics.util.Samtools;
  * @author timpalpant
  *
  */
-public class BAMFile extends IntervalFile<SAMEntry> {
+public class BAMFileReader extends IntervalFileReader<SAMEntry> {
 	
-	private static final Logger log = Logger.getLogger(BAMFile.class);
+	private static final Logger log = Logger.getLogger(BAMFileReader.class);
 	
 	private Set<String> chromosomes;
 	private SAMFileReader reader;
 	private Path index;
 	private SAMRecordIterator it;
-	private boolean allowUnmappedReads = false;
+	
+	/**
+	 * By default, consider all alignments (mapped or unmapped)
+	 */
+	private boolean allowUnmappedReads = true;
 
-	public BAMFile(Path p) {
+	public BAMFileReader(Path p) {
 		super(p);
 		
 		// Automatically index BAM files that do not have an index
 		reader = new SAMFileReader(p.toFile());
 		if (!reader.hasIndex()) {
 			try {
-				index = Files.createTempFile(p.getFileName().toString(), ".bai");
+				index = Files.createTempFile(p.getFileName().toString(), BAMIndex.BAMIndexSuffix);
 			} catch (IOException e) {
 				log.error("Error creating temporary BAM index for: " + p.getFileName());
 				e.printStackTrace();
@@ -72,7 +76,7 @@ public class BAMFile extends IntervalFile<SAMEntry> {
 		reader.enableIndexCaching(true);
 	}
 	
-	public BAMFile(Path p, boolean allowUnmappedReads) {
+	public BAMFileReader(Path p, boolean allowUnmappedReads) {
 		this(p);
 		this.allowUnmappedReads = allowUnmappedReads;
 	}

@@ -17,11 +17,11 @@ import edu.unc.genomics.BedEntry;
  * @author timpalpant
  *
  */
-public class BigBedFile extends IntervalFile<BedEntry> {
+public class BigBedFileReader extends IntervalFileReader<BedEntry> {
 
 	BBFileReader reader;
 	
-	protected BigBedFile(Path p) throws IOException {
+	protected BigBedFileReader(Path p) throws IOException {
 		super(p);
 		reader = new BBFileReader(p.toString());
 		if (!reader.isBigBedFile()) {

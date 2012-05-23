@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edu.unc.genomics.BedEntry;
+import edu.unc.genomics.Strand;
 
 public class BedEntryTest {
 	
@@ -24,7 +25,7 @@ public class BedEntryTest {
 		assertEquals(1, test.getStop());
 		assertEquals("Spot8", test.getId());
 		assertEquals(1, test.getValue());
-		assertEquals("-", test.strand());
+		assertEquals(Strand.CRICK, test.strand());
 	}
 
 }

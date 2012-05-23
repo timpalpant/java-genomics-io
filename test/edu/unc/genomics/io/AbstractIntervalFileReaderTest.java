@@ -8,9 +8,9 @@ import org.junit.Test;
 
 import edu.unc.genomics.Interval;
 
-public abstract class AbstractIntervalFileTest {
+public abstract class AbstractIntervalFileReaderTest {
 	
-	protected IntervalFile<? extends Interval> test;
+	protected IntervalFileReader<? extends Interval> test;
 
 	@After
 	public void tearDown() throws Exception {
@@ -21,12 +21,12 @@ public abstract class AbstractIntervalFileTest {
 
 	@Test
 	public void testAutodetect() throws IntervalFileSnifferException, IOException {
-		IntervalFile<? extends Interval> auto = IntervalFile.autodetect(test.getPath());
+		IntervalFileReader<? extends Interval> auto = IntervalFileReader.autodetect(test.getPath());
 	}
 
 	@Test
 	public void testLoadAllPath() throws IntervalFileSnifferException, IOException {
-		List<? extends Interval> list = IntervalFile.loadAll(test.getPath());
+		List<? extends Interval> list = IntervalFileReader.loadAll(test.getPath());
 	}
 
 	@Test

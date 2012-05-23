@@ -4,16 +4,14 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Iterator;
 
-import org.broad.igv.bbfile.WigItem;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
 
-public abstract class AbstractWigFileTest {
+public abstract class AbstractWigFileReaderTest {
 	
-	protected WigFile test;
+	protected WigFileReader test;
 	
 	@After
 	public void tearDown() throws Exception {
@@ -25,80 +23,118 @@ public abstract class AbstractWigFileTest {
 	@AfterClass
 	public static void cleanUp() throws Exception {
 		// Delete the text wig file index
-		Files.deleteIfExists(TextWigFileTest.TEST_WIG.resolveSibling(TextWigFileTest.TEST_WIG.getFileName()+TextWigFile.INDEX_EXTENSION));
+		Files.deleteIfExists(TextWigFileReaderTest.TEST_WIG.resolveSibling(TextWigFileReaderTest.TEST_WIG.getFileName()+TextWigFileReader.INDEX_EXTENSION));
 	}
 
 	@Test
 	public void testAutodetect() throws WigFileException, IOException {
-		WigFile text = WigFile.autodetect(TextWigFileTest.TEST_WIG);
+		WigFileReader text = WigFileReader.autodetect(TextWigFileReaderTest.TEST_WIG);
 		text.close();
 		
-		WigFile bw = WigFile.autodetect(BigWigFileTest.TEST_BIGWIG);
+		WigFileReader bw = WigFileReader.autodetect(BigWigFileReaderTest.TEST_BIGWIG);
 		bw.close();
 	}
 
 	@Test
 	public void testFlattenData() throws WigFileException, IOException {
-		Iterator<WigItem> result = test.query("chrI", 5, 8);
-		float[] data = WigFile.flattenData(result, 5, 8);
+		WigQueryResult result = test.query("chrI", 5, 8);
+		float[] data = result.flattened();
 		assertEquals(4, data.length);
 		float[] expected = {5.0f, 6.0f, 7.0f, 8.0f};
 		assertArrayEquals(expected, data, 1e-7f);
 	}
 	
 	@Test
+	public void testFlattenDataCrick() throws WigFileException, IOException {
+		WigQueryResult result = test.query("chrI", 8, 5);
+		float[] data = result.flattened();
+		assertEquals(4, data.length);
+		float[] expected = {8.0f, 7.0f, 6.0f, 5.0f};
+		assertArrayEquals(expected, data, 1e-7f);
+	}
+	
+	@Test
+	public void testGetSubset() throws WigFileException, IOException {
+		WigQueryResult result = test.query("chrI", 5, 8);
+		float[] subset = result.getSubset(6, 7);
+		assertEquals(2, subset.length);
+		float[] expected = {6.0f, 7.0f};
+		assertArrayEquals(expected, subset, 1e-7f);
+	}
+	
+	@Test
+	public void testGetSubsetCrick() throws WigFileException, IOException {
+		WigQueryResult result = test.query("chrI", 5, 8);
+		float[] subset = result.getSubset(7, 6);
+		assertEquals(2, subset.length);
+		float[] expected = {7.0f, 6.0f};
+		assertArrayEquals(expected, subset, 1e-7f);
+	}
+	
+	@Test
+	public void testGetSubsetDoubleCrick() throws WigFileException, IOException {
+		WigQueryResult result = test.query("chrI", 8, 5);
+		float[] subset = result.getSubset(6, 7);
+		assertEquals(2, subset.length);
+		float[] expected = {6.0f, 7.0f};
+		assertArrayEquals(expected, subset, 1e-7f);
+	}
+	
+	@Test(expected = WigFileException.class)
+	public void testGetSubsetException() throws WigFileException, IOException {
+		WigQueryResult result = test.query("chrI", 5, 8);
+		float[] subset = result.getSubset(4, 7);
+	}
+	
+	@Test
 	public void testMeanQuery() throws WigFileException, IOException {
-		Iterator<WigItem> result = test.query("chrI", 5, 8);
-		assertEquals(6.5, WigFile.mean(result, 5, 8), 1e-7);
+		WigQueryResult result = test.query("chrI", 5, 8);
+		assertEquals(6.5, result.mean(), 1e-7);
 	}
 
 	/**
-	 * Test method for {@link edu.unc.genomics.io.WigFile#stdev(java.util.Iterator)}.
+	 * Test method for {@link edu.unc.genomics.io.WigFileReader#stdev(java.util.Iterator)}.
 	 * @throws IOException 
 	 * @throws WigFileException 
 	 */
 	@Test
 	public void testStdevQuery() throws WigFileException, IOException {
-		Iterator<WigItem> result = test.query("chrI", 5, 8);
-		assertEquals(1.1180340051651, WigFile.stdev(result, 5, 8), 1e-7);
+		WigQueryResult result = test.query("chrI", 5, 8);
+		assertEquals(1.1180340051651, result.stdev(), 1e-7);
 	}
 
 	/**
-	 * Test method for {@link edu.unc.genomics.io.WigFile#min(java.util.Iterator)}.
+	 * Test method for {@link edu.unc.genomics.io.WigFileReader#min(java.util.Iterator)}.
 	 * @throws IOException 
 	 * @throws WigFileException 
 	 */
 	@Test
 	public void testMinQuery() throws WigFileException, IOException {
-		Iterator<WigItem> result = test.query("chrI", 5, 8);
-		assertEquals(5, WigFile.min(result, 5, 8), 1e-7);
+		WigQueryResult result = test.query("chrI", 5, 8);
+		assertEquals(5, result.min(), 1e-7);
 	}
 
 	/**
-	 * Test method for {@link edu.unc.genomics.io.WigFile#max(java.util.Iterator)}.
+	 * Test method for {@link edu.unc.genomics.io.WigFileReader#max(java.util.Iterator)}.
 	 * @throws IOException 
 	 * @throws WigFileException 
 	 */
 	@Test
 	public void testMaxQuery() throws WigFileException, IOException {
-		Iterator<WigItem> result = test.query("chrI", 5, 8);
-		assertEquals(8, WigFile.max(result, 5, 8), 1e-7);
+		WigQueryResult result = test.query("chrI", 5, 8);
+		assertEquals(8, result.max(), 1e-7);
 	}
 
 	@Test
-	public void testQueryCount() throws WigFileException, IOException {
-		Iterator<WigItem> result = test.query("chrI", 5, 8);
-		int count = 0;
-		while (result.hasNext()) {
-			result.next();
-			count++;
-		}
-		assertEquals(4, count);
+	public void testCoverageQuery() throws WigFileException, IOException {
+		WigQueryResult result = test.query("chrI", 5, 8);
+		assertEquals(4, result.coverage());
+		assertEquals(4, result.numBases());
 	}
 	
 	@Test(expected = WigFileException.class)
 	public void testQueryException() throws WigFileException, IOException {
-		Iterator<WigItem> result = test.query("chrI", -2, 8);
+		WigQueryResult result = test.query("chrI", -2, 8);
 	}
 
 	@Test

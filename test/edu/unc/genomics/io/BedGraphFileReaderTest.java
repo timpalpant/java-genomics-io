@@ -12,13 +12,13 @@ import org.junit.Test;
 
 import edu.unc.genomics.Interval;
 
-public class BedGraphFileTest extends AbstractIntervalFileTest {
+public class BedGraphFileReaderTest extends AbstractIntervalFileReaderTest {
 
 	public static final Path TEST_BEDGRAPH = Paths.get("test/fixtures/test.bedGraph");
 
 	@Before
 	public void setUp() throws Exception {
-		test = new BedGraphFile(TEST_BEDGRAPH);
+		test = new BedGraphFileReader(TEST_BEDGRAPH);
 	}
 
 	@Test

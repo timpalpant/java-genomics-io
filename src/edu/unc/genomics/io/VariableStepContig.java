@@ -7,6 +7,8 @@ import java.util.Iterator;
 import org.apache.log4j.Logger;
 import org.broad.igv.bbfile.WigItem;
 
+import edu.unc.genomics.Interval;
+
 /**
  * Holds index information about variableStep contigs in a TextWigFile
  * @author timpalpant
@@ -61,16 +63,14 @@ class VariableStepContig extends Contig {
 	}
 
 	@Override
-	public VariableStepContigIterator query(RandomAccessFile raf, String chr, 
-			int start, int stop) throws IOException, WigFileException {
-		
-		return new VariableStepContigIterator(raf, chr, start, stop);
+	public VariableStepContigIterator query(RandomAccessFile raf, Interval interval) throws IOException, WigFileException {
+		return new VariableStepContigIterator(raf, interval);
 	}
 	
 	private class VariableStepContigIterator implements Iterator<WigItem> {
 
 		private final RandomAccessFile raf;
-		private final String chr;
+		private final Interval interval;
 		private final int low;
 		private final int high;
 
@@ -79,14 +79,13 @@ class VariableStepContig extends Contig {
 		private float value;
 		private boolean hasNextLine = false;
 		
-		public VariableStepContigIterator(final RandomAccessFile raf, final String chr, 
-				final int start, final int stop) throws IOException, WigFileException {
+		public VariableStepContigIterator(final RandomAccessFile raf, final Interval interval) throws IOException, WigFileException {
 			this.raf = raf;
-			this.chr = chr;
+			this.interval = interval;
 			
 			// Clamp to bases that are covered by this Contig
-			low = Math.max(getStart(), start);
-			high = Math.min(getStop(), stop);
+			low = Math.max(start, interval.low());
+			high = Math.min(stop, interval.high());
 			
 			// Find the closest known upstream base-pair position
 			int closestUpstream = getUpstreamIndexedBP(low);
