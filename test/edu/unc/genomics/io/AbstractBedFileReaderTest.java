@@ -2,24 +2,14 @@ package edu.unc.genomics.io;
 
 import static org.junit.Assert.*;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.List;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import edu.unc.genomics.Interval;
 
-public class GeneTrackFileReaderTest extends AbstractIntervalFileReaderTest {
-
-	public static final Path TEST_GENETRACK = Paths.get("test/fixtures/test.genetrack");
-
-	@Before
-	public void setUp() throws Exception {
-		test = new GeneTrackFileReader(TEST_GENETRACK);
-	}
+public abstract class AbstractBedFileReaderTest extends AbstractIntervalFileReaderTest {
 
 	@Test
 	public void testCount() {
@@ -37,13 +27,13 @@ public class GeneTrackFileReaderTest extends AbstractIntervalFileReaderTest {
 
 	@Test
 	public void testQuery() {
-		Iterator<? extends Interval> it = test.query("chrI", 10, 20);
+		Iterator<? extends Interval> it = test.query("chrI", 10, 97);
 		int count = 0;
 		while (it.hasNext()) {
 			it.next();
 			count++;
 		}
-		assertEquals(2, count);
+		assertEquals(3, count);
 	}
 
 	@Test

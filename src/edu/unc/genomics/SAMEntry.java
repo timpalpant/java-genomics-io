@@ -23,7 +23,7 @@ public class SAMEntry extends Interval {
 
 	private static final long serialVersionUID = -439658908814430105L;
 	
-	private SAMRecord r;
+	private final SAMRecord r;
 	
 	/**
 	 * @param chr
@@ -826,15 +826,6 @@ public class SAMEntry extends Interval {
 
 	/**
 	 * @return
-	 * @see net.sf.samtools.SAMRecord#toString()
-	 */
-	@Override
-	public String toString() {
-		return r.toString();
-	}
-
-	/**
-	 * @return
 	 * @see net.sf.samtools.SAMRecord#getSAMString()
 	 */
 	public String getSAMString() {
@@ -844,6 +835,13 @@ public class SAMEntry extends Interval {
 	@Override
 	public String toOutput() {
 		return getSAMString();
+	}
+
+	/**
+	 * @return the SAMRecord that this entry wraps
+	 */
+	public SAMRecord getSAMRecord() {
+		return r;
 	}
 
 }

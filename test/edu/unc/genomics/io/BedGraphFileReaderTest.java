@@ -40,7 +40,7 @@ public class BedGraphFileReaderTest extends AbstractIntervalFileReaderTest {
 		Iterator<? extends Interval> it = test.query("chrI", 10, 97);
 		int count = 0;
 		while (it.hasNext()) {
-			System.out.println(it.next());
+			it.next();
 			count++;
 		}
 		assertEquals(3, count);

@@ -1,33 +1,30 @@
 package edu.unc.genomics.io;
 
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.Iterator;
 
-import org.apache.log4j.Logger;
-import org.broad.igv.bbfile.WigItem;
-
+import ed.javatools.BufferedRandomAccessFile;
+import edu.unc.genomics.Contig;
 import edu.unc.genomics.Interval;
+import edu.unc.genomics.WigEntry;
 
 /**
  * Holds index information about variableStep contigs in a TextWigFile
  * @author timpalpant
  *
  */
-class VariableStepContig extends Contig {
-	
-	private static final Logger log = Logger.getLogger(VariableStepContig.class);
+class VariableStepContigIndex extends ContigIndex {
 	
 	private static final long serialVersionUID = 3139905829545756903L;
 
-	public VariableStepContig(String chr, int start, int stop, int span) {
+	public VariableStepContigIndex(String chr, int start, int stop, int span) {
 		super(chr, start, stop, span);
 	}
 	
-	public static VariableStepContig parseHeader(String headerLine) throws WigFileException {
+	public static VariableStepContigIndex parseHeader(String headerLine) throws WigFileFormatException {
 		String[] tokens = headerLine.split(" ");
-		if (tokens.length == 0 || !tokens[0].equals(Contig.VARIABLE_STEP)) {
-			throw new WigFileException("Not a valid variableStep header line: " + headerLine);
+		if (tokens.length == 0 || !tokens[0].equals(Contig.Type.VARIABLESTEP.getId())) {
+			throw new WigFileFormatException("Not a valid variableStep header line: " + headerLine);
 		}
 		
 		String chr = "";
@@ -37,7 +34,7 @@ class VariableStepContig extends Contig {
 			String s = tokens[i];
 			String[] pair = s.split("=");
 			if (pair.length != 2) {
-				throw new WigFileException("Invalid keypair in variableStep header line: " + s);
+				throw new WigFileFormatException("Invalid keypair in variableStep header line: " + s);
 			}
 			
 			String key = pair[0];
@@ -50,38 +47,35 @@ class VariableStepContig extends Contig {
 				span = Integer.parseInt(value);
 				break;
 			default:
-				throw new WigFileException("Invalid attribute in variableStep header line: " + key);
+				throw new WigFileFormatException("Invalid attribute in variableStep header line: " + key);
 			}
 		}
 		
-		return new VariableStepContig(chr, start, -1, span);
+		return new VariableStepContigIndex(chr, start, -1, span);
 	}
 	
 	@Override
-	public String toString() {
-		return Contig.VARIABLE_STEP + " chrom=" + getChr() + " span=" + getSpan();
+	public String toOutput() {
+		return Contig.Type.VARIABLESTEP.getId() + " chrom=" + getChr() + " span=" + getSpan();
 	}
 
 	@Override
-	public VariableStepContigIterator query(RandomAccessFile raf, Interval interval) throws IOException, WigFileException {
+	public VariableStepContigIterator query(BufferedRandomAccessFile raf, Interval interval) throws IOException, WigFileException {
 		return new VariableStepContigIterator(raf, interval);
 	}
 	
-	private class VariableStepContigIterator implements Iterator<WigItem> {
+	private class VariableStepContigIterator implements Iterator<WigEntry> {
 
-		private final RandomAccessFile raf;
-		private final Interval interval;
+		private final BufferedRandomAccessFile raf;
 		private final int low;
 		private final int high;
 
-		private int itemIndex = 0;
 		private int bp;
 		private float value;
 		private boolean hasNextLine = false;
 		
-		public VariableStepContigIterator(final RandomAccessFile raf, final Interval interval) throws IOException, WigFileException {
+		public VariableStepContigIterator(final BufferedRandomAccessFile raf, final Interval interval) throws IOException, WigFileException {
 			this.raf = raf;
-			this.interval = interval;
 			
 			// Clamp to bases that are covered by this Contig
 			low = Math.max(start, interval.low());
@@ -93,9 +87,9 @@ class VariableStepContig extends Contig {
 			
 			// Move to the first item
 			String line;
-			while ((line = raf.readLine()) != null) {
+			while ((line = raf.readLine2()) != null) {
 				// Break if at the next Contig
-				if (line.startsWith(Contig.FIXED_STEP) || line.startsWith(Contig.VARIABLE_STEP)) {
+				if (line.startsWith(Contig.Type.FIXEDSTEP.getId()) || line.startsWith(Contig.Type.VARIABLESTEP.getId())) {
 					hasNextLine = false;
 					break;
 				}
@@ -116,12 +110,12 @@ class VariableStepContig extends Contig {
 		}
 
 		@Override
-		public WigItem next() {
-			WigItem item = new WigItem(itemIndex++, chr, bp, bp+getSpan()-1, value);
+		public WigEntry next() {
+			WigEntry item = new WigEntry(chr, bp, bp+getSpan()-1, value);
 			
 			try {
-				String line = raf.readLine();
-				if (line == null || line.startsWith(Contig.FIXED_STEP) || line.startsWith(Contig.VARIABLE_STEP)) {
+				String line = raf.readLine2();
+				if (line == null || line.startsWith(Contig.Type.FIXEDSTEP.getId()) || line.startsWith(Contig.Type.VARIABLESTEP.getId())) {
 					hasNextLine = false;
 				} else {
 					int delim = line.indexOf('\t');

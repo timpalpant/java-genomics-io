@@ -8,6 +8,7 @@ package edu.unc.genomics;
  */
 public class ValuedInterval extends Interval {
 	private static final long serialVersionUID = 2976113135643438146L;
+	
 	protected String id;
 	protected Number value;
 	
@@ -41,7 +42,7 @@ public class ValuedInterval extends Interval {
 	@Override
 	public String toBed() {
 		String idStr = (id == null) ? "." : id;
-		String valueStr = (getValue() == null) ? "." : getValue().toString();
+		String valueStr = (getValue() == null) ? "." : String.valueOf(getValue().intValue());
 		return getChr() + "\t" + (low()-1) + "\t" + high() + "\t" + idStr + "\t" + valueStr + "\t" + strand();
 	}
 	

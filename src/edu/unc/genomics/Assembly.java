@@ -50,12 +50,12 @@ public class Assembly implements Iterable<String> {
 		}
 	}
 	
-	public Path getPath() {
+	public final Path getPath() {
 		return p;
 	}
 	
 	@Override
-	public String toString() {
+	public final String toString() {
 		String name = p.getFileName().toString();
 		if (name.endsWith(".len")) {
 			name = name.substring(0, name.length()-4);
@@ -67,7 +67,7 @@ public class Assembly implements Iterable<String> {
 	 * The set of chromosomes in this Assembly
 	 * @return all chromosomes in this Assembly
 	 */
-	public Set<String> chromosomes() {
+	public final Set<String> chromosomes() {
 		return index.keySet();
 	}
 	
@@ -76,7 +76,7 @@ public class Assembly implements Iterable<String> {
 	 * @param chr the chromosome to look for
 	 * @return true if this Assembly contains chr, false otherwise
 	 */
-	public boolean includes(String chr) {
+	public final boolean includes(String chr) {
 		return index.containsKey(chr);
 	}
 	
@@ -85,12 +85,12 @@ public class Assembly implements Iterable<String> {
 	 * @param chr the chromosome to look for
 	 * @return the length of chr
 	 */
-	public Integer getChrLength(String chr) {
+	public final Integer getChrLength(String chr) {
 		return index.get(chr);
 	}
 
 	@Override
-	public Iterator<String> iterator() {
+	public final Iterator<String> iterator() {
 		return index.keySet().iterator();
 	}
 }

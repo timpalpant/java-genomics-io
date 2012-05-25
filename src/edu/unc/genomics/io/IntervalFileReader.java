@@ -108,9 +108,8 @@ public abstract class IntervalFileReader<T extends Interval> implements Iterable
 	 * Query for intervals that overlap a given interval
 	 * @param i the interval to query for
 	 * @return an Iterator over the intervals in this file that overlap i
-	 * @throws UnsupportedOperationException if the subclass does not support random queries
 	 */
-	public Iterator<T> query(Interval i) throws UnsupportedOperationException {
+	public final Iterator<T> query(Interval i) {
 		return query(i.getChr(), i.low(), i.high());
 	}
 	
@@ -120,11 +119,35 @@ public abstract class IntervalFileReader<T extends Interval> implements Iterable
 	 * @param start the start of the interval to query for
 	 * @param stop the stop of the interval to query for
 	 * @return an Iterator over intervals in this file that overlap chr:start-stop
-	 * @throws UnsupportedOperationException if the subclass does not support random queries
 	 */
-	public abstract Iterator<T> query(String chr, int start, int stop) throws UnsupportedOperationException;
+	public abstract Iterator<T> query(String chr, int start, int stop);
 	
-	public Path getPath() {
+	/**
+	 * Query for intervals that overlap a given interval, and load all of the results into a List
+	 * @param i the interval to query for
+	 * @return a List of all the intervals in this file that overlap i
+	 */
+	public final List<T> load(Interval i) {
+		return load(i.getChr(), i.low(), i.high());
+	}
+	
+	/**
+	 * Query for intervals that overlap a given interval, and load all of hte results into a List
+	 * @param chr the chromosome of the interval to query for
+	 * @param start the start of the interval to query for
+	 * @param stop the stop of the interval to query for
+	 * @return a List of all the intervals in this file that overlap chr:start-stop
+	 */
+	public final List<T> load(String chr, int start, int stop) {
+		List<T> list = new ArrayList<>();
+		Iterator<T> it = query(chr, start, stop);
+		while (it.hasNext()) {
+			list.add(it.next());
+		}
+		return list;
+	}
+	
+	public final Path getPath() {
 		return p;
 	}
 }

@@ -90,7 +90,7 @@ public class Interval implements Serializable {
 	 * The length of this interval, equal to high-low+1
 	 * @return
 	 */
-	public int length() {
+	public final int length() {
 		return Math.abs(stop-start) + 1;
 	}
 	
@@ -100,8 +100,8 @@ public class Interval implements Serializable {
 	 * @param bp
 	 * @return
 	 */
-	public boolean includes(final String chr, final int bp) {
-		return this.chr == chr && includes(bp);
+	public final boolean includes(final String chr, final int bp) {
+		return this.chr.equals(chr) && includes(bp);
 	}
 	
 	/**
@@ -109,7 +109,7 @@ public class Interval implements Serializable {
 	 * @param bp
 	 * @return
 	 */
-	public boolean includes(final int bp) {
+	public final boolean includes(final int bp) {
 		return low() <= bp && bp <= high();
 	}
 	
@@ -153,17 +153,11 @@ public class Interval implements Serializable {
 		return isWatson() ? Strand.WATSON : Strand.CRICK;
 	}
 	
-  /* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
-	public String toString() {
+	public final String toString() {
 		return chr + ":" + start + "-" + stop;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;

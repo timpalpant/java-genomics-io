@@ -1,4 +1,4 @@
-package edu.genomics;
+package edu.unc.genomics;
 
 import static org.junit.Assert.*;
 

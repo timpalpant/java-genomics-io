@@ -1,4 +1,4 @@
-package edu.genomics;
+package edu.unc.genomics;
 
 import static org.junit.Assert.*;
 
@@ -23,17 +23,17 @@ public class IntervalTest {
 	
 	@Test(expected = IntervalException.class)
 	public void testParseInvalid() throws IntervalException {
-		Interval test = Interval.parse("chr23:3040");
+		Interval.parse("chr23:3040");
 	}
 	
 	@Test(expected = IntervalException.class)
 	public void testParseInvalid2() throws IntervalException {
-		Interval test = Interval.parse("chr23:a-b");
+		Interval.parse("chr23:a-b");
 	}
 	
 	@Test(expected = IntervalException.class)
 	public void testParseInvalid3() throws IntervalException {
-		Interval test = Interval.parse("2340-50");
+		Interval.parse("2340-50");
 	}
 	
 	@Test
@@ -111,6 +111,12 @@ public class IntervalTest {
 	public void testStrand() {
 		assertEquals(Strand.WATSON, watson.strand());
 		assertEquals(Strand.CRICK, crick.strand());
+	}
+	
+	@Test
+	public void testToString() {
+		assertEquals("chr23:30-40", watson.toString());
+		assertEquals("chr23:101-95", crick.toString());
 	}
 
 }

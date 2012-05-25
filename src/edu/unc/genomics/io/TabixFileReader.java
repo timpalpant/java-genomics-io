@@ -5,6 +5,8 @@ import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import net.sf.samtools.TabixReader;
 
 import edu.unc.genomics.Interval;
@@ -17,8 +19,11 @@ import edu.unc.genomics.IntervalFactory;
  */
 public class TabixFileReader<T extends Interval> extends IntervalFileReader<T> {
 
+	private static final Logger log = Logger.getLogger(TabixFileReader.class);
+	
 	private TabixReader reader;
 	private IntervalFactory<T> factory;
+	private int count = 0;
 	
 	protected TabixFileReader(Path p, IntervalFactory<T> factory) throws IOException {
 		super(p);
@@ -40,12 +45,23 @@ public class TabixFileReader<T extends Interval> extends IntervalFileReader<T> {
 	}
 
 	@Override
-	public int count() {
-		// FIXME Efficiently count Tabix entries
-		int count = 0;
-		for (Interval i : this) {
-			count++;
+	public int count() throws IntervalFileFormatException {
+		// FIXME More efficiently count Tabix entries using index information?
+		if (count == 0) {
+			try {
+				TabixReader tmpReader = new TabixReader(p);
+				StringIntervalIterator<T> tmpIter = new StringIntervalIterator<T>(tmpReader.iterator(), factory);
+				while (tmpIter.hasNext()) {
+					tmpIter.next();
+					count++;
+				}
+			} catch (IOException e) {
+				log.error("Error counting entries in Tabix file "+p);
+				e.printStackTrace();
+				throw new IntervalFileFormatException("Error counting entries in Tabix file "+p);
+			}
 		}
+		
 		return count;
 	}
 

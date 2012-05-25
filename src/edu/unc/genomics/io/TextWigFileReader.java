@@ -3,11 +3,8 @@ package edu.unc.genomics.io;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -19,12 +16,13 @@ import java.util.Set;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.log4j.Logger;
-import org.broad.igv.bbfile.WigItem;
 
 import ed.javatools.BufferedRandomAccessFile;
 import edu.ucsc.genome.TrackHeader;
 import edu.ucsc.genome.TrackHeaderException;
+import edu.unc.genomics.Contig;
 import edu.unc.genomics.Interval;
+import edu.unc.genomics.WigEntry;
 import edu.unc.genomics.util.ChecksumUtils;
 
 /**
@@ -37,17 +35,16 @@ import edu.unc.genomics.util.ChecksumUtils;
  *
  */
 public class TextWigFileReader extends WigFileReader {
-	private static final long serialVersionUID = 4L;
+	private static final long serialVersionUID = 6L;
 	public static final String INDEX_EXTENSION = ".idx";
 	public static final int KEY_GRANULARITY = 10_000;
 	
 	private static Logger log = Logger.getLogger(TextWigFileReader.class);
 	
 	private BufferedRandomAccessFile raf;
-	private TrackHeader header = new TrackHeader("wiggle_0");
 	
-	private List<Contig> contigs = new ArrayList<Contig>();
-	private Set<String> chromosomes = new LinkedHashSet<String>();
+	private List<ContigIndex> contigs = new ArrayList<>();
+	private Set<String> chromosomes = new LinkedHashSet<>();
 	
 	private long checksum;
 	
@@ -58,22 +55,22 @@ public class TextWigFileReader extends WigFileReader {
 	 * @throws IOException if an error occurs while opening or reading from the Wig file
 	 * @throws WigFileException if an error occurs while indexing the Wig file
 	 */
-	public TextWigFileReader(Path p) throws IOException, WigFileException {
+	public TextWigFileReader(Path p) throws IOException, WigFileFormatException {
 		super(p);
 		raf = new BufferedRandomAccessFile(p.toFile(), "r");
 
-		String headerLine = raf.readLine();
+		String headerLine = raf.readLine2();
 		if (headerLine.startsWith("track")) {
 			try {
 				header = TrackHeader.parse(headerLine);
 			} catch (TrackHeaderException e) {
-				log.error("Error parsing UCSC track header in file: " + p.toString());
+				log.error("Error parsing UCSC track header in file: " + p);
 				e.printStackTrace();
 			}
 		}
 
 		// Compute the checksum of this file
-		checksum = ChecksumUtils.adler32(p);
+		checksum = ChecksumUtils.crc32(p);
 		
 		// Attempt to load an index from disk, or generate one otherwise
 		Path indexFile = p.resolveSibling(p.getFileName()+INDEX_EXTENSION);
@@ -92,13 +89,13 @@ public class TextWigFileReader extends WigFileReader {
 	 * @param p the path to the Wig file
 	 * @param index the path for the Wig file's precomputed index
 	 * @throws IOException if an error occurs opening the Wig file or its index
-	 * @throws WigFileException if an error ocurs while loading the index
+	 * @throws WigFileException if an error occurs while loading the index
 	 */
 	public TextWigFileReader(Path p, Path index) throws IOException, WigFileException {
 		super(p);
 		raf = new BufferedRandomAccessFile(p.toFile(), "r");
 
-		String headerLine = raf.readLine();
+		String headerLine = raf.readLine2();
 		if (headerLine.startsWith("track")) {
 			try {
 				header = TrackHeader.parse(headerLine);
@@ -121,24 +118,19 @@ public class TextWigFileReader extends WigFileReader {
 	}
 	
 	@Override
-	public Iterator<WigItem> getOverlappingItems(Interval interval) throws IOException, WigFileException {
+	public Iterator<WigEntry> getOverlappingEntries(Interval interval) throws IOException, WigFileException {
 		if (!includes(interval)) {
 			throw new WigFileException("WigFile does not contain data for region: "+interval);
 		}
 		
-		List<Contig> relevantContigs = getContigsForInterval(interval);
+		List<ContigIndex> relevantContigs = getContigsOverlappingInterval(interval);
 		return new TextWigIterator(raf, relevantContigs.iterator(), interval);
 	}
-
-	@Override
-	public WigQueryResult query(Interval interval) throws IOException, WigFileException {
-		return new WigQueryResult(getOverlappingItems(interval), interval);
-	}
 	
-	private List<Contig> getContigsForInterval(Interval interval) {
-		List<Contig> relevantContigs = new ArrayList<Contig>();
+	private List<ContigIndex> getContigsOverlappingInterval(Interval interval) {
+		List<ContigIndex> relevantContigs = new ArrayList<>();
 		
-		for (Contig c : contigs) {
+		for (ContigIndex c : contigs) {
 			if (c.getChr().equals(interval.getChr()) && c.getStop() >= interval.low() && c.getStart() <= interval.high()) {
 				relevantContigs.add(c);
 			}
@@ -157,8 +149,8 @@ public class TextWigFileReader extends WigFileReader {
 		}
 		
 		s.append("Contigs:\n");
-		for (Contig c : contigs) {
-			s.append("\t").append(c.toString()).append('\n');
+		for (ContigIndex c : contigs) {
+			s.append("\t").append(c.toOutput()).append('\n');
 		}
 		
 		s.append("Basic Statistics:\n");
@@ -184,7 +176,7 @@ public class TextWigFileReader extends WigFileReader {
 		}
 		
 		int start = Integer.MAX_VALUE;
-		for (Contig c : contigs) {
+		for (ContigIndex c : contigs) {
 			if (c.getChr().equals(chr) && c.getStart() < start) {
 				start = c.getStart();
 			}
@@ -196,7 +188,7 @@ public class TextWigFileReader extends WigFileReader {
 	@Override
 	public int getChrStop(String chr) {		
 		int stop = -1;
-		for (Contig c : contigs) {
+		for (ContigIndex c : contigs) {
 			if (c.getChr().equals(chr) && c.getStop() > stop) {
 				stop = c.getStop();
 			}
@@ -268,13 +260,13 @@ public class TextWigFileReader extends WigFileReader {
 	 * @throws IOException 
 	 * @throws WigFileException 
 	 */
-	private void generateIndex() throws IOException, WigFileException {
+	private void generateIndex() throws IOException, WigFileFormatException {
 		log.debug("Indexing ascii text Wig file: " + p.getFileName().toString());
 		
 		// Skip the track line, if there is one
 		raf.seek(0);
 		long lineNum = 0;
-		String line = raf.readLine();
+		String line = raf.readLine2();
 		if (!line.startsWith("track")) {
 			raf.seek(0);
 		} else {
@@ -283,15 +275,15 @@ public class TextWigFileReader extends WigFileReader {
 
 		// Index the Contigs and data in the Wig File by going through it once
 		stats = new SummaryStatistics();
-		contigs = new ArrayList<Contig>();
-		Contig contig = null;
+		contigs = new ArrayList<ContigIndex>();
+		ContigIndex contig = null;
 		int bp = 0;
 		double value;
 		long cursor = raf.getFilePointer();
-		while ((line = raf.readLine()) != null) {
+		while ((line = raf.readLine2()) != null) {
 			lineNum++;
 			
-			if (line.startsWith(Contig.FIXED_STEP) || line.startsWith(Contig.VARIABLE_STEP)) {
+			if (line.startsWith(Contig.Type.FIXEDSTEP.getId()) || line.startsWith(Contig.Type.VARIABLESTEP.getId())) {
 				// If this is the end of a previous Contig, store the stop info
 				if (contigs.size() > 0) {
 					contig.setStopLine(lineNum-1);
@@ -299,47 +291,47 @@ public class TextWigFileReader extends WigFileReader {
 				}
 				
 				// Now parse the new Contig
-				contig = Contig.parseHeader(line);
+				contig = ContigIndex.parseHeader(line);
 				contigs.add(contig);
 				
 				// Set the new Contig's start info
 				contig.setStartLine(lineNum+1);
-				if (contig instanceof VariableStepContig) {
+				if (contig instanceof VariableStepContigIndex) {
 					cursor = raf.getFilePointer();
-					String firstLine = raf.readLine();
+					String firstLine = raf.readLine2();
 					int delim = firstLine.indexOf('\t');
 					if (delim == -1) {
-						throw new WigFileException("Illegal format in variableStep contig, line " + lineNum);
+						throw new WigFileFormatException("Illegal format in variableStep contig, line " + lineNum);
 					}
 					try {
 						bp = Integer.parseInt(firstLine.substring(0, delim));
 					} catch (NumberFormatException e) {
-						throw new WigFileException("Illegal format in variableStep contig, line " + lineNum);
+						throw new WigFileFormatException("Illegal format in variableStep contig, line " + lineNum);
 					}
 					contig.setStart(bp);
 					raf.seek(cursor);
 				} else {
-					bp = contig.getStart() - ((FixedStepContig)contig).getStep();
+					bp = contig.getStart() - ((FixedStepContigIndex)contig).getStep();
 				}
 			} else {
-				if (contig instanceof FixedStepContig) {
-					bp += ((FixedStepContig)contig).getStep();
+				if (contig instanceof FixedStepContigIndex) {
+					bp += ((FixedStepContigIndex)contig).getStep();
 					try {
 						value = Double.parseDouble(line);
 					} catch (NumberFormatException e) {
-						throw new WigFileException("Illegal format in fixedStep contig, line " + lineNum);
+						throw new WigFileFormatException("Illegal format in fixedStep contig, line " + lineNum);
 					}
 				} else {
 					int delim = line.indexOf('\t');
 					if (delim == -1) {
-						throw new WigFileException("Illegal format in variableStep contig, line " + lineNum);
+						throw new WigFileFormatException("Illegal format in variableStep contig, line " + lineNum);
 					}
 					
 					try {
 						bp = Integer.parseInt(line.substring(0, delim));
 						value = Double.parseDouble(line.substring(delim+1));
 					} catch (NumberFormatException e) {
-						throw new WigFileException("Illegal format in variableStep contig, line " + lineNum);
+						throw new WigFileFormatException("Illegal format in variableStep contig, line " + lineNum);
 					}
 				}
 				
@@ -369,7 +361,7 @@ public class TextWigFileReader extends WigFileReader {
 
 		// Set the Set of chromosomes
 		chromosomes = new LinkedHashSet<String>();
-		for (Contig c : contigs) {
+		for (ContigIndex c : contigs) {
 			chromosomes.add(c.getChr());
 		}
 	}
@@ -382,10 +374,7 @@ public class TextWigFileReader extends WigFileReader {
 	 */
 	private void loadIndex(Path p, boolean matchChecksum) throws IOException, WigFileException {
 		log.debug("Attempting to load Wig file index from disk");
-		try (InputStream is = Files.newInputStream(p)) {
-			BufferedInputStream bis = new BufferedInputStream(is);
-			ObjectInputStream dis = new ObjectInputStream(bis);
-			
+		try (ObjectInputStream dis = new ObjectInputStream(new BufferedInputStream(Files.newInputStream(p)))) {
 			// Load and match version
 			long version = dis.readLong();
 			if (version != serialVersionUID) {
@@ -419,14 +408,11 @@ public class TextWigFileReader extends WigFileReader {
 				
 				// Load Contigs
 				int numContigs = dis.readInt();
-				contigs = new ArrayList<Contig>(numContigs);
+				contigs = new ArrayList<ContigIndex>(numContigs);
 				for (int i = 0; i < numContigs; i++) {
-					Contig contig = (Contig) dis.readObject();
+					ContigIndex contig = (ContigIndex) dis.readObject();
 					contigs.add(contig);
 				}
-				
-				dis.close();
-				bis.close();
 			} catch (ClassNotFoundException e) {
 				log.error("ClassNotFoundException while loading Wig index from file");
 				e.printStackTrace();
@@ -442,10 +428,7 @@ public class TextWigFileReader extends WigFileReader {
 	 */
 	private void saveIndex(Path p) throws IOException {
 		log.debug("Writing Wig index information to disk");
-		try (OutputStream os = Files.newOutputStream(p)) {
-			BufferedOutputStream bos = new BufferedOutputStream(os);
-			ObjectOutputStream dos = new ObjectOutputStream(bos);
-			
+		try (ObjectOutputStream dos = new ObjectOutputStream(new BufferedOutputStream(Files.newOutputStream(p)))) {
 			// Write the serialization version and corresponding Wig file checksum
 			// at the top so it can easily be matched
 			dos.writeLong(serialVersionUID);
@@ -462,12 +445,9 @@ public class TextWigFileReader extends WigFileReader {
 			
 			// Write Contigs
 			dos.writeInt(contigs.size());
-			for (Contig c : contigs) {
+			for (ContigIndex c : contigs) {
 				dos.writeObject(c);
 			}
-			
-			dos.close();
-			bos.close();
 		} catch (IOException e) {
 			log.error("Error saving Wig index information to disk!: " + e.getMessage());
 			e.printStackTrace();
@@ -484,14 +464,14 @@ public class TextWigFileReader extends WigFileReader {
 	 * @author timpalpant
 	 *
 	 */
-	private static class TextWigIterator implements Iterator<WigItem> {
+	private static class TextWigIterator implements Iterator<WigEntry> {
 
-		private final RandomAccessFile raf;
+		private final BufferedRandomAccessFile raf;
 		private final Interval interval;
-		private final Iterator<Contig> relevantContigsIter;
-		private Iterator<WigItem> currentContigIter;
+		private final Iterator<ContigIndex> relevantContigsIter;
+		private Iterator<WigEntry> currentContigIter;
 		
-		public TextWigIterator(final RandomAccessFile raf, final Iterator<Contig> relevantContigsIter, final Interval interval) {
+		public TextWigIterator(BufferedRandomAccessFile raf, Iterator<ContigIndex> relevantContigsIter, Interval interval) {
 			this.raf = raf;
 			this.relevantContigsIter = relevantContigsIter;
 			this.interval = interval;
@@ -504,12 +484,12 @@ public class TextWigFileReader extends WigFileReader {
 				return advanceContig();
 			}
 			
-			// The currentContigIter is not null, and it hasNext
+			// The currentContigIter is not null, and it hasNext()
 			return true;
 		}
 
 		@Override
-		public WigItem next() {
+		public WigEntry next() {
 			if (hasNext()) {
 				return currentContigIter.next();
 			}
@@ -524,7 +504,7 @@ public class TextWigFileReader extends WigFileReader {
 		
 		private boolean advanceContig() {
 			while (relevantContigsIter.hasNext()) {
-				Contig currentContig = relevantContigsIter.next();
+				ContigIndex currentContig = relevantContigsIter.next();
 				try {
 					currentContigIter = currentContig.query(raf, interval);
 					if (currentContigIter.hasNext()) {

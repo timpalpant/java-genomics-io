@@ -1,13 +1,12 @@
 package edu.unc.genomics.io;
 
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.Iterator;
 
-import org.apache.log4j.Logger;
-import org.broad.igv.bbfile.WigItem;
-
+import ed.javatools.BufferedRandomAccessFile;
+import edu.unc.genomics.Contig;
 import edu.unc.genomics.Interval;
+import edu.unc.genomics.WigEntry;
 
 /**
  * Hold index information about a fixedStep contig in a TextWigFile
@@ -15,23 +14,21 @@ import edu.unc.genomics.Interval;
  * @author timpalpant
  *
  */
-class FixedStepContig extends Contig {
-	
-	private static final Logger log = Logger.getLogger(FixedStepContigIterator.class);
+class FixedStepContigIndex extends ContigIndex {
 	
 	private static final long serialVersionUID = -142695785731234833L;
 	
 	private int step;
 	
-	public FixedStepContig(String chr, int start, int stop, int span, int step) {
+	public FixedStepContigIndex(String chr, int start, int stop, int span, int step) {
 		super(chr, start, stop, span);
 		this.step = step;
 	}
 	
-	public static FixedStepContig parseHeader(String headerLine) throws WigFileException {
+	public static FixedStepContigIndex parseHeader(String headerLine) throws WigFileFormatException {
 		String[] tokens = headerLine.split(" ");
-		if (tokens.length == 0 || !tokens[0].equals(Contig.FIXED_STEP)) {
-			throw new WigFileException("Not a valid fixedStep header line: " + headerLine);
+		if (tokens.length == 0 || !tokens[0].equals(Contig.Type.FIXEDSTEP.getId())) {
+			throw new WigFileFormatException("Not a valid fixedStep header line: " + headerLine);
 		}
 		
 		String chr = "";
@@ -42,7 +39,7 @@ class FixedStepContig extends Contig {
 			String s = tokens[i];
 			String[] pair = s.split("=");
 			if (pair.length != 2) {
-				throw new WigFileException("Invalid keypair in fixedStep header line: " + s);
+				throw new WigFileFormatException("Invalid keypair in fixedStep header line: " + s);
 			}
 			
 			String key = pair[0];
@@ -61,11 +58,11 @@ class FixedStepContig extends Contig {
 				step = Integer.parseInt(value);
 				break;
 			default:
-				throw new WigFileException("Invalid attribute in fixedStep header line: " + key);
+				throw new WigFileFormatException("Invalid attribute in fixedStep header line: " + key);
 			}
 		}
 		
-		return new FixedStepContig(chr, start, -1, span, step);
+		return new FixedStepContigIndex(chr, start, -1, span, step);
 	}
 	
 	/**
@@ -90,8 +87,8 @@ class FixedStepContig extends Contig {
 	}
 	
 	@Override
-	public String toString() {
-		return Contig.FIXED_STEP + " chrom=" + getChr() + " start=" + getStart() + " span=" + getSpan() + " step=" + step;
+	public String toOutput() {
+		return Contig.Type.FIXEDSTEP.getId() + " chrom=" + getChr() + " start=" + getStart() + " span=" + getSpan() + " step=" + step;
 	}
 
 	/**
@@ -102,25 +99,22 @@ class FixedStepContig extends Contig {
 	}
 
 	@Override
-	public FixedStepContigIterator query(RandomAccessFile raf, Interval interval) throws IOException, WigFileException {
+	public FixedStepContigIterator query(BufferedRandomAccessFile raf, Interval interval) throws IOException, WigFileException {
 		return new FixedStepContigIterator(raf, interval);
 	}
 	
-	private class FixedStepContigIterator implements Iterator<WigItem> {
+	private class FixedStepContigIterator implements Iterator<WigEntry> {
 
-		private final RandomAccessFile raf;
-		private final Interval interval;
+		private final BufferedRandomAccessFile raf;
 		private final int low;
 		private final int high;
 		private final long startLine;
 		private final long stopLine;
 		private long currentLine;
 		private int bp;
-		private int itemIndex = 0;
 		
-		public FixedStepContigIterator(final RandomAccessFile raf, final Interval interval) throws IOException, WigFileException {
+		public FixedStepContigIterator(BufferedRandomAccessFile raf, Interval interval) throws IOException, WigFileException {
 			this.raf = raf;
-			this.interval = interval;
 			
 			// Clamp to bases that are covered by this Contig
 			low = Math.max(start, interval.low());
@@ -137,7 +131,7 @@ class FixedStepContig extends Contig {
 			// Skip to the start line
 			for (currentLine = getLineNumForBasePair(closestUpstream); 
 					currentLine < startLine; currentLine++) {
-				raf.readLine();
+				raf.readLine2();
 			}
 			
 			// Set the base pair we are at (may be < start if span > 1)
@@ -150,13 +144,13 @@ class FixedStepContig extends Contig {
 		}
 
 		@Override
-		public WigItem next() {
+		public WigEntry next() {
 			try {
-				String line = raf.readLine();
+				String line = raf.readLine2();
 				currentLine++;
 				
 				float value = Float.parseFloat(line);
-				WigItem item = new WigItem(itemIndex++, chr, bp, bp+getSpan()-1, value);
+				WigEntry item = new WigEntry(chr, bp, bp+getSpan()-1, value);
 							
 				bp += getStep();
 				

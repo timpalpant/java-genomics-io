@@ -9,7 +9,6 @@ package edu.unc.genomics.util;
  */
 import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.zip.Adler32;
@@ -27,10 +26,10 @@ public class ChecksumUtils {
 	}
 	
 	public static long file(Path p, Checksum c) throws IOException {
-		InputStream is = Files.newInputStream(p);
-		CheckedInputStream cis = new CheckedInputStream(is, c);
-		BufferedInputStream in = new BufferedInputStream(cis);
-		while (in.read() != -1) { }
-		return cis.getChecksum().getValue();
+		try (CheckedInputStream cis = new CheckedInputStream(Files.newInputStream(p), c);
+				BufferedInputStream bis = new BufferedInputStream(cis)) {
+			while (bis.read() != -1) { }
+			return cis.getChecksum().getValue();
+		}
 	}
 }

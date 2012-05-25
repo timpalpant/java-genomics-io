@@ -10,9 +10,9 @@ import org.broad.igv.bbfile.BBFileReader;
 import org.broad.igv.bbfile.BBTotalSummaryBlock;
 import org.broad.igv.bbfile.BigWigIterator;
 import org.broad.igv.bbfile.RPChromosomeRegion;
-import org.broad.igv.bbfile.WigItem;
 
 import edu.unc.genomics.Interval;
+import edu.unc.genomics.WigEntry;
 
 /**
  * A BigWig file. For more information, see: http://genome.ucsc.edu/goldenPath/help/bigWig.html
@@ -50,17 +50,12 @@ public class BigWigFileReader extends WigFileReader {
 	public void close() { }
 	
 	@Override
-	public Iterator<WigItem>  getOverlappingItems(Interval interval) throws WigFileException {
+	public Iterator<WigEntry>  getOverlappingEntries(Interval interval) throws WigFileException {
 		if (!includes(interval)) {
 			throw new WigFileException("BigWigFile does not contain data for region: "+interval);
 		}
 		
 		return new BigWigCoordinateChangeIterator(reader.getBigWigIterator(interval.getChr(), interval.low()-1, interval.getChr(), interval.high(), false));
-	}
-	
-	@Override
-	public WigQueryResult query(Interval interval) throws WigFileException {
-		return new WigQueryResult(getOverlappingItems(interval), interval);
 	}
 
 	@Override
@@ -152,7 +147,7 @@ public class BigWigFileReader extends WigFileReader {
 	 * @author timpalpant
 	 *
 	 */
-	private static class BigWigCoordinateChangeIterator implements Iterator<WigItem> {
+	private static class BigWigCoordinateChangeIterator implements Iterator<WigEntry> {
 
 		private final BigWigIterator bwIter;
 		
@@ -166,11 +161,9 @@ public class BigWigFileReader extends WigFileReader {
 		}
 
 		@Override
-		public WigItem next() {
-			WigItem item = bwIter.next();
-			// Make the result a closed (inclusive) interval
-			WigItem closed = new WigItem(item.getItemNumber(), item.getChromosome(), item.getStartBase()+1, item.getEndBase(), item.getWigValue());
-			return closed;
+		public WigEntry next() {
+			// Wrap the result into a closed (inclusive) Interval
+			return new WigEntry(bwIter.next());
 		}
 
 		@Override

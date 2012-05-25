@@ -7,9 +7,10 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.broad.igv.bbfile.WigItem;
 
+import edu.ucsc.genome.TrackHeader;
 import edu.unc.genomics.Interval;
+import edu.unc.genomics.WigEntry;
 
 /**
  * The base class for ASCII-text Wig files and binary BigWig files.
@@ -24,6 +25,7 @@ public abstract class WigFileReader implements Closeable {
 	
 	private static final Logger log = Logger.getLogger(WigFileReader.class);
 	protected final Path p;
+	protected TrackHeader header = TrackHeader.newWiggle();
 	
 	protected WigFileReader(Path p) {
 		this.p = p;
@@ -33,10 +35,10 @@ public abstract class WigFileReader implements Closeable {
 	 * Autodetect whether a file is an ASCII-text Wig file or a BigWig file and initialize it
 	 * @param p the file to initialize
 	 * @return a WigFile handle to p that is the appropriate subclass (BigWigFile or TextWigFile)
-	 * @throws IOException
-	 * @throws WigFileException
+	 * @throws IOException if an IO error occurs while trying to open the file
+	 * @throws WigFileFormatException if the format cannot be autodetected, or there is an illegal format in the file, or the file is not actually a Wig file
 	 */
-	public static WigFileReader autodetect(Path p) throws IOException, WigFileException {
+	public static WigFileReader autodetect(Path p) throws IOException, WigFileFormatException {
 		WigFileReader wig;
 		
 		if (BigWigFileReader.isBigWig(p)) {
@@ -53,44 +55,56 @@ public abstract class WigFileReader implements Closeable {
 	/**
 	 * @return the path to this Wig file
 	 */
-	public Path getPath() {
+	public final Path getPath() {
 		return p;
 	}
 	
 	/**
+	 * @return the track header for this Wig file
+	 */
+	public final TrackHeader getHeader() {
+		return header;
+	}
+
+	/**
 	 * Return an iterator over the items (data values) in this Wig file that overlap an interval
+	 * This is a lower level method for accessing the data in the Wig file. In general, query() should be used instead.
+	 * This method is good if the query is too large of an interval to load into memory all at once.
 	 * @param interval the Interval of data to get overlapping WigItems for
-	 * @return an Iterator over the WigItems in this file that overlap the interval
+	 * @return an Iterator over the WigEntries in this file that overlap the interval
 	 * @throws IOException if a disk read error occurs
 	 * @throws WigFileException if the Wig file does not contain data for this Interval
 	 */
-	public abstract Iterator<WigItem> getOverlappingItems(Interval interval) throws IOException, WigFileException;
+	public abstract Iterator<WigEntry> getOverlappingEntries(Interval interval) throws IOException, WigFileException;
 	
 	/**
 	 * Return an iterator over the items (data values) in this Wig file that overlap an interval
+	 * This is a lower level method for accessing the data in the Wig file. In general, query() should be used instead.
+	 * This method is good if the query is too large of an interval to load into memory all at once.
 	 * @param chr the chromosome of the interval
 	 * @param start the start base pair of the interval
 	 * @param stop the stop base pair of the interval
-	 * @returnan Iterator over the WigItems in this file that overlap the interval
+	 * @returnan Iterator over the WigEntries in this file that overlap the interval
 	 * @throws IOException if a disk read error occurs
 	 * @throws WigFileException if the Wig file does not contain data for this Interval
 	 */
-	public Iterator<WigItem> getOverlappingItems(String chr, int start, int stop) throws IOException, WigFileException {
-		Interval interval = new Interval(chr, start, stop);
-		return getOverlappingItems(interval);
+	public final Iterator<WigEntry> getOverlappingEntries(String chr, int start, int stop) throws IOException, WigFileException {
+		return getOverlappingEntries(new Interval(chr, start, stop));
 	}
 	
 	/**
-	 * Query for data in this Wig file that overlaps a specific interval
+	 * Query for a Contig of data in this Wig file corresponding to a specific interval
 	 * @param interval the Interval of data to query for
 	 * @return an Iterator of WigItems that overlap the Interval i
 	 * @throws IOException if a disk read error occurs
 	 * @throws WigFileException if the Wig file does not contain data for this Interval
 	 */
-	public abstract WigQueryResult query(Interval interval) throws IOException, WigFileException;
+	public final WigQueryResult query(Interval interval) throws IOException, WigFileException {
+		return new WigQueryResult(interval, getOverlappingEntries(interval));
+	}
 	
 	/**
-	 * Query for data in this Wig file that overlaps a specific interval
+	 * Query for a Contig of data in this Wig file corresponding to a specific interval
 	 * @param chr the chromosome of the interval
 	 * @param start the start base pair of the interval
 	 * @param stop the stop base pair of the interval
@@ -98,9 +112,8 @@ public abstract class WigFileReader implements Closeable {
 	 * @throws IOException if a disk read error occurs
 	 * @throws WigFileException if the Wig file does not contain data for this Interval
 	 */
-	public WigQueryResult query(String chr, int start, int stop) throws IOException, WigFileException {
-		Interval interval = new Interval(chr, start, stop);
-		return query(interval);
+	public final WigQueryResult query(String chr, int start, int stop) throws IOException, WigFileException {
+		return query(new Interval(chr, start, stop));
 	}
 	
 	/**
@@ -125,7 +138,7 @@ public abstract class WigFileReader implements Closeable {
 	 * @param i the Interval to query for
 	 * @return true if this Wig file includes data for i
 	 */
-	public boolean includes(Interval i) {
+	public final boolean includes(Interval i) {
 		return includes(i.getChr(), i.getStart(), i.getStop());
 	}
 	

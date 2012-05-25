@@ -1,4 +1,4 @@
-package edu.genomics;
+package edu.unc.genomics;
 
 import static org.junit.Assert.*;
 
@@ -14,7 +14,7 @@ public class ValuedIntervalTest {
 	@Test
 	public void testToBed() {
 		assertEquals("chr23\t29\t40\twatson\t5\t+", watson.toBed());
-		assertEquals("chr23\t94\t101\tcrick\t3.2\t-", crick.toBed());
+		assertEquals("chr23\t94\t101\tcrick\t3\t-", crick.toBed());
 	}
 
 	@Test

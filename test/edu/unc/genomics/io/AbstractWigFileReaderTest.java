@@ -6,12 +6,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Iterator;
 
-import org.broad.igv.bbfile.WigItem;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
 
-import edu.unc.genomics.Interval;
+import edu.unc.genomics.WigEntry;
 
 public abstract class AbstractWigFileReaderTest {
 	
@@ -33,15 +32,17 @@ public abstract class AbstractWigFileReaderTest {
 	@Test
 	public void testAutodetect() throws WigFileException, IOException {
 		WigFileReader text = WigFileReader.autodetect(TextWigFileReaderTest.TEST_WIG);
+		assertTrue(text instanceof TextWigFileReader);
 		text.close();
 		
 		WigFileReader bw = WigFileReader.autodetect(BigWigFileReaderTest.TEST_BIGWIG);
+		assertTrue(bw instanceof BigWigFileReader);
 		bw.close();
 	}
 	
 	@Test
-	public void testGetOverlappingItems() throws WigFileException, IOException {
-		Iterator<WigItem> iter = test.getOverlappingItems("chrI", 5, 8);
+	public void testGetOverlappingEntries() throws WigFileException, IOException {
+		Iterator<WigEntry> iter = test.getOverlappingEntries("chrI", 5, 8);
 		int count = 0;
 		while (iter.hasNext()) {
 			iter.next();
@@ -51,18 +52,18 @@ public abstract class AbstractWigFileReaderTest {
 	}
 
 	@Test
-	public void testGetFlattened() throws WigFileException, IOException {
+	public void testQuery() throws WigFileException, IOException {
 		WigQueryResult result = test.query("chrI", 5, 8);
-		float[] data = result.getFlattened();
+		float[] data = result.getValues();
 		assertEquals(4, data.length);
 		float[] expected = {5.0f, 6.0f, 7.0f, 8.0f};
 		assertArrayEquals(expected, data, 1e-7f);
 	}
 	
 	@Test
-	public void testGetFlattenedCrick() throws WigFileException, IOException {
+	public void testQueryCrick() throws WigFileException, IOException {
 		WigQueryResult result = test.query("chrI", 8, 5);
-		float[] data = result.getFlattened();
+		float[] data = result.getValues();
 		assertEquals(4, data.length);
 		float[] expected = {8.0f, 7.0f, 6.0f, 5.0f};
 		assertArrayEquals(expected, data, 1e-7f);
@@ -164,7 +165,7 @@ public abstract class AbstractWigFileReaderTest {
 	
 	@Test(expected = WigFileException.class)
 	public void testQueryException() throws WigFileException, IOException {
-		WigQueryResult result = test.query("chrI", -2, 8);
+		test.query("chrI", -2, 8);
 	}
 
 	@Test

@@ -9,7 +9,9 @@ import org.junit.Test;
 public class TrackHeaderTest {
 	
 	public static final String TEST_HEADER = "track type=wiggle_0 name='Test Wig File' description=\"ChIP of Protein\" viewLimits=-5:5 autoScale=off visibility=full";
-	public static final String TYPE = "wiggle_0";
+	public static final String INVALID_HEADER = "track type=wiggle_0 name='Test Wig File' description=";
+	public static final String INVALID_HEADER2 = "track type=wiggle_0 name='Test Wig File' mykey=value";
+	public static final TrackHeader.Type TYPE = TrackHeader.Type.WIGGLE;
 	public static final String NAME = "Test Wig File";
 	public static final String DESCRIPTION = "ChIP of Protein";
 	public static final Double[] VIEW_LIMITS = {-5.0, 5.0};
@@ -42,6 +44,16 @@ public class TrackHeaderTest {
 		assertArrayEquals("View limits not parsed correctly", VIEW_LIMITS, header.getViewLimits());
 		assertEquals("Auto scale not parsed correctly", AUTO_SCALE, header.isAutoScale());
 		assertEquals("Visibility not parsed correctly", VISIBILITY, header.getVisibility());
+	}
+	
+	@Test(expected = TrackHeaderException.class)
+	public void testParseInvalid() throws TrackHeaderException {
+		TrackHeader.parse(INVALID_HEADER);
+	}
+	
+	@Test(expected = TrackHeaderException.class)
+	public void testParseInvalidKey() throws TrackHeaderException {
+		TrackHeader.parse(INVALID_HEADER2);
 	}
 
 	@Test

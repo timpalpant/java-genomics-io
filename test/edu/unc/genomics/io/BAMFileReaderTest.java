@@ -5,7 +5,7 @@ import java.nio.file.Paths;
 
 import org.junit.Before;
 
-public class BAMFileReaderTest extends SAMFileReaderTest {
+public class BAMFileReaderTest extends AbstractSAMFileReaderTest {
 
 	public static final Path TEST_BAM = Paths.get("test/fixtures/test.bam");
 
@@ -13,4 +13,5 @@ public class BAMFileReaderTest extends SAMFileReaderTest {
 	public void setUp() throws Exception {
 		test = new BAMFileReader(TEST_BAM);
 	}
+
 }

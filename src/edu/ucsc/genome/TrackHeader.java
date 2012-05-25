@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
  * smoothingWindow   off|[2-16]           # default is off
  */
 public class TrackHeader {
-	protected String type;
+	protected Type type;
 	protected String name;
 	protected String description;
 	protected String visibility;
@@ -57,14 +57,30 @@ public class TrackHeader {
 	 * Matches key-value attribute pairs in a track line, with optional quotation marks around the value
 	 * (quotation marks are mandatory for values with whitespace)
 	 */
-	private static final Pattern ATTRIBUTE_PATTERN = Pattern.compile("\\b[\\w]*=(\".*\"|\'.*\'|\\S*)");
+	private static final Pattern ATTRIBUTE_PATTERN = Pattern.compile("\\b[\\w]*=(\".*?\"|\'.*?\'|\\S*)");
 	
-	public TrackHeader(String type) {
+	public TrackHeader(Type type) {
 		this.type = type;
 	}
 	
 	public TrackHeader() {
 		this(null);
+	}
+	
+	public static TrackHeader newWiggle() {
+		return new TrackHeader(Type.WIGGLE);
+	}
+	
+	public static TrackHeader newBed() {
+		return new TrackHeader(Type.BED);
+	}
+	
+	public static TrackHeader newBedGraph() {
+		return new TrackHeader(Type.BEDGRAPH);
+	}
+	
+	public static TrackHeader newGFF() {
+		return new TrackHeader(Type.GFF);
 	}
 	
 	/**
@@ -80,9 +96,6 @@ public class TrackHeader {
 		while (m.find()) {
 			String token = m.group();
 			int delim = token.indexOf('=');
-			if (delim == -1) { 
-				throw new TrackHeaderException("Invalid token: '" + token + "' in UCSC track header"); 
-			}
 			String key = token.substring(0, delim);
 			String value = token.substring(delim+1);
 			if (key.length() == 0 || value.length() == 0) { 
@@ -101,7 +114,7 @@ public class TrackHeader {
 			try {
 				switch(key) {
 				case "type":
-					header.setType(value);
+					header.setType(Type.forId(value));
 					break;
 				case "name":
 					header.setName(value);
@@ -191,7 +204,7 @@ public class TrackHeader {
 	public String toString() {
 		StringBuilder s = new StringBuilder("track");
 		
-		if (type != null) { s.append(" type=").append(type); }
+		if (type != null) { s.append(" type=").append(type.toString()); }
 		if (name != null) { s.append(" name='").append(name).append("'"); }
 		if (description != null) { s.append(" description='").append(description).append("'"); }
 		if (autoScale != null) {
@@ -228,14 +241,14 @@ public class TrackHeader {
 	/**
 	 * @return the type
 	 */
-	public String getType() {
+	public Type getType() {
 		return type;
 	}
 
 	/**
 	 * @param type the type to set
 	 */
-	public void setType(String type) {
+	public void setType(Type type) {
 		this.type = type;
 	}
 
@@ -570,5 +583,37 @@ public class TrackHeader {
 	 */
 	public void setHtmlUrl(String htmlUrl) {
 		this.htmlUrl = htmlUrl;
+	}
+	
+	public static enum Type {
+		WIGGLE("wiggle_0"),
+		BED("bed"),
+		BEDGRAPH("bedGraph"),
+		GFF("gff");
+		
+		private final String id;
+		
+		Type(final String id) {
+			this.id = id;
+		}
+		
+		public static Type forId(final String id) {
+			for (Type t : Type.values()) {
+				if (t.getId().equals(id)) {
+					return t;
+				}
+			}
+			
+			return null;
+		}
+		
+		public String getId() {
+			return id;
+		}
+		
+		@Override
+		public String toString() {
+			return getId();
+		}
 	}
 }
