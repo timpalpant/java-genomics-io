@@ -4,9 +4,9 @@ This library provides a simple and performant API for reading and writing many g
 
 The design seeks to accomplish two major tasks:
 
-  1. Allow many different formats to be accessed and manipulated in a consistent way without needing to worry about parsing individual file types. For example, all line-based interval formats (Bed, BedGraph, BigBed, GFF, GeneTrack, SAM, BAM) inherit from the Interval class so that applications may be agnostic to the specific format of input files. In a similar fashion, text Wiggle files and BigWig files share the same interface and may be used interchangeably.
+1. Allow many different formats to be accessed and manipulated in a consistent way without needing to worry about parsing individual file types. For example, all line-based interval formats (Bed, BedGraph, BigBed, GFF, GeneTrack, SAM, BAM) inherit from the Interval class so that applications may be agnostic to the specific format of input files. In a similar fashion, text Wiggle files and BigWig files share the same interface and may be used interchangeably.
   
-  2. Make random-access to information in large genomic datasets efficient by using indexing schemes. In this way, your tools can randomly pull information from specific regions of the genome without the major performance cost incurred by seeking through ASCII text files line-by-line. Line-based interval files are indexed as needed using a pure-Java reimplementation of Tabix. Built-in indexes are used for BAM, BigWig, and BigBed files. ASCII Wiggle files are indexed using a custom implementation.
+2. Make random-access to information in large genomic datasets efficient by using indexing schemes. In this way, your tools can randomly pull information from specific regions of the genome without the major performance cost incurred by seeking through ASCII text files line-by-line. Line-based interval files are indexed as needed using a pure-Java reimplementation of Tabix. Built-in indexes are used for BAM, BigWig, and BigBed files. ASCII Wiggle files are indexed using a custom implementation.
 With all readers, data is buffered and lazy-parsed to minimize memory requirements and maximize disk performance.
 
 Writers are also available to create line-based interval files and Wiggle files.
@@ -35,7 +35,9 @@ Reports for the unit test results and code coverage are output in the reports su
 
 == Examples
 
-A diagram of the API design is available at http://palpant.us/java-genomics-io. There are two major categories of readers/writers: for line-based interval files and for (Big)Wig files.
+There are two major categories of readers/writers: for line-based interval files and for (Big)Wig files.
+
+http://palpant.us/java-genomics-io/images/api.png
 
 === Line-based interval files
 
@@ -43,25 +45,23 @@ Entries in line-based interval files can be iterated over, or the file can be qu
 
 The format of the interval file can also be auto-detected so that your application can be format-agnostic:
 
-  $ IntervalFile<? extends Interval> loci = null;
-  $ try {
-  $   loci = IntervalFile.autodetect(lociFile);
+  $ try (IntervalFile<? extends Interval> loci = IntervalFile.autodetect(lociFile)){
+  $   for (Interval interval : loci) {
+  $     System.out.println(interval.toBed());
+  $   }
   $ } catch (IntervalFileSnifferException e) {
   $  log.fatal("Error autodetecting interval file format");
   $  e.printStackTrace();
-  $ }
-  $
-  $ for (Interval interval : loci) {
-  $   System.out.println(interval.toBed());
   $ }
 
 This is particularly useful for writing Galaxy tools (http://getgalaxy.org).
 
 Alternatively, if the file format is known and type-specific data is needed, it can be opened directly:
 
-  $ BAMFile bam = new BAMFile(bamFile);
-  $ for (BAMEntry entry : bam) {
-  $   System.out.println(entry.getQuality());
+  $ try (BAMFile bam = new BAMFile(bamFile)) {
+  $   for (BAMEntry entry : bam) {
+  $     System.out.println(entry.getQuality());
+  $   }
   $ }
 
 Interval files can also be queried to retrieve only entries that overlap a given locus. Queries are performed efficiently by first indexing the files with a pure-Java reimplementation of Samtools/Tabix. For example, to retrieve all BAM alignments overlapping the region chr1:1,000,000-2,000,000:
@@ -90,13 +90,14 @@ Generics can be used to restrict the types of Interval that may be written to a 
 
 Similar abstraction is provided for Wig/BigWig files. Contiguous blocks of values can be retrieved from either kind of Wig file:
 
-  $ WigFile wig = WigFile.autodetect(wigOrBigWigFile);
-  $ Contig result = wig.query("chr23", 10_000, 1_000_000);
-  $ float[] values = result.getValues();
-  $ System.out.println("Mean of interval chr23:10,000-1,000,000 = " + result.mean());
-  $ System.out.println("StDev = " + result.stdev());
-  $ System.out.println("Coverage = " + result.coverage());
-  $ System.out.println("Total = " + result.total());
+  $ try (WigFileReader wig = WigFileReader.autodetect(wigOrBigWigFile)) {
+  $   Contig result = wig.query("chr23", 10_000, 1_000_000);
+  $   float[] values = result.getValues();
+  $   System.out.println("Mean of interval chr23:10,000-1,000,000 = " + result.mean());
+  $   System.out.println("StDev = " + result.stdev());
+  $   System.out.println("Coverage = " + result.coverage());
+  $   System.out.println("Total = " + result.total());
+  $ }
 
 Indexing is used to execute the queries efficiently. In addition, individual entries in a Wig file can be iterated over if the query is too large to load into memory all at once:
 
