@@ -1,6 +1,9 @@
 package edu.unc.genomics;
 
+import java.util.Arrays;
+
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+import org.apache.commons.math3.util.ArithmeticUtils;
 
 /**
  * A contiguous block of values in the genome
@@ -11,8 +14,12 @@ public class Contig extends Interval {
 
 	private static final long serialVersionUID = -4260411310249231783L;
 
-	protected final float[] values;
+	private final float[] values;
 	private SummaryStatistics stats;
+	
+	public Contig(Interval interval) {
+		this(interval, null);
+	}
 	
 	public Contig(Interval interval, float[] values) throws ContigException {
 		this(interval.getChr(), interval.getStart(), interval.getStop(), values);
@@ -30,10 +37,17 @@ public class Contig extends Interval {
 		super(chr, start, stop);
 		
 		// Verify that values has the correct length
-		if (values.length != length()) {
+		if (values == null) {
+			values = new float[length()];
+			Arrays.fill(values, Float.NaN);
+		} else if (values.length != length()) {
 			throw new ContigException("Incorrect number of values for Contig ("+values.length+" != "+length()+")");
 		}
 		this.values = values;
+	}
+	
+	public Contig(String chr, int start, int stop) {
+		this(chr, start, stop, null);
 	}
 
 	/**
@@ -233,7 +247,7 @@ public class Contig extends Interval {
 	 * @return a variableStep header line for a Wig file
 	 */
 	public String getVariableStepHeader() {
-		return Contig.Type.VARIABLESTEP.getId()+" chrom="+chr+" span="+getMinSpan();
+		return Contig.Type.VARIABLESTEP.getId()+" chrom="+chr+" span="+getVariableStepSpan();
 	}
 	
 	/**
@@ -270,6 +284,45 @@ public class Contig extends Interval {
 			} else {
 				if (!Float.isNaN(prevValue) && span < minSpan) {
 					minSpan = span;
+				}
+				
+				if (minSpan == 1) {
+					break;
+				}
+				
+				prevValue = value;
+				span = 1;
+			}
+		}
+		
+		return minSpan;
+	}
+	
+	/**
+	 * Pass through the data again to check that all values can be resolved with minSpan
+	 * For an example why this is necessary, see the unit test VariableStepContigTest
+	 * Essentially, all spans must be integer multiples of minSpan, or else we have to shrink
+	 * to the greatest common denominator.
+	 * @return the span size that must be used if this Contig is written in variableStep format
+	 */
+	public int getVariableStepSpan() {
+		int minSpan = getMinSpan();
+		int span = 1;
+		int firstbp = getFirstBaseWithData();
+		float prevValue = get(firstbp);
+		for (int bp = firstbp+1; bp <= high(); bp++) {
+			float value = get(bp);
+			if (value == prevValue) {
+				span++;
+			} else {
+				if (!Float.isNaN(prevValue)) {
+					if (span % minSpan > 0) {
+						minSpan = ArithmeticUtils.gcd(span, minSpan);
+					}
+				}
+				
+				if (minSpan == 1) {
+					break;
 				}
 				
 				prevValue = value;
@@ -338,7 +391,8 @@ public class Contig extends Interval {
 			}
 			
 			int step = bp - prevbp;
-			if (step != firstStep) {
+			// Can have multiple spans of the same value in a row
+			if (step % firstStep > 0) {
 				return false;
 			}
 			

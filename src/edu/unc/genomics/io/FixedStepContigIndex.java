@@ -97,6 +97,16 @@ class FixedStepContigIndex extends ContigIndex {
 	public int getStep() {
 		return step;
 	}
+	
+	@Override
+	public boolean isFixedStep() {
+		return true;
+	}
+
+	@Override
+	public boolean isVariableStep() {
+		return false;
+	}
 
 	@Override
 	public FixedStepContigIterator query(BufferedRandomAccessFile raf, Interval interval) throws IOException, WigFileException {

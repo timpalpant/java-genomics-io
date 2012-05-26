@@ -48,6 +48,10 @@ abstract class ContigIndex extends Interval implements Serializable {
 	
 	public abstract Iterator<WigEntry> query(BufferedRandomAccessFile raf, Interval interval) throws IOException, WigFileException;
 	
+	public abstract boolean isFixedStep();
+	
+	public abstract boolean isVariableStep();
+	
 	@Override
 	public abstract String toOutput();
 	

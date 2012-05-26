@@ -143,6 +143,11 @@ public class FixedStepContigTest {
 	}
 	
 	@Test
+	public void testGetVariableStepSpan() {
+		assertEquals(2, test.getVariableStepSpan());
+	}
+	
+	@Test
 	public void testGetMinStep() {
 		assertEquals(3, test.getMinStep());
 	}

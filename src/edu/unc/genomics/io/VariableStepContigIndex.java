@@ -58,6 +58,16 @@ class VariableStepContigIndex extends ContigIndex {
 	public String toOutput() {
 		return Contig.Type.VARIABLESTEP.getId() + " chrom=" + getChr() + " span=" + getSpan();
 	}
+	
+	@Override
+	public boolean isFixedStep() {
+		return false;
+	}
+
+	@Override
+	public boolean isVariableStep() {
+		return true;
+	}
 
 	@Override
 	public VariableStepContigIterator query(BufferedRandomAccessFile raf, Interval interval) throws IOException, WigFileException {

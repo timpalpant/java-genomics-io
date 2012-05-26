@@ -66,12 +66,21 @@ public class WigFileWriter implements Closeable {
 	
 	/**
 	 * Add a new Contig of values to this Wig file
-	 * The most compact format will automatically be chosen (fixedStep/variableStep) based on sparsity
+	 * The most compact format will automatically be chosen (fixedStep/variableStep) based on sparsity and layout
 	 * and it will be written with the largest resolution that still resolves all features in the data
 	 * @param contig the Contig of values to write to this Wig file
 	 */
 	public final void write(Contig contig) {
-		writeFixedStepContig(contig);
+		if(contig.isFixedStep()) {
+			writeFixedStepContig(contig);
+		} else {
+			float sparsity = ((float) contig.coverage()) / contig.length();
+			if (sparsity < 0.55 || contig.getVariableStepSpan() > 1) {
+				writeVariableStepContig(contig);
+			} else {
+				writeFixedStepContig(contig);
+			}
+		}
 	}
 	
 	/**
@@ -97,7 +106,7 @@ public class WigFileWriter implements Closeable {
 	public final void writeVariableStepContig(Contig contig) {
 		writer.println(contig.getVariableStepHeader());
 		int bp = contig.getFirstBaseWithData();
-		int span = contig.getMinSpan();
+		int span = contig.getVariableStepSpan();
 		while (bp <= contig.high()) {
 			float value = contig.get(bp);
 			// Write the value and skip the span size

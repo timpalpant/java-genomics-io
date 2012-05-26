@@ -15,6 +15,9 @@ import edu.unc.genomics.Interval;
  * By default, added Intervals will be output using their toOutput() method
  * If a specific format is desired that is different than the interval object, create a new BedFileWriter, etc.
  * 
+ * The Generic type is used to restrict the IntervalWriter to only accepting certain types in order
+ * to maintain consistency of the output.
+ * 
  * @author timpalpant
  *
  */

@@ -8,9 +8,10 @@ import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -35,19 +36,15 @@ import edu.unc.genomics.util.ChecksumUtils;
  *
  */
 public class TextWigFileReader extends WigFileReader {
-	private static final long serialVersionUID = 6L;
+	private static final long serialVersionUID = 7L;
 	public static final String INDEX_EXTENSION = ".idx";
 	public static final int KEY_GRANULARITY = 10_000;
 	
 	private static Logger log = Logger.getLogger(TextWigFileReader.class);
 	
 	private BufferedRandomAccessFile raf;
-	
-	private List<ContigIndex> contigs = new ArrayList<>();
-	private Set<String> chromosomes = new LinkedHashSet<>();
-	
+	private Map<String,List<ContigIndex>> contigs = new HashMap<>();
 	private long checksum;
-	
 	private SummaryStatistics stats;
 
 	/**
@@ -130,8 +127,8 @@ public class TextWigFileReader extends WigFileReader {
 	private List<ContigIndex> getContigsOverlappingInterval(Interval interval) {
 		List<ContigIndex> relevantContigs = new ArrayList<>();
 		
-		for (ContigIndex c : contigs) {
-			if (c.getChr().equals(interval.getChr()) && c.getStop() >= interval.low() && c.getStart() <= interval.high()) {
+		for (ContigIndex c : contigs.get(interval.getChr())) {
+			if (c.getStop() >= interval.low() && c.getStart() <= interval.high()) {
 				relevantContigs.add(c);
 			}
 		}
@@ -144,13 +141,15 @@ public class TextWigFileReader extends WigFileReader {
 		StringBuilder s = new StringBuilder("ASCII Text Wiggle file: " + header.toString() + "\n");
 		
 		s.append("Chromosomes:\n");
-		for (String chr : chromosomes) {
+		for (String chr : chromosomes()) {
 			s.append('\t').append(chr).append(" start=").append(getChrStart(chr)).append(" stop=").append(getChrStop(chr)).append('\n');
 		}
 		
 		s.append("Contigs:\n");
-		for (ContigIndex c : contigs) {
-			s.append("\t").append(c.toOutput()).append('\n');
+		for (List<ContigIndex> chromContigs : contigs.values()) {
+			for (ContigIndex c : chromContigs) {
+				s.append("\t").append(c.toOutput()).append('\n');
+			}
 		}
 		
 		s.append("Basic Statistics:\n");
@@ -166,7 +165,7 @@ public class TextWigFileReader extends WigFileReader {
 	
 	@Override
 	public Set<String> chromosomes() {
-		return chromosomes;
+		return contigs.keySet();
 	}
 	
 	@Override
@@ -176,8 +175,8 @@ public class TextWigFileReader extends WigFileReader {
 		}
 		
 		int start = Integer.MAX_VALUE;
-		for (ContigIndex c : contigs) {
-			if (c.getChr().equals(chr) && c.getStart() < start) {
+		for (ContigIndex c : contigs.get(chr)) {
+			if (c.getStart() < start) {
 				start = c.getStart();
 			}
 		}
@@ -188,8 +187,8 @@ public class TextWigFileReader extends WigFileReader {
 	@Override
 	public int getChrStop(String chr) {		
 		int stop = -1;
-		for (ContigIndex c : contigs) {
-			if (c.getChr().equals(chr) && c.getStop() > stop) {
+		for (ContigIndex c : contigs.get(chr)) {
+			if (c.getStop() > stop) {
 				stop = c.getStop();
 			}
 		}
@@ -204,7 +203,7 @@ public class TextWigFileReader extends WigFileReader {
 	
 	@Override
 	public boolean includes(String chr) {
-		return chromosomes.contains(chr);
+		return contigs.containsKey(chr);
 	}
 	
 	/**
@@ -275,7 +274,7 @@ public class TextWigFileReader extends WigFileReader {
 
 		// Index the Contigs and data in the Wig File by going through it once
 		stats = new SummaryStatistics();
-		contigs = new ArrayList<ContigIndex>();
+		contigs = new HashMap<>();
 		ContigIndex contig = null;
 		int bp = 0;
 		double value;
@@ -290,13 +289,16 @@ public class TextWigFileReader extends WigFileReader {
 					contig.setStop(bp + contig.getSpan() - 1);
 				}
 				
-				// Now parse the new Contig
+				// Now parse the new Contig and add to the list of Contigs
 				contig = ContigIndex.parseHeader(line);
-				contigs.add(contig);
+				if (!contigs.containsKey(contig.getChr())) {
+					contigs.put(contig.getChr(), new ArrayList<ContigIndex>());
+				}
+				contigs.get(contig.getChr()).add(contig);
 				
 				// Set the new Contig's start info
 				contig.setStartLine(lineNum+1);
-				if (contig instanceof VariableStepContigIndex) {
+				if (contig.isVariableStep()) {
 					cursor = raf.getFilePointer();
 					String firstLine = raf.readLine2();
 					int delim = firstLine.indexOf('\t');
@@ -314,7 +316,7 @@ public class TextWigFileReader extends WigFileReader {
 					bp = contig.getStart() - ((FixedStepContigIndex)contig).getStep();
 				}
 			} else {
-				if (contig instanceof FixedStepContigIndex) {
+				if (contig.isFixedStep()) {
 					bp += ((FixedStepContigIndex)contig).getStep();
 					try {
 						value = Double.parseDouble(line);
@@ -342,27 +344,21 @@ public class TextWigFileReader extends WigFileReader {
 				}
 				
 				// Store this line in the index
-				if ((lineNum - contig.getStartLine()) % KEY_GRANULARITY == 0) {
+				if ((lineNum-contig.getStartLine()) % KEY_GRANULARITY == 0) {
 					contig.storeIndex(bp, cursor);
 				}
 			}
 			
 			// Store the cursor position if the next line will be stored in the index
-			if ((lineNum + 1 - contig.getStartLine()) % KEY_GRANULARITY == 0) {
+			if ((lineNum+1-contig.getStartLine()) % KEY_GRANULARITY == 0) {
 				cursor = raf.getFilePointer();
 			}
 		}
 		
 		// Set the stop info for the last contig
-		if (contigs.size() > 0) {
+		if (contig != null) {
 			contig.setStopLine(lineNum);
 			contig.setStop(bp + contig.getSpan() - 1);
-		}
-
-		// Set the Set of chromosomes
-		chromosomes = new LinkedHashSet<String>();
-		for (ContigIndex c : contigs) {
-			chromosomes.add(c.getChr());
 		}
 	}
 	
@@ -398,20 +394,15 @@ public class TextWigFileReader extends WigFileReader {
 			}
 			
 			try {
-				// Load chromosomes
-				int numChromosomes = dis.readInt();
-				chromosomes = new LinkedHashSet<String>(numChromosomes);
-				for (int i = 0; i < numChromosomes; i++) {
-					String chr = (String) dis.readObject();
-					chromosomes.add(chr);
-				}
-				
 				// Load Contigs
 				int numContigs = dis.readInt();
-				contigs = new ArrayList<ContigIndex>(numContigs);
+				contigs = new HashMap<String,List<ContigIndex>>();
 				for (int i = 0; i < numContigs; i++) {
 					ContigIndex contig = (ContigIndex) dis.readObject();
-					contigs.add(contig);
+					if (!contigs.containsKey(contig.getChr())) {
+						contigs.put(contig.getChr(), new ArrayList<ContigIndex>());
+					}
+					contigs.get(contig.getChr()).add(contig);
 				}
 			} catch (ClassNotFoundException e) {
 				log.error("ClassNotFoundException while loading Wig index from file");
@@ -436,17 +427,17 @@ public class TextWigFileReader extends WigFileReader {
 			
 			// Write statistics
 			dos.writeObject(stats);
-			
-			// Write chromosomes
-			dos.writeInt(chromosomes.size());
-			for (String chr : chromosomes) {
-				dos.writeObject(chr);
-			}
-			
+					
 			// Write Contigs
-			dos.writeInt(contigs.size());
-			for (ContigIndex c : contigs) {
-				dos.writeObject(c);
+			int numContigs = 0;
+			for (List<ContigIndex> chromContigs : contigs.values()) {
+				numContigs += chromContigs.size();
+			}
+			dos.writeInt(numContigs);
+			for (List<ContigIndex> chromContigs : contigs.values()) {
+				for (ContigIndex c : chromContigs) {
+					dos.writeObject(c);
+				}
 			}
 		} catch (IOException e) {
 			log.error("Error saving Wig index information to disk!: " + e.getMessage());
