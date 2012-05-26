@@ -1,12 +1,17 @@
 = Java Genomics IO API
 
-This library provides a simple and performant API for working with many genomic file formats in a consistent fashion. The library requires JDK7 (http://www.oracle.com/technetwork/java/javase/downloads/index.html) since it makes use of switches on Strings and the new File/Path classes.
+This library provides a simple and performant API for reading and writing many genomic file formats in a consistent fashion. File formats currently supported include: Bed, BigBed, BedGraph, GFF, GeneTrack, SAM, BAM, Wiggle, BigWig, and Tabix.
 
-The library is mainly a wrapper to pull together multiple existing libraries, including Picard (http://picard.sourceforge.net) for reading SAM/BAM files and the BigWig/BigBed readers provided by the Broad Institute (http://code.google.com/p/bigwig). The complete list of file formats currently supported is: Bed, BigBed, BedGraph, GFF, GeneTrack, SAM, BAM, Wiggle, BigWig, Tabix. It seeks to accomplish two major tasks: 1) Allow many different formats to be accessed and manipulated in a consistent way without needing to worry about parsing implementation. For example, all line-based interval formats inherit from the Interval class so that tools can be agnostic to the specific format of input files. 2) Make random-access to information in large genomic datasets efficient by using indexing schemes. In this way, your tools can randomly pull information from specific genomic intervals without the major performance cost incurred by seeking through ASCII text files line-by-line. Line-based interval files are indexed as needed using a pure-Java reimplementation of  Tabix (http://samtools.sourceforge.net/tabix.shtml). Built-in indexes are used for BAM, BigWig, and BigBed files. ASCII Wiggle files are indexed using a custom implementation.
+The design seeks to accomplish two major tasks:
+
+  1. Allow many different formats to be accessed and manipulated in a consistent way without needing to worry about parsing individual file types. For example, all line-based interval formats (Bed, BedGraph, BigBed, GFF, GeneTrack, SAM, BAM) inherit from the Interval class so that applications may be agnostic to the specific format of input files. In a similar fashion, text Wiggle files and BigWig files share the same interface and may be used interchangeably.
+  
+  2. Make random-access to information in large genomic datasets efficient by using indexing schemes. In this way, your tools can randomly pull information from specific regions of the genome without the major performance cost incurred by seeking through ASCII text files line-by-line. Line-based interval files are indexed as needed using a pure-Java reimplementation of Tabix. Built-in indexes are used for BAM, BigWig, and BigBed files. ASCII Wiggle files are indexed using a custom implementation.
+With all readers, data is buffered and lazy-parsed to minimize memory requirements and maximize disk performance.
+
+Writers are also available to create line-based interval files and Wiggle files.
 
 Complete JavaDocs are available at: http://palpant.us/java-genomics-io and may also be generated with the ant task "javadoc"
-
-This library was prototyped in Ruby (https://github.com/timpalpant/bioruby-genomic-file).
 
 == Compilation
 
@@ -30,7 +35,13 @@ Reports for the unit test results and code coverage are output in the reports su
 
 == Examples
 
-For applications that only require interval information (chr:start-stop), the format of the interval file can be auto-detected, and the intervals can be iterated over:
+A diagram of the API design is available at http://palpant.us/java-genomics-io. There are two major categories of readers/writers: for line-based interval files and for (Big)Wig files.
+
+=== Line-based interval files
+
+Entries in line-based interval files can be iterated over, or the file can be queried for entries that overlap a given genomic coordinate.
+
+The format of the interval file can also be auto-detected so that your application can be format-agnostic:
 
   $ IntervalFile<? extends Interval> loci = null;
   $ try {
@@ -52,29 +63,60 @@ Alternatively, if the file format is known and type-specific data is needed, it 
   $ for (BAMEntry entry : bam) {
   $   System.out.println(entry.getQuality());
   $ }
-  $ 
-  $ Iterator<BAMEntry> result = bam.query("chr1", 1, 1_000_000);
+
+Interval files can also be queried to retrieve only entries that overlap a given locus. Queries are performed efficiently by first indexing the files with a pure-Java reimplementation of Samtools/Tabix. For example, to retrieve all BAM alignments overlapping the region chr1:1,000,000-2,000,000:
+
+  $ Iterator<BAMEntry> result = bam.query("chr1", 1_000_000, 2_000_000);
   $ while(result.hasNext()) {
   $   BAMEntry entry = result.next();
   $   // process the alignment
   $ }
 
-This could also be accomplished by casting in the first place, but is not recommended.
+This type of querying is available for all supported file types.
 
-Similar abstraction is provided for Wig/BigWig files:
+Interval files can be written in any desired format using IntervalFileWriters. For example, to convert a file from GFF format to Bed format, open the input file with a GFFFileReader, iterate over each interval, and write it to a BedFileWriter:
+
+  $ try (GFFFileReader reader = new GFFFileReader(gffFile);
+  $      BedFileWriter<GFFEntry> writer = new BedFileWriter<>(bedFile)) {
+  $   for (GFFEntry entry : reader) {
+  $     // do some processing
+  $     writer.write(entry);
+  $   }
+  $ }
+  
+Generics can be used to restrict the types of Interval that may be written to a given file.
+
+=== Wiggle files
+
+Similar abstraction is provided for Wig/BigWig files. Contiguous blocks of values can be retrieved from either kind of Wig file:
 
   $ WigFile wig = WigFile.autodetect(wigOrBigWigFile);
-  $ Iterator<WigItem> result = wig.query("chr23", 10_000, 1_000_000);
-  $ while(result.hasNext()) {
-  $   System.out.println(result.getWigValue());
+  $ Contig result = wig.query("chr23", 10_000, 1_000_000);
+  $ float[] values = result.getValues();
+  $ System.out.println("Mean of interval chr23:10,000-1,000,000 = " + result.mean());
+  $ System.out.println("StDev = " + result.stdev());
+  $ System.out.println("Coverage = " + result.coverage());
+  $ System.out.println("Total = " + result.total());
+
+Indexing is used to execute the queries efficiently. In addition, individual entries in a Wig file can be iterated over if the query is too large to load into memory all at once:
+
+  $ Iterator<WigEntry> it = wig.getOverlappingEntries("chr23", 1, 100_000_000);
+  $ while(it.hasNext()) {
+  $   System.out.println(it.next().toBedGraph());
   $ }
-  $ 
-  $ Iterator<WigItem> result2 = wig.query("chr23", 1, 10_000);
-  $ float[] data = WigFile.flattenData(result2, 1, 10_000);
-  $ float meanValueOnInterval = WigFile.mean(result2, 1, 10_000);
+  
+However, the order in which entries are returned is not guaranteed and will vary based on the structure of the underlying Wig file.
 
-Rudimentary indexing is provided for text-Wig files, while BigWig files are accessed using the R-tree information. This means that performance is somewhat better for BigWig files. However, in some cases it is inconvenient or impossible to convert Wig files to BigWig since the wigToBigWig tool consumes ~4 x (file size) memory. The indexing scheme used for text-Wig files requires relatively modest memory, even for human-scale genomes, yet ensures an upper bound for seek times in random queries.
+Wig files can be written using a WigFileWriter. Contigs can be written in fixedStep or variableStep format, or the most dense format can automatically be chosen based on the sparsity and layout of the data:
 
-With all readers, data is buffered and lazy-parsed to minimize memory requirements and maximize disk performance.
+  $ try (WigFileWriter writer = new WigFileWriter(wigFile)) {
+  $   writer.writeFixedStep(contig);
+  $   writer.writeVariableStepContig(contig);
+  $
+  $   // Automatically decide which format is denser
+  $   writer.write(contig);
+  $ }
 
-See also https://github.com/timpalpant/java-genomics-toolkit for some full implementations using this library. A good starting point is: https://github.com/timpalpant/java-genomics-toolkit/blob/master/src/edu/unc/genomics/ngs/IntervalStats.java which demonstrates querying for data from Wig files based on a list of intervals in a Bed/BedGraph/GFF file.
+=== Full application examples
+
+See https://github.com/timpalpant/java-genomics-toolkit for some full implementations using this library. A good starting point is: https://github.com/timpalpant/java-genomics-toolkit/blob/master/src/edu/unc/genomics/ngs/IntervalStats.java which demonstrates iterating over a list of intervals in a Bed/BedGraph/GFF file, querying for data from each interval in a Wig file, and calculating the mean value of the data in each interval.
