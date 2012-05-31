@@ -19,7 +19,7 @@ import net.sf.samtools.SAMValidationError;
  * @author timpalpant
  *
  */
-public class SAMEntry extends Interval {
+public class SAMEntry extends Interval implements Sequence {
 
 	private static final long serialVersionUID = -439658908814430105L;
 	
@@ -842,6 +842,16 @@ public class SAMEntry extends Interval {
 	 */
 	public SAMRecord getSAMRecord() {
 		return r;
+	}
+
+	@Override
+	public String getSequence() {
+		return getReadString();
+	}
+
+	@Override
+	public String getQualities() {
+		return getBaseQualityString();
 	}
 
 }

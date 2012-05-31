@@ -1,9 +1,7 @@
-/**
- * 
- */
 package edu.unc.genomics.io;
 
 /**
+ * Thrown when a (likely) unrecoverable format error is found in an Interval file
  * @author timpalpant
  *
  */

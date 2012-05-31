@@ -28,6 +28,7 @@ public class TabixFileReader<T extends Interval> extends IntervalFileReader<T> {
 	protected TabixFileReader(Path p, IntervalFactory<T> factory) throws IOException {
 		super(p);
 		this.factory = factory;
+		log.debug("Opening Tabix file reader "+p);
 		reader = new TabixReader(p);
 	}
 
@@ -37,7 +38,9 @@ public class TabixFileReader<T extends Interval> extends IntervalFileReader<T> {
 	}
 
 	@Override
-	public void close() throws IOException { }
+	public void close() throws IOException { 
+		log.debug("Closing Tabix file reader "+p);
+	}
 
 	@Override
 	public Iterator<T> query(String chr, int start, int stop) {

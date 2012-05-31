@@ -42,10 +42,10 @@ public abstract class WigFileReader implements Closeable {
 		WigFileReader wig;
 		
 		if (BigWigFileReader.isBigWig(p)) {
-			log.debug("Autodetected BigWig file type for: " + p.getFileName());
+			log.info("Autodetected BigWig file type: " + p);
 			wig = new BigWigFileReader(p);
 		} else {
-			log.debug("Autodetected Wiggle file type for: " + p.getFileName());
+			log.info("Autodetected Wiggle file type: " + p);
 			wig = new TextWigFileReader(p);
 		}
 		
@@ -99,7 +99,7 @@ public abstract class WigFileReader implements Closeable {
 	 * @throws IOException if a disk read error occurs
 	 * @throws WigFileException if the Wig file does not contain data for this Interval
 	 */
-	public final WigQueryResult query(Interval interval) throws IOException, WigFileException {
+	public final synchronized WigQueryResult query(Interval interval) throws IOException, WigFileException {
 		return new WigQueryResult(interval, getOverlappingEntries(interval));
 	}
 	
@@ -112,7 +112,7 @@ public abstract class WigFileReader implements Closeable {
 	 * @throws IOException if a disk read error occurs
 	 * @throws WigFileException if the Wig file does not contain data for this Interval
 	 */
-	public final WigQueryResult query(String chr, int start, int stop) throws IOException, WigFileException {
+	public final synchronized WigQueryResult query(String chr, int start, int stop) throws IOException, WigFileException {
 		return query(new Interval(chr, start, stop));
 	}
 	

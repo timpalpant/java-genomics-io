@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.zip.DataFormatException;
 
+import org.apache.log4j.Logger;
+
 /**
  * Holds chromosome length information loaded from *.len files
  * Assembly files should be tab-delimited, with the format "chrIV\t123123"
@@ -20,6 +22,9 @@ import java.util.zip.DataFormatException;
  *
  */
 public class Assembly implements Iterable<String> {
+	
+	private static final Logger log = Logger.getLogger(Assembly.class);
+	
 	private final Path p;
 	private final Map<String, Integer> index = new HashMap<String, Integer>();
 	
@@ -31,6 +36,7 @@ public class Assembly implements Iterable<String> {
 	 */
 	public Assembly(Path p) throws IOException, DataFormatException {
 		this.p = p;
+		log.debug("Loading assembly "+this);
 		try (BufferedReader reader = Files.newBufferedReader(p, Charset.defaultCharset())) {
 			String line;
 			while ((line = reader.readLine()) != null) {
@@ -48,6 +54,7 @@ public class Assembly implements Iterable<String> {
 				}
 			}
 		}
+		log.debug("Loaded "+index.size()+" chromosomes from assembly");
 	}
 	
 	public final Path getPath() {

@@ -54,6 +54,7 @@ public class TextWigFileReader extends WigFileReader {
 	 */
 	public TextWigFileReader(Path p) throws IOException, WigFileFormatException {
 		super(p);
+		log.debug("Opening ASCII-text Wig file "+p);
 		raf = new BufferedRandomAccessFile(p.toFile(), "r");
 
 		String headerLine = raf.readLine2();
@@ -90,6 +91,7 @@ public class TextWigFileReader extends WigFileReader {
 	 */
 	public TextWigFileReader(Path p, Path index) throws IOException, WigFileException {
 		super(p);
+		log.debug("Opening ASCII-text Wig file "+p+" with index "+index);
 		raf = new BufferedRandomAccessFile(p.toFile(), "r");
 
 		String headerLine = raf.readLine2();
@@ -107,6 +109,7 @@ public class TextWigFileReader extends WigFileReader {
 	
 	@Override
 	public void close() {
+		log.debug("Closing Wig file reader "+p);
 		try {
 			raf.close();
 		} catch (IOException e) { 
@@ -133,6 +136,7 @@ public class TextWigFileReader extends WigFileReader {
 			}
 		}
 		
+		log.debug("Found "+relevantContigs.size()+" contigs matching query interval "+interval);
 		return relevantContigs;
 	}
 
@@ -260,7 +264,7 @@ public class TextWigFileReader extends WigFileReader {
 	 * @throws WigFileException 
 	 */
 	private void generateIndex() throws IOException, WigFileFormatException {
-		log.debug("Indexing ascii text Wig file: " + p.getFileName().toString());
+		log.debug("Indexing ASCII text Wig file: " + p);
 		
 		// Skip the track line, if there is one
 		raf.seek(0);
@@ -291,6 +295,7 @@ public class TextWigFileReader extends WigFileReader {
 				
 				// Now parse the new Contig and add to the list of Contigs
 				contig = ContigIndex.parseHeader(line);
+				log.debug("Found contig header: "+line+" (line "+lineNum+")");
 				if (!contigs.containsKey(contig.getChr())) {
 					contigs.put(contig.getChr(), new ArrayList<ContigIndex>());
 				}
@@ -374,13 +379,13 @@ public class TextWigFileReader extends WigFileReader {
 			// Load and match version
 			long version = dis.readLong();
 			if (version != serialVersionUID) {
-				log.error("Version of index does not match version of Wig file!");
+				log.warn("Version of index does not match version of Wig file!");
 				throw new WigFileException("Cannot load index from older version!");
 			}
 			// Load and optionally match checksum
 			long indexChecksum = dis.readLong();
 			if (matchChecksum && indexChecksum != checksum) {
-				log.error("Index does not match checksum of Wig file!");
+				log.warn("Index does not match checksum of Wig file!");
 				throw new WigFileException("Index does not match checksum of Wig file!");
 			}
 			
@@ -404,6 +409,7 @@ public class TextWigFileReader extends WigFileReader {
 					}
 					contigs.get(contig.getChr()).add(contig);
 				}
+				log.debug("Loaded index information for "+contigs.size()+" contigs");
 			} catch (ClassNotFoundException e) {
 				log.error("ClassNotFoundException while loading Wig index from file");
 				e.printStackTrace();
@@ -457,6 +463,8 @@ public class TextWigFileReader extends WigFileReader {
 	 */
 	private static class TextWigIterator implements Iterator<WigEntry> {
 
+		private static final Logger log = Logger.getLogger(TextWigIterator.class);
+		
 		private final BufferedRandomAccessFile raf;
 		private final Interval interval;
 		private final Iterator<ContigIndex> relevantContigsIter;
@@ -496,15 +504,16 @@ public class TextWigFileReader extends WigFileReader {
 		private boolean advanceContig() {
 			while (relevantContigsIter.hasNext()) {
 				ContigIndex currentContig = relevantContigsIter.next();
+				log.debug("Loading data from contig: "+currentContig.toOutput());
 				try {
 					currentContigIter = currentContig.query(raf, interval);
 					if (currentContigIter.hasNext()) {
 						return true;
 					}
 				} catch (IOException | WigFileException e) {
-					log.error("Error querying Contig: " + currentContig.toString());
+					log.error("Error querying Contig: " + currentContig.toOutput());
 					e.printStackTrace();
-					throw new RuntimeException("Error querying Contig: " + currentContig.toString());
+					throw new RuntimeException("Error querying Contig: " + currentContig.toOutput());
 				}
 			}
 			

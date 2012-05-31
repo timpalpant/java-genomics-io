@@ -4,6 +4,8 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.Path;
 
+import org.apache.log4j.Logger;
+
 import edu.unc.genomics.SAMEntry;
 
 import net.sf.samtools.SAMFileHeader;
@@ -16,22 +18,25 @@ import net.sf.samtools.SAMFileWriterFactory;
  */
 public class BAMFileWriter implements Closeable {
 	
-	private final Path p;
+	private static final Logger log = Logger.getLogger(BAMFileWriter.class);
 	
+	private final Path p;
 	private final net.sf.samtools.SAMFileWriter writer;
 	private final SAMFileHeader header = new SAMFileHeader();
 	
 	public BAMFileWriter(Path p) {
 		this.p = p;
+		log.debug("Opening BAM file writer "+p);
 		this.writer = new SAMFileWriterFactory().makeBAMWriter(header, false, p.toFile());
 	}
 	
 	@Override
 	public void close() throws IOException {
+		log.debug("Closing BAM file writer "+p);
 		writer.close();
 	}
 	
-	public void write(SAMEntry entry) {
+	public synchronized void write(SAMEntry entry) {
 		writer.addAlignment(entry.getSAMRecord());
 	}
 	

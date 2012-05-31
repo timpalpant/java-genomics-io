@@ -1,5 +1,10 @@
 package edu.unc.genomics;
 
+/**
+ * Exception thrown when attempting to set a value in a Contig that is outside the range
+ * @author timpalpant
+ *
+ */
 public class ContigException extends RuntimeException {
 
 	private static final long serialVersionUID = 5101389182563499491L;

@@ -201,6 +201,8 @@ public class IntervalFileSniffer {
 					firstLine = reader.readLine();
 				}
 			}
+			
+			log.debug("Loaded first line of interval file: "+firstLine);
 		}
 		
 		return firstLine;

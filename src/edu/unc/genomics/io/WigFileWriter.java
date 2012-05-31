@@ -10,6 +10,8 @@ import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 
+import org.apache.log4j.Logger;
+
 import edu.ucsc.genome.TrackHeader;
 import edu.unc.genomics.Contig;
 
@@ -20,6 +22,8 @@ import edu.unc.genomics.Contig;
  *
  */
 public class WigFileWriter implements Closeable {
+	
+	private static final Logger log = Logger.getLogger(WigFileWriter.class);
 	
 	// The format for writing numerical (float) values into Wig files
 	private static final DecimalFormat formatter = new DecimalFormat();
@@ -43,6 +47,7 @@ public class WigFileWriter implements Closeable {
 	 */
 	public WigFileWriter(Path p, OpenOption... options) throws IOException {
 		this.p = p;
+		log.debug("Initializing Wig file writer "+p);
 		this.writer = new PrintWriter(Files.newBufferedWriter(p, Charset.defaultCharset(), options));
 	}
 	
@@ -56,11 +61,17 @@ public class WigFileWriter implements Closeable {
 		this(p);
 		
 		// Write the header to the output file
-		writer.println(header);
+		if (header.getType() != TrackHeader.Type.WIGGLE) {
+			log.error("Refusing to write track header with type="+header.getType().getId()+" to Wig file");
+		} else {
+			log.debug("Writing Wig file header: "+header);
+			writer.println(header);
+		}
 	}
 
 	@Override
 	public final void close() throws IOException {
+		log.debug("Closing Wig file writer "+p);
 		writer.close();
 	}
 	
@@ -70,7 +81,7 @@ public class WigFileWriter implements Closeable {
 	 * and it will be written with the largest resolution that still resolves all features in the data
 	 * @param contig the Contig of values to write to this Wig file
 	 */
-	public final void write(Contig contig) {
+	public final synchronized void write(final Contig contig) {
 		if(contig.isFixedStep()) {
 			writeFixedStepContig(contig);
 		} else {
@@ -88,8 +99,10 @@ public class WigFileWriter implements Closeable {
 	 * Resolution (step/span) will be automatically chosen so that the output is
 	 * as compact as possible while still resolving all features in the data.
 	 * @param contig the Contig of values to write to this Wig file
+	 * @return the Future corresponding to this Contig's write job
 	 */
-	public final void writeFixedStepContig(Contig contig) {
+	public final synchronized void writeFixedStepContig(final Contig contig) {
+		log.debug("Writing contig: "+contig.getFixedStepHeader());
 		writer.println(contig.getFixedStepHeader());
 		int step = contig.getMinStep();
 		for (int bp = contig.getFirstBaseWithData(); bp <= contig.high(); bp += step) {
@@ -102,8 +115,10 @@ public class WigFileWriter implements Closeable {
 	 * Resolution (span) will be automatically chosen so that the output is
 	 * as compact as possible while still resolving all features in the data.
 	 * @param contig the Contig of values to write to this Wig file
+	 * @return 
 	 */
-	public final void writeVariableStepContig(Contig contig) {
+	public final synchronized void writeVariableStepContig(final Contig contig) {
+		log.debug("Writing contig: "+contig.getVariableStepHeader());
 		writer.println(contig.getVariableStepHeader());
 		int bp = contig.getFirstBaseWithData();
 		int span = contig.getVariableStepSpan();

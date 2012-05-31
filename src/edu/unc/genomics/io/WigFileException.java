@@ -4,7 +4,6 @@ import java.util.zip.DataFormatException;
 
 /**
  * Exception thrown when trying to query a Wig file for an invalid interval
- * or if there is an error parsing an invalid Wig file
  * 
  * @author timpalpant
  *

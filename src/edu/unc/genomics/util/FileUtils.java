@@ -9,6 +9,8 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 /**
  * Miscellaneous low-key file utilities
  * such as guessing whether a file is ASCII text, counting the number of lines in a file,
@@ -18,6 +20,8 @@ import java.util.List;
  * 
  */
 public class FileUtils {
+	
+	private static final Logger log = Logger.getLogger(FileUtils.class);
 	public static double DEFAULT_THRESHOLD = 0.3;
 
 	/**
@@ -50,7 +54,9 @@ public class FileUtils {
 			}
 		}
 		
-		return ((double)binaryCount)/totalCount < threshold;
+		float binaryFraction = ((float)binaryCount)/totalCount;
+		log.debug("Found "+100*binaryFraction+"% non-ASCII characters in "+p);
+		return binaryFraction < threshold;
 	}
 	
 	/**
@@ -81,9 +87,11 @@ public class FileUtils {
 	 */
 	public static void sort(final Path input, final Path output, final Comparator<String> cmp) throws IOException {
 		// Use an external sort to sort the file in chunks
+		log.debug("Sorting file "+input+" to "+output);
 		List<Path> pieces = ExternalSort.sortInBatch(input, cmp);
 		
 		// Merge the sorted chunks together
+		log.debug("Merging sorted chunks");
 		ExternalSort.mergeSortedFiles(pieces, output, cmp);
 	}
 

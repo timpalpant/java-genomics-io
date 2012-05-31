@@ -18,6 +18,7 @@ import edu.unc.genomics.WigEntry;
  * 
  */
 abstract class ContigIndex extends Interval implements Serializable {
+	
 	private static final long serialVersionUID = 7665673936467048945L;
 	
 	private int span;

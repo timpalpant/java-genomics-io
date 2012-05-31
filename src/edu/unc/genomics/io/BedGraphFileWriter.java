@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 
+import org.apache.log4j.Logger;
+
 import edu.unc.genomics.Interval;
 
 /**
@@ -14,12 +16,15 @@ import edu.unc.genomics.Interval;
  */
 public class BedGraphFileWriter<T extends Interval> extends IntervalFileWriter<T> {
 	
+	private static final Logger log = Logger.getLogger(BedGraphFileWriter.class);
+	
 	public BedGraphFileWriter(Path p, OpenOption... options) throws IOException {
 		super(p, options);
+		log.debug("Opening BedGraph file writer "+p);
 	}
 
 	@Override
-	public void write(T entry) {
+	public synchronized void write(T entry) {
 		writer.println(entry.toBedGraph());
 	}
 }

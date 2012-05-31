@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.log4j.Logger;
 
 import edu.unc.genomics.Contig;
 import edu.unc.genomics.Interval;
@@ -18,6 +19,7 @@ import edu.unc.genomics.WigEntry;
 public class WigQueryResult extends Contig {
 	
 	private static final long serialVersionUID = 2066295662711901691L;
+	private static final Logger log = Logger.getLogger(WigQueryResult.class);
 	
 	WigQueryResult(Interval interval, Iterator<WigEntry> iter) throws RuntimeException {
 		super(interval, collect(interval, iter));
@@ -31,7 +33,9 @@ public class WigQueryResult extends Contig {
 		float[] values = new float[interval.length()];
 		Arrays.fill(values, Float.NaN);
 		
+		int count = 0;
 		while (iter.hasNext()) {
+			count++;
 			WigEntry item = iter.next();
 			float value = item.getValue().floatValue();
 			if (!Float.isNaN(value)) {
@@ -42,6 +46,7 @@ public class WigQueryResult extends Contig {
 				}
 			}
 		}
+		log.debug("Loaded data from "+count+" Wig entries");
 		
 		if (interval.isCrick()) {
 			ArrayUtils.reverse(values);

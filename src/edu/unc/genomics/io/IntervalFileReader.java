@@ -40,25 +40,25 @@ public abstract class IntervalFileReader<T extends Interval> implements Iterable
 		IntervalFileSniffer sniffer = new IntervalFileSniffer(p);
 		
 		if (sniffer.isBigBed()) {
-			log.debug("Autodetected BigBed filetype for: " + p.getFileName().toString());
+			log.debug("Autodetected BigBed filetype for: " + p);
 			return new BigBedFileReader(p);
 		} else if (sniffer.isBAM()) {
-			log.debug("Autodetected BAM filetype for: " + p.getFileName().toString());
+			log.debug("Autodetected BAM filetype for: " + p);
 			return new BAMFileReader(p);
 		} else if (sniffer.isGFF()) {
-			log.debug("Autodetected GFF filetype for: " + p.getFileName().toString());
+			log.debug("Autodetected GFF filetype for: " + p);
 			return new GFFFileReader(p);
 		} else if (sniffer.isBedGraph()) {
-			log.debug("Autodetected BedGraph filetype for: " + p.getFileName().toString());
+			log.debug("Autodetected BedGraph filetype for: " + p);
 			return new BedGraphFileReader(p);
 		} else if (sniffer.isBed()) {
-			log.debug("Autodetected Bed filetype for: " + p.getFileName().toString());
+			log.debug("Autodetected Bed filetype for: " + p);
 			return new BedFileReader(p);
 		} else if (sniffer.isSAM()) {
-			log.debug("Autodetected SAM filetype for: " + p.getFileName().toString());
+			log.debug("Autodetected SAM filetype for: " + p);
 			return new SAMFileReader(p);
 		} else if (sniffer.isGeneTrack()) {
-			log.debug("Autodetected GeneTrack filetype for: " + p.getFileName().toString());
+			log.debug("Autodetected GeneTrack filetype for: " + p);
 			return new GeneTrackFileReader(p);
 		} else {
 			throw new IntervalFileSnifferException("Could not autodetect Interval file format");
@@ -86,7 +86,7 @@ public abstract class IntervalFileReader<T extends Interval> implements Iterable
 	/**
 	 * @return all of the intervals in this IntervalFile
 	 */
-	public List<T> loadAll() {
+	public final synchronized List<T> loadAll() {
 		List<T> intervals = new ArrayList<>();
 		for (T interval : this) {
 			intervals.add(interval);
@@ -138,7 +138,7 @@ public abstract class IntervalFileReader<T extends Interval> implements Iterable
 	 * @param stop the stop of the interval to query for
 	 * @return a List of all the intervals in this file that overlap chr:start-stop
 	 */
-	public final List<T> load(String chr, int start, int stop) {
+	public final synchronized List<T> load(String chr, int start, int stop) {
 		List<T> list = new ArrayList<>();
 		Iterator<T> it = query(chr, start, stop);
 		while (it.hasNext()) {

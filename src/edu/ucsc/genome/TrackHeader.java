@@ -3,6 +3,8 @@ package edu.ucsc.genome;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
+
 /**
  * @author timpalpant
  * Represents a track line for the UCSC Genome Browser
@@ -28,6 +30,9 @@ import java.util.regex.Pattern;
  * smoothingWindow   off|[2-16]           # default is off
  */
 public class TrackHeader {
+	
+	private static final Logger log = Logger.getLogger(TrackHeader.class);
+	
 	protected Type type;
 	protected String name;
 	protected String description;
@@ -90,11 +95,13 @@ public class TrackHeader {
 	 * @throws TrackHeaderException if there is a formatting error in the track line
 	 */
 	public static TrackHeader parse(String line) throws TrackHeaderException {
+		log.debug("Parsing UCSC track header: "+line);
 		TrackHeader header = new TrackHeader();
 		
 		Matcher m = ATTRIBUTE_PATTERN.matcher(line);
 		while (m.find()) {
 			String token = m.group();
+			log.debug("Parsing token: "+token);
 			int delim = token.indexOf('=');
 			String key = token.substring(0, delim);
 			String value = token.substring(delim+1);

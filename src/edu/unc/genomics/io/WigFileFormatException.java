@@ -1,5 +1,10 @@
 package edu.unc.genomics.io;
 
+/**
+ * Exception thrown when there is a (likely) unrecoverable formatting error in a text Wig file
+ * @author timpalpant
+ *
+ */
 public class WigFileFormatException extends RuntimeException {
 
 	private static final long serialVersionUID = 5605887792955081973L;

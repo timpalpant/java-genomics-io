@@ -8,6 +8,8 @@ package edu.ucsc.genome;
  */
 public class TrackHeaderException extends Exception {
 
+	private static final long serialVersionUID = -515886535133569480L;
+
 	/**
 	 * 
 	 */

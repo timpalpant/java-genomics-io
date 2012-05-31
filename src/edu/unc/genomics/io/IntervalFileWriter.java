@@ -8,6 +8,8 @@ import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 
+import org.apache.log4j.Logger;
+
 import edu.unc.genomics.Interval;
 
 /**
@@ -23,6 +25,8 @@ import edu.unc.genomics.Interval;
  */
 public class IntervalFileWriter<T extends Interval> implements Closeable {
 
+	private static final Logger log = Logger.getLogger(IntervalFileWriter.class);
+	
 	protected final Path p;
 	protected final PrintWriter writer;
 	
@@ -38,6 +42,7 @@ public class IntervalFileWriter<T extends Interval> implements Closeable {
 	}
 
 	public void close() {
+		log.debug("Closing Interval file writer "+p);
 		writer.close();
 	}
 	
@@ -46,7 +51,7 @@ public class IntervalFileWriter<T extends Interval> implements Closeable {
 	 * NOTE: There is no format checking, so the comment line must be correctly formatted/demarcated
 	 * @param line a line to write to this interval file
 	 */
-	public void writeComment(String line) {
+	public synchronized void writeComment(String line) {
 		writer.println(line);
 	}
 
@@ -54,7 +59,7 @@ public class IntervalFileWriter<T extends Interval> implements Closeable {
 	 * Write an Interval as line in this output file
 	 * @param entry the Interval to write to disk
 	 */
-	public void write(T entry) {
+	public synchronized void write(T entry) {
 		writer.println(entry.toOutput());
 	}
 

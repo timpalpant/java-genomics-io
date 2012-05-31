@@ -46,6 +46,7 @@ public class BAMFileReader extends IntervalFileReader<SAMEntry> {
 		super(p);
 		
 		// Automatically index BAM files that do not have an index
+		log.debug("Opening BAM file reader "+p);
 		reader = new SAMFileReader(p.toFile());
 		if (!reader.hasIndex()) {
 			try {
@@ -83,6 +84,7 @@ public class BAMFileReader extends IntervalFileReader<SAMEntry> {
 
 	@Override
 	public void close() throws IOException {
+		log.debug("Closing BAM file "+p);
 		reader.close();
 	}
 

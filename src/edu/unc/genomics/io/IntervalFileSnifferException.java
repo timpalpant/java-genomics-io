@@ -1,9 +1,7 @@
-/**
- * 
- */
 package edu.unc.genomics.io;
 
 /**
+ * Exception thrown when an Interval file's format cannot be autodetected
  * @author timpalpant
  * 
  */

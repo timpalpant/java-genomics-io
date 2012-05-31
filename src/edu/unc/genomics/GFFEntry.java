@@ -1,6 +1,3 @@
-/**
- * 
- */
 package edu.unc.genomics;
 
 import edu.unc.genomics.io.IntervalFileFormatException;

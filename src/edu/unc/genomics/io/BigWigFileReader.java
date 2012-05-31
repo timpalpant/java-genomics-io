@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.broad.igv.bbfile.BBFileReader;
 import org.broad.igv.bbfile.BBTotalSummaryBlock;
 import org.broad.igv.bbfile.BigWigIterator;
@@ -27,12 +28,16 @@ import edu.unc.genomics.WigEntry;
  *
  */
 public class BigWigFileReader extends WigFileReader {
+	
+	private static final Logger log = Logger.getLogger(BigWigFileReader.class);
+	
 	private BBFileReader reader;
 	private BBTotalSummaryBlock summary;
 
 	public BigWigFileReader(Path p) throws IOException {
 		super(p);
 		
+		log.debug("Opening BigWig file reader "+p);
 		reader = new BBFileReader(p.toString());
 		summary = reader.getTotalSummaryBlock();
 	}
@@ -47,7 +52,9 @@ public class BigWigFileReader extends WigFileReader {
 	}
 	
 	@Override
-	public void close() { }
+	public void close() { 
+		log.debug("Closing BigWig file reader "+p);
+	}
 	
 	@Override
 	public Iterator<WigEntry>  getOverlappingEntries(Interval interval) throws WigFileException {

@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.broad.igv.bbfile.BBFileReader;
 import org.broad.igv.bbfile.BedFeature;
 
@@ -19,10 +20,13 @@ import edu.unc.genomics.BedEntry;
  */
 public class BigBedFileReader extends IntervalFileReader<BedEntry> {
 
-	BBFileReader reader;
+	private static final Logger log = Logger.getLogger(BigBedFileReader.class);
+	
+	private BBFileReader reader;
 	
 	protected BigBedFileReader(Path p) throws IOException {
 		super(p);
+		log.debug("Opening BigBed file reader "+p);
 		reader = new BBFileReader(p.toString());
 		if (!reader.isBigBedFile()) {
 			throw new IntervalFileFormatException("Not a BigBed file!");

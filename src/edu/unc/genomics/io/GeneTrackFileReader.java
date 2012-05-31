@@ -3,6 +3,8 @@ package edu.unc.genomics.io;
 import java.io.IOException;
 import java.nio.file.Path;
 
+import org.apache.log4j.Logger;
+
 import net.sf.samtools.TabixWriter;
 import net.sf.samtools.TabixWriter.Conf;
 
@@ -17,8 +19,11 @@ import edu.unc.genomics.IntervalFactory;
  */
 public class GeneTrackFileReader extends TextIntervalFileReader<GeneTrackEntry> {
 
+	private static final Logger log = Logger.getLogger(GeneTrackFileReader.class);
+	
 	public GeneTrackFileReader(Path p) throws IOException {
 		super(p, new GeneTrackEntryFactory());
+		log.debug("Opening GeneTrack file reader "+p);
 	}
 	
 	public static class GeneTrackEntryFactory implements IntervalFactory<GeneTrackEntry> {

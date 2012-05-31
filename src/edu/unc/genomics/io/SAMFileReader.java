@@ -44,6 +44,7 @@ public class SAMFileReader extends IntervalFileReader<SAMEntry> {
 	
 	public SAMFileReader(Path p) {
 		super(p);
+		log.debug("Opening SAM file reader "+p);
 		reader = new net.sf.samtools.SAMFileReader(p.toFile());
 	}
 	
@@ -54,6 +55,7 @@ public class SAMFileReader extends IntervalFileReader<SAMEntry> {
 	
 	@Override
 	public void close() throws IOException {
+		log.debug("Closing SAM file reader "+p);
 		reader.close();
 	}
 	
@@ -117,6 +119,7 @@ public class SAMFileReader extends IntervalFileReader<SAMEntry> {
 	
 	private void convertToBAM() {
 		// Convert the SAM file to BAM to do queries
+		log.debug("Autoconverting SAM file ("+p+") to BAM");
 		try {
 			bam = Files.createTempFile(p.getFileName().toString(), ".bam");
 		} catch (IOException e) {

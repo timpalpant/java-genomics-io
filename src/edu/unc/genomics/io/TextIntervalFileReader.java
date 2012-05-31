@@ -44,6 +44,7 @@ public abstract class TextIntervalFileReader<T extends Interval> extends Interva
 	protected TextIntervalFileReader(Path p, IntervalFactory<T> factory) throws IOException {
 		super(p);
 		this.factory = factory;
+		log.debug("Opening ASCII-text interval file reader "+p);
 		reader = Files.newBufferedReader(p, Charset.defaultCharset());
 		BufferedLineReader lineReader = new BufferedLineReader(reader);
 		iter = new StringIntervalIterator<T>(lineReader.iterator(), factory);
@@ -99,6 +100,7 @@ public abstract class TextIntervalFileReader<T extends Interval> extends Interva
 	 * Filter, sort, BGZip, and index this file with Tabix for random querying
 	 */
 	private void convertToTabix() {
+		log.debug("Auto-indexing ASCII interval file with Tabix");
 		try {
 			// Filter the input file
 			Path filtered = Files.createTempFile(p.getFileName().toString(), ".filtered");
