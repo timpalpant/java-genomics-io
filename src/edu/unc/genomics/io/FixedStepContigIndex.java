@@ -1,12 +1,10 @@
 package edu.unc.genomics.io;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import ed.javatools.BufferedRandomAccessFile;
 import edu.unc.genomics.Contig;
 import edu.unc.genomics.Interval;
-import edu.unc.genomics.WigEntry;
 
 /**
  * Hold index information about a fixedStep contig in a TextWigFile
@@ -109,70 +107,43 @@ class FixedStepContigIndex extends ContigIndex {
 	}
 
 	@Override
-	public FixedStepContigIterator query(BufferedRandomAccessFile raf, Interval interval) throws IOException, WigFileException {
-		return new FixedStepContigIterator(raf, interval);
-	}
-	
-	private class FixedStepContigIterator implements Iterator<WigEntry> {
-
-		private final BufferedRandomAccessFile raf;
-		private final int low;
-		private final int high;
-		private final long startLine;
-		private final long stopLine;
-		private long currentLine;
-		private int bp;
+	public void fill(BufferedRandomAccessFile raf, Interval interval, float[] values) throws WigFileException, IOException {
+		// Clamp to bases that are covered by this Contig
+		int low = Math.max(start, interval.low());
+		int high = Math.min(stop, interval.high());
 		
-		public FixedStepContigIterator(BufferedRandomAccessFile raf, Interval interval) throws IOException, WigFileException {
-			this.raf = raf;
-			
-			// Clamp to bases that are covered by this Contig
-			low = Math.max(start, interval.low());
-			high = Math.min(stop, interval.high());
-			
-			// Figure out what lines we need
-			startLine = getLineNumForBasePair(low);
-			stopLine = getLineNumForBasePair(high);
-			
-			// Find the closest known upstream base-pair position and seek
-			int closestUpstream = getUpstreamIndexedBP(low);
-			raf.seek(getIndex(closestUpstream));
-			
-			// Skip to the start line
-			for (currentLine = getLineNumForBasePair(closestUpstream); 
-					currentLine < startLine; currentLine++) {
-				raf.readLine2();
-			}
-			
-			// Set the base pair we are at (may be < start if span > 1)
-			bp = getBasePairForLineNum(currentLine);
+		// Figure out what lines we need
+		long startLine = getLineNumForBasePair(low);
+		long stopLine = getLineNumForBasePair(high);
+		
+		// Find the closest known upstream base-pair position and seek
+		int closestUpstream = getUpstreamIndexedBP(low);
+		raf.seek(getIndex(closestUpstream));
+		
+		// Skip to the start line
+		long currentLine;
+		for (currentLine = getLineNumForBasePair(closestUpstream); currentLine < startLine; currentLine++) {
+			raf.readLine2();
 		}
 		
-		@Override
-		public boolean hasNext() {
-			return currentLine <= stopLine;
-		}
-
-		@Override
-		public WigEntry next() {
-			try {
-				String line = raf.readLine2();
-				currentLine++;
-				
-				float value = Float.parseFloat(line);
-				WigEntry item = new WigEntry(chr, bp, bp+getSpan()-1, value);
-							
-				bp += getStep();
-				
-				return item;
-			} catch (IOException e) {
-				throw new RuntimeException("Error getting next entry in Wig file!");
+		// Get the base pair we are at (may be < start if span > 1)
+		int bp = getBasePairForLineNum(currentLine);
+		
+		// Load the values from disk into the array
+		while (currentLine <= stopLine) {
+			String line = raf.readLine2();
+			currentLine++;
+			
+			float value = Float.parseFloat(line);
+			if (!Float.isNaN(value)) {
+				for (int i = bp; i <= bp+getSpan()-1; i++) {
+					if (interval.includes(i)) {
+						values[i-interval.low()] = value;
+					}
+				}
 			}
-		}
-
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException("Cannot remove elements from Wig file");
+						
+			bp += getStep();
 		}
 	}
 }

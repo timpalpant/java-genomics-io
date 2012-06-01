@@ -21,12 +21,12 @@ public class ChecksumUtilsTest {
 
 	@Test
 	public void testAdler32() throws IOException {
-		assertEquals(3238352161L, ChecksumUtils.adler32(TEST));
+		assertEquals(643785759L, ChecksumUtils.adler32(TEST));
 	}
 
 	@Test
 	public void testCrc32() throws IOException {
-		assertEquals(1665388664L, ChecksumUtils.crc32(TEST));
+		assertEquals(2455014470L, ChecksumUtils.crc32(TEST));
 	}
 
 }

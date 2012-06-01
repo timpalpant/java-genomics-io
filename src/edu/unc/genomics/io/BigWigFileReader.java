@@ -2,18 +2,20 @@ package edu.unc.genomics.io;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Iterator;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.broad.igv.bbfile.BBFileReader;
 import org.broad.igv.bbfile.BBTotalSummaryBlock;
 import org.broad.igv.bbfile.BigWigIterator;
 import org.broad.igv.bbfile.RPChromosomeRegion;
+import org.broad.igv.bbfile.WigItem;
 
+import edu.unc.genomics.Contig;
 import edu.unc.genomics.Interval;
-import edu.unc.genomics.WigEntry;
 
 /**
  * A BigWig file. For more information, see: http://genome.ucsc.edu/goldenPath/help/bigWig.html
@@ -57,12 +59,34 @@ public class BigWigFileReader extends WigFileReader {
 	}
 	
 	@Override
-	public Iterator<WigEntry>  getOverlappingEntries(Interval interval) throws WigFileException {
+	public synchronized Contig query(Interval interval) throws WigFileException {
 		if (!includes(interval)) {
 			throw new WigFileException("BigWigFile does not contain data for region: "+interval);
 		}
 		
-		return new BigWigCoordinateChangeIterator(reader.getBigWigIterator(interval.getChr(), interval.low()-1, interval.getChr(), interval.high(), false));
+		BigWigIterator it = reader.getBigWigIterator(interval.getChr(), interval.low()-1, interval.getChr(), interval.high(), false);
+		float[] values = new float[interval.length()];
+		Arrays.fill(values, Float.NaN);
+		int count = 0;
+		while (it.hasNext()) {
+			WigItem item = it.next();
+			float value = item.getWigValue();
+			if (!Float.isNaN(value)) {
+				count++;
+				for (int bp = item.getStartBase()+1; bp <= item.getEndBase(); bp++) {
+					if(interval.includes(bp)) {
+						values[bp-interval.low()] = value;
+					}
+				}
+			}
+		}
+		log.debug("Collected values from "+count+" Wig entries");
+		
+		if (interval.isCrick()) {
+			ArrayUtils.reverse(values);
+		}
+		
+		return new Contig(interval, values);
 	}
 
 	@Override
@@ -145,38 +169,6 @@ public class BigWigFileReader extends WigFileReader {
 		s.append("\tMax value:\t\t").append(max());
 		
 		return s.toString();
-	}
-	
-	/**
-	 * BigWig files are 0-indexed, half-open
-	 * To conform with the rest of the java-genomics-io package, 
-	 * wrap and shift the results to 1-indexed, closed
-	 * @author timpalpant
-	 *
-	 */
-	private static class BigWigCoordinateChangeIterator implements Iterator<WigEntry> {
-
-		private final BigWigIterator bwIter;
-		
-		private BigWigCoordinateChangeIterator(BigWigIterator bwIter) {
-			this.bwIter = bwIter;
-		}
-		
-		@Override
-		public boolean hasNext() {
-			return bwIter.hasNext();
-		}
-
-		@Override
-		public WigEntry next() {
-			// Wrap the result into a closed (inclusive) Interval
-			return new WigEntry(bwIter.next());
-		}
-
-		@Override
-		public void remove() {
-			bwIter.remove();
-		}
 	}
 
 }

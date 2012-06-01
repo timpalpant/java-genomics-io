@@ -3,13 +3,11 @@ package edu.unc.genomics.io;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import ed.javatools.BufferedRandomAccessFile;
 import edu.unc.genomics.Contig;
 import edu.unc.genomics.Interval;
-import edu.unc.genomics.WigEntry;
 
 /**
  * Holds index information about a Contig in a WigFile
@@ -47,10 +45,22 @@ abstract class ContigIndex extends Interval implements Serializable {
 		}
 	}
 	
-	public abstract Iterator<WigEntry> query(BufferedRandomAccessFile raf, Interval interval) throws IOException, WigFileException;
+	/**
+	 * Fill data from this contig into the array of values
+	 * @param raf the file handle to get the data from
+	 * @param interval the query interval
+	 * @param values the array to load the values into
+	 */
+	public abstract void fill(BufferedRandomAccessFile raf, Interval interval, float[] values) throws WigFileException, IOException;
 	
+	/**
+	 * @return true if this index holds information about a fixedStep contig, false otherwise
+	 */
 	public abstract boolean isFixedStep();
 	
+	/**
+	 * @return true if this index holds information about a variableStep contig, false otherwise
+	 */
 	public abstract boolean isVariableStep();
 	
 	@Override

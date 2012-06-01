@@ -8,13 +8,13 @@ import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.log4j.Logger;
 
@@ -23,7 +23,6 @@ import edu.ucsc.genome.TrackHeader;
 import edu.ucsc.genome.TrackHeaderException;
 import edu.unc.genomics.Contig;
 import edu.unc.genomics.Interval;
-import edu.unc.genomics.WigEntry;
 import edu.unc.genomics.util.ChecksumUtils;
 
 /**
@@ -118,13 +117,23 @@ public class TextWigFileReader extends WigFileReader {
 	}
 	
 	@Override
-	public Iterator<WigEntry> getOverlappingEntries(Interval interval) throws IOException, WigFileException {
+	public synchronized Contig query(Interval interval) throws IOException, WigFileException {
 		if (!includes(interval)) {
 			throw new WigFileException("WigFile does not contain data for region: "+interval);
 		}
 		
-		List<ContigIndex> relevantContigs = getContigsOverlappingInterval(interval);
-		return new TextWigIterator(raf, relevantContigs.iterator(), interval);
+		float[] values = new float[interval.length()];
+		Arrays.fill(values, Float.NaN);
+		// Load the values from each relevant contig into the array
+		for (ContigIndex c : getContigsOverlappingInterval(interval)) {
+			c.fill(raf, interval, values);
+		}
+		
+		if (interval.isCrick()) {
+			ArrayUtils.reverse(values);
+		}
+		
+		return new Contig(interval, values);
 	}
 	
 	private List<ContigIndex> getContigsOverlappingInterval(Interval interval) {
@@ -136,7 +145,7 @@ public class TextWigFileReader extends WigFileReader {
 			}
 		}
 		
-		log.debug("Found "+relevantContigs.size()+" contigs matching query interval "+interval);
+		log.debug("Found "+relevantContigs.size()+" contigs overlapping query interval "+interval);
 		return relevantContigs;
 	}
 
@@ -283,6 +292,7 @@ public class TextWigFileReader extends WigFileReader {
 		int bp = 0;
 		double value;
 		long cursor = raf.getFilePointer();
+		int count = 0;
 		while ((line = raf.readLine2()) != null) {
 			lineNum++;
 			
@@ -343,6 +353,7 @@ public class TextWigFileReader extends WigFileReader {
 				}
 				
 				if (!Double.isNaN(value) && !Double.isInfinite(value)) {
+					count++;
 					for (int i = 0; i < contig.getSpan(); i++) {
 						stats.addValue(value);
 					}
@@ -365,6 +376,8 @@ public class TextWigFileReader extends WigFileReader {
 			contig.setStopLine(lineNum);
 			contig.setStop(bp + contig.getSpan() - 1);
 		}
+		
+		log.debug("Indexed "+count+" entries in Wig file");
 	}
 	
 	/**
@@ -453,71 +466,4 @@ public class TextWigFileReader extends WigFileReader {
 		}
 	}
 	
-	/**
-	 * Takes an iterator of Contigs that are relevant to a query,
-	 * and a file with data for those contigs, and iterates over all WigItems
-	 * in the resulting query across all relevant Contigs
-	 * 
-	 * @author timpalpant
-	 *
-	 */
-	private static class TextWigIterator implements Iterator<WigEntry> {
-
-		private static final Logger log = Logger.getLogger(TextWigIterator.class);
-		
-		private final BufferedRandomAccessFile raf;
-		private final Interval interval;
-		private final Iterator<ContigIndex> relevantContigsIter;
-		private Iterator<WigEntry> currentContigIter;
-		
-		public TextWigIterator(BufferedRandomAccessFile raf, Iterator<ContigIndex> relevantContigsIter, Interval interval) {
-			this.raf = raf;
-			this.relevantContigsIter = relevantContigsIter;
-			this.interval = interval;
-		}
-		
-		@Override
-		public boolean hasNext() {
-			// If there is no current contig, or there are no more entries in the current contig
-			if (currentContigIter == null || !currentContigIter.hasNext()) {
-				return advanceContig();
-			}
-			
-			// The currentContigIter is not null, and it hasNext()
-			return true;
-		}
-
-		@Override
-		public WigEntry next() {
-			if (hasNext()) {
-				return currentContigIter.next();
-			}
-			
-			throw new NoSuchElementException("No more WigItem elements available");
-		}
-
-		@Override
-		public void remove() throws UnsupportedOperationException {
-			throw new UnsupportedOperationException("Cannot remove records from Wig file");
-		}
-		
-		private boolean advanceContig() {
-			while (relevantContigsIter.hasNext()) {
-				ContigIndex currentContig = relevantContigsIter.next();
-				log.debug("Loading data from contig: "+currentContig.toOutput());
-				try {
-					currentContigIter = currentContig.query(raf, interval);
-					if (currentContigIter.hasNext()) {
-						return true;
-					}
-				} catch (IOException | WigFileException e) {
-					log.error("Error querying Contig: " + currentContig.toOutput());
-					e.printStackTrace();
-					throw new RuntimeException("Error querying Contig: " + currentContig.toOutput());
-				}
-			}
-			
-			return false;
-		}
-	}
 }
