@@ -23,8 +23,8 @@ public class BedFileWriter<T extends Interval> extends IntervalFileWriter<T> {
 	}
 
 	@Override
-	public synchronized void write(T entry) {
-		writer.println(entry.toBed());
+	public void write(T entry) {
+		write(entry.toBed());
 	}
 
 }

@@ -75,25 +75,28 @@ class VariableStepContigIndex extends ContigIndex {
 		
 		// Find the closest known upstream base-pair position
 		int closestUpstream = getUpstreamIndexedBP(low);
-		raf.seek(getIndex(closestUpstream));
-		
-		// Load the data from the file into the values array
-		String line;
-		int bp = low;
-		while ((line = raf.readLine2()) != null && bp <= high) {
-			// Break if at the next Contig
-			if (line.startsWith(Contig.Type.FIXEDSTEP.getId()) || line.startsWith(Contig.Type.VARIABLESTEP.getId())) {
-				break;
-			}
+		synchronized (raf) {
+			// Seek to the closest known position in the index
+			raf.seek(getIndex(closestUpstream));
 			
-			int delim = line.indexOf('\t');
-			bp = Integer.parseInt(line.substring(0, delim));
-			if (bp + getSpan() - 1 >= low) {
-				float value = Float.parseFloat(line.substring(delim+1));
-				if (!Float.isNaN(value)) {
-					for (int i = bp; i <= bp+getSpan()-1; i++) {
-						if (interval.includes(i)) {
-							values[i-interval.low()] = value;
+			// Load the data from the file into the values array
+			String line;
+			int bp = low;
+			while ((line = raf.readLine2()) != null && bp <= high) {
+				// Break if at the next Contig
+				if (line.startsWith(Contig.Type.FIXEDSTEP.getId()) || line.startsWith(Contig.Type.VARIABLESTEP.getId())) {
+					break;
+				}
+				
+				int delim = line.indexOf('\t');
+				bp = Integer.parseInt(line.substring(0, delim));
+				if (bp + getSpan() - 1 >= low) {
+					float value = Float.parseFloat(line.substring(delim+1));
+					if (!Float.isNaN(value)) {
+						for (int i = bp; i <= bp+getSpan()-1; i++) {
+							if (interval.includes(i)) {
+								values[i-interval.low()] = value;
+							}
 						}
 					}
 				}

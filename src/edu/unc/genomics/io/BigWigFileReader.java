@@ -59,28 +59,27 @@ public class BigWigFileReader extends WigFileReader {
 	}
 	
 	@Override
-	public synchronized Contig query(Interval interval) throws WigFileException {
+	public Contig query(Interval interval) throws WigFileException {
 		if (!includes(interval)) {
 			throw new WigFileException("BigWigFile does not contain data for region: "+interval);
 		}
 		
-		BigWigIterator it = reader.getBigWigIterator(interval.getChr(), interval.low()-1, interval.getChr(), interval.high(), false);
 		float[] values = new float[interval.length()];
 		Arrays.fill(values, Float.NaN);
-		int count = 0;
-		while (it.hasNext()) {
-			WigItem item = it.next();
-			float value = item.getWigValue();
-			if (!Float.isNaN(value)) {
-				count++;
-				for (int bp = item.getStartBase()+1; bp <= item.getEndBase(); bp++) {
-					if(interval.includes(bp)) {
-						values[bp-interval.low()] = value;
+		synchronized (reader) {
+			BigWigIterator it = reader.getBigWigIterator(interval.getChr(), interval.low()-1, interval.getChr(), interval.high(), false);
+			while (it.hasNext()) {
+				WigItem item = it.next();
+				float value = item.getWigValue();
+				if (!Float.isNaN(value)) {
+					for (int bp = item.getStartBase()+1; bp <= item.getEndBase(); bp++) {
+						if(interval.includes(bp)) {
+							values[bp-interval.low()] = value;
+						}
 					}
 				}
 			}
 		}
-		log.debug("Collected values from "+count+" Wig entries");
 		
 		if (interval.isCrick()) {
 			ArrayUtils.reverse(values);

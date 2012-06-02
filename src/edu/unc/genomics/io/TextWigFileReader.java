@@ -117,7 +117,7 @@ public class TextWigFileReader extends WigFileReader {
 	}
 	
 	@Override
-	public synchronized Contig query(Interval interval) throws IOException, WigFileException {
+	public Contig query(Interval interval) throws IOException, WigFileException {
 		if (!includes(interval)) {
 			throw new WigFileException("WigFile does not contain data for region: "+interval);
 		}

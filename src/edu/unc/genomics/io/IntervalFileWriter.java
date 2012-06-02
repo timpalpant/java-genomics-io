@@ -27,8 +27,8 @@ public class IntervalFileWriter<T extends Interval> implements Closeable {
 
 	private static final Logger log = Logger.getLogger(IntervalFileWriter.class);
 	
-	protected final Path p;
-	protected final PrintWriter writer;
+	private final Path p;
+	private final PrintWriter writer;
 	
 	/**
 	 * Create a new Interval file or append to an existing interval file
@@ -61,6 +61,14 @@ public class IntervalFileWriter<T extends Interval> implements Closeable {
 	 */
 	public synchronized void write(T entry) {
 		writer.println(entry.toOutput());
+	}
+	
+	/**
+	 * For subclasses to write entries to the file while remaining synchronized
+	 * @param line the line to write
+	 */
+	protected synchronized void write(String line) {
+		writer.println(line);
 	}
 
 }

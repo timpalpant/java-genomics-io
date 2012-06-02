@@ -25,6 +25,6 @@ public class BedGraphFileWriter<T extends Interval> extends IntervalFileWriter<T
 
 	@Override
 	public synchronized void write(T entry) {
-		writer.println(entry.toBedGraph());
+		write(entry.toBedGraph());
 	}
 }

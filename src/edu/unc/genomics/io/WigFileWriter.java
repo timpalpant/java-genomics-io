@@ -81,7 +81,7 @@ public class WigFileWriter implements Closeable {
 	 * and it will be written with the largest resolution that still resolves all features in the data
 	 * @param contig the Contig of values to write to this Wig file
 	 */
-	public final synchronized void write(final Contig contig) {
+	public final void write(final Contig contig) {
 		if(contig.isFixedStep()) {
 			writeFixedStepContig(contig);
 		} else {

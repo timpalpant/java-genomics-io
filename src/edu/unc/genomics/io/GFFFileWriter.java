@@ -24,7 +24,7 @@ public class GFFFileWriter<T extends Interval> extends IntervalFileWriter<T> {
 
 	@Override
 	public synchronized void write(T entry) {
-		writer.println(entry.toGFF());
+		write(entry.toGFF());
 	}
 
 }
