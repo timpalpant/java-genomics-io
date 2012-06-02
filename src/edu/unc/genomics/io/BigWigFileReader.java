@@ -59,23 +59,21 @@ public class BigWigFileReader extends WigFileReader {
 	}
 	
 	@Override
-	public Contig query(Interval interval) throws WigFileException {
+	public synchronized Contig query(Interval interval) throws WigFileException {
 		if (!includes(interval)) {
 			throw new WigFileException("BigWigFile does not contain data for region: "+interval);
 		}
 		
 		float[] values = new float[interval.length()];
 		Arrays.fill(values, Float.NaN);
-		synchronized (reader) {
-			BigWigIterator it = reader.getBigWigIterator(interval.getChr(), interval.low()-1, interval.getChr(), interval.high(), false);
-			while (it.hasNext()) {
-				WigItem item = it.next();
-				float value = item.getWigValue();
-				if (!Float.isNaN(value)) {
-					for (int bp = item.getStartBase()+1; bp <= item.getEndBase(); bp++) {
-						if(interval.includes(bp)) {
-							values[bp-interval.low()] = value;
-						}
+		BigWigIterator it = reader.getBigWigIterator(interval.getChr(), interval.low()-1, interval.getChr(), interval.high(), false);
+		while (it.hasNext()) {
+			WigItem item = it.next();
+			float value = item.getWigValue();
+			if (!Float.isNaN(value)) {
+				for (int bp = item.getStartBase()+1; bp <= item.getEndBase(); bp++) {
+					if(interval.includes(bp)) {
+						values[bp-interval.low()] = value;
 					}
 				}
 			}
@@ -89,26 +87,26 @@ public class BigWigFileReader extends WigFileReader {
 	}
 
 	@Override
-	public Set<String> chromosomes() {
+	public synchronized Set<String> chromosomes() {
 		return new LinkedHashSet<String>(reader.getChromosomeNames());
 	}
 
 	@Override
-	public int getChrStart(String chr) {
+	public synchronized int getChrStart(String chr) {
 		int chrID = reader.getChromosomeID(chr);
 		RPChromosomeRegion region = reader.getChromosomeBounds(chrID, chrID);
 		return region.getStartBase()+1;
 	}
 
 	@Override
-	public int getChrStop(String chr) {
+	public synchronized int getChrStop(String chr) {
 		int chrID = reader.getChromosomeID(chr);
 		RPChromosomeRegion region = reader.getChromosomeBounds(chrID, chrID);
 		return region.getEndBase();
 	}
 
 	@Override
-	public boolean includes(String chr, int start, int stop) {
+	public synchronized boolean includes(String chr, int start, int stop) {
 		int chrID = reader.getChromosomeID(chr);
 		if (chrID == -1) { return false; }
 		RPChromosomeRegion region = reader.getChromosomeBounds(chrID, chrID);
@@ -116,37 +114,37 @@ public class BigWigFileReader extends WigFileReader {
 	}
 
 	@Override
-	public boolean includes(String chr) {
+	public synchronized boolean includes(String chr) {
 		return reader.getChromosomeID(chr) != -1;
 	}
 
 	@Override
-	public long numBases() {
+	public synchronized long numBases() {
 		return summary.getBasesCovered();
 	}
 
 	@Override
-	public double total() {
+	public synchronized double total() {
 		return summary.getSumData();
 	}
 
 	@Override
-	public double mean() {
+	public synchronized double mean() {
 		return total() / numBases();
 	}
 
 	@Override
-	public double stdev() {
+	public synchronized double stdev() {
 		return Math.sqrt(summary.getSumSquares()/numBases() - Math.pow(mean(), 2));
 	}
 
 	@Override
-	public double min() {
+	public synchronized double min() {
 		return summary.getMinVal();
 	}
 
 	@Override
-	public double max() {
+	public synchronized double max() {
 		return summary.getMaxVal();
 	}
 
