@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.nio.file.Files;
 
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
@@ -112,6 +113,16 @@ public abstract class AbstractWigFileReaderTest {
 		assertEquals(Float.NaN, result.get(4), 1e-7f);
 		assertEquals(Float.NaN, result.get(9), 1e-7f);
 		assertEquals(Float.NaN, result.get(-1), 1e-7f);
+	}
+	
+	@Test
+	public void testQueryStats() throws WigFileException, IOException {
+		SummaryStatistics stats = test.queryStats("chrI", 5, 8);
+		assertEquals(6.5, stats.getMean(), 1e-7);
+		assertEquals(1.1180340051651, Math.sqrt(stats.getPopulationVariance()), 1e-7);
+		assertEquals(5, stats.getMin(), 1e-7);
+		assertEquals(8, stats.getMax(), 1e-7);
+		assertEquals(4, stats.getN());
 	}
 	
 	@Test
