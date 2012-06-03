@@ -136,6 +136,21 @@ public class TextWigFileReader extends WigFileReader {
 		return new Contig(interval, values);
 	}
 	
+	@Override
+	public SummaryStatistics queryStats(Interval interval) throws IOException, WigFileException {
+		if (!includes(interval)) {
+			throw new WigFileException("WigFile does not contain data for region: "+interval);
+		}
+		
+		SummaryStatistics stats = new SummaryStatistics();
+		// Load the values from each relevant contig
+		for (ContigIndex c : getContigsOverlappingInterval(interval)) {
+			c.fillStats(raf, interval, stats);
+		}
+		
+		return stats;
+	}
+	
 	private List<ContigIndex> getContigsOverlappingInterval(Interval interval) {
 		List<ContigIndex> relevantContigs = new ArrayList<>();
 		

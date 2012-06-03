@@ -101,12 +101,14 @@ public class WigFileWriter implements Closeable {
 	 * @param contig the Contig of values to write to this Wig file
 	 * @return the Future corresponding to this Contig's write job
 	 */
-	public final synchronized void writeFixedStepContig(final Contig contig) {
+	public final void writeFixedStepContig(final Contig contig) {
 		log.debug("Writing contig: "+contig.getFixedStepHeader());
-		writer.println(contig.getFixedStepHeader());
-		int step = contig.getMinStep();
-		for (int bp = contig.getFirstBaseWithData(); bp <= contig.high(); bp += step) {
-			writer.println(formatter.format(contig.get(bp)));
+		synchronized (writer) {
+			writer.println(contig.getFixedStepHeader());
+			int step = contig.getMinStep();
+			for (int bp = contig.getFirstBaseWithData(); bp <= contig.high(); bp += step) {
+				writer.println(formatter.format(contig.get(bp)));
+			}
 		}
 	}
 	
@@ -117,19 +119,21 @@ public class WigFileWriter implements Closeable {
 	 * @param contig the Contig of values to write to this Wig file
 	 * @return 
 	 */
-	public final synchronized void writeVariableStepContig(final Contig contig) {
+	public final void writeVariableStepContig(final Contig contig) {
 		log.debug("Writing contig: "+contig.getVariableStepHeader());
-		writer.println(contig.getVariableStepHeader());
-		int bp = contig.getFirstBaseWithData();
-		int span = contig.getVariableStepSpan();
-		while (bp <= contig.high()) {
-			float value = contig.get(bp);
-			// Write the value and skip the span size
-			if (!Float.isNaN(value)) {
-				writer.println(bp+"\t"+formatter.format(value));
-				bp += span;
-			} else {
-				bp++;
+		synchronized (writer) {
+			writer.println(contig.getVariableStepHeader());
+			int bp = contig.getFirstBaseWithData();
+			int span = contig.getVariableStepSpan();
+			while (bp <= contig.high()) {
+				float value = contig.get(bp);
+				// Write the value and skip the span size
+				if (!Float.isNaN(value)) {
+					writer.println(bp+"\t"+formatter.format(value));
+					bp += span;
+				} else {
+					bp++;
+				}
 			}
 		}
 	}

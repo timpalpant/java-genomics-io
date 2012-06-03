@@ -7,6 +7,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.log4j.Logger;
 import org.broad.igv.bbfile.BBFileReader;
 import org.broad.igv.bbfile.BBTotalSummaryBlock;
@@ -84,6 +85,29 @@ public class BigWigFileReader extends WigFileReader {
 		}
 		
 		return new Contig(interval, values);
+	}
+	
+	@Override
+	public synchronized SummaryStatistics queryStats(Interval interval) throws WigFileException {
+		if (!includes(interval)) {
+			throw new WigFileException("BigWigFile does not contain data for region: "+interval);
+		}
+		
+		SummaryStatistics stats = new SummaryStatistics();
+		BigWigIterator it = reader.getBigWigIterator(interval.getChr(), interval.low()-1, interval.getChr(), interval.high(), false);
+		while (it.hasNext()) {
+			WigItem item = it.next();
+			float value = item.getWigValue();
+			if (!Float.isNaN(value)) {
+				for (int bp = item.getStartBase()+1; bp <= item.getEndBase(); bp++) {
+					if(interval.includes(bp)) {
+						stats.addValue(value);
+					}
+				}
+			}
+		}
+		
+		return stats;
 	}
 
 	@Override

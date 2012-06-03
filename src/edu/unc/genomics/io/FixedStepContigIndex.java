@@ -2,6 +2,8 @@ package edu.unc.genomics.io;
 
 import java.io.IOException;
 
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+
 import ed.javatools.BufferedRandomAccessFile;
 import edu.unc.genomics.Contig;
 import edu.unc.genomics.Interval;
@@ -141,6 +143,50 @@ class FixedStepContigIndex extends ContigIndex {
 					for (int i = bp; i <= bp+getSpan()-1; i++) {
 						if (interval.includes(i)) {
 							values[i-interval.low()] = value;
+						}
+					}
+				}
+							
+				bp += getStep();
+			}
+		}
+	}
+	
+	@Override
+	public void fillStats(BufferedRandomAccessFile raf, Interval interval, SummaryStatistics stats) throws WigFileException, IOException {
+		// Clamp to bases that are covered by this Contig
+		int low = Math.max(start, interval.low());
+		int high = Math.min(stop, interval.high());
+		
+		// Figure out what lines we need
+		long startLine = getLineNumForBasePair(low);
+		long stopLine = getLineNumForBasePair(high);
+		
+		// Find the closest known upstream base-pair position in the index
+		int closestUpstream = getUpstreamIndexedBP(low);
+		synchronized (raf) {
+			// Seek to the closest known position in the index
+			raf.seek(getIndex(closestUpstream));
+			
+			// Skip to the start line
+			long currentLine;
+			for (currentLine = getLineNumForBasePair(closestUpstream); currentLine < startLine; currentLine++) {
+				raf.readLine2();
+			}
+			
+			// Get the base pair we are at (may be < start if span > 1)
+			int bp = getBasePairForLineNum(currentLine);
+			
+			// Load the values from disk into the array
+			while (currentLine <= stopLine) {
+				String line = raf.readLine2();
+				currentLine++;
+				
+				float value = Float.parseFloat(line);
+				if (!Float.isNaN(value)) {
+					for (int i = bp; i <= bp+getSpan()-1; i++) {
+						if (interval.includes(i)) {
+							stats.addValue(value);
 						}
 					}
 				}

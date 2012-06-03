@@ -36,8 +36,10 @@ public class BAMFileWriter implements Closeable {
 		writer.close();
 	}
 	
-	public synchronized void write(SAMEntry entry) {
-		writer.addAlignment(entry.getSAMRecord());
+	public void write(SAMEntry entry) {
+		synchronized (writer) {
+			writer.addAlignment(entry.getSAMRecord());
+		}
 	}
 	
 	/**

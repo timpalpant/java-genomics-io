@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Set;
 
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.log4j.Logger;
 
 import edu.ucsc.genome.TrackHeader;
@@ -68,7 +69,7 @@ public abstract class WigFileReader implements Closeable {
 	/**
 	 * Query for a Contig of data in this Wig file corresponding to a specific interval
 	 * @param interval the Interval of data to query for
-	 * @return an Iterator of WigItems that overlap the Interval i
+	 * @return a Contig of data from the Interval interval
 	 * @throws IOException if a disk read error occurs
 	 * @throws WigFileException if the Wig file does not contain data for this Interval
 	 */
@@ -79,12 +80,34 @@ public abstract class WigFileReader implements Closeable {
 	 * @param chr the chromosome of the interval
 	 * @param start the start base pair of the interval
 	 * @param stop the stop base pair of the interval
-	 * @return an Iterator of WigItems that overlap the specified interval
+	 * @return a Contig of data from the specified interval
 	 * @throws IOException if a disk read error occurs
 	 * @throws WigFileException if the Wig file does not contain data for this Interval
 	 */
 	public final Contig query(String chr, int start, int stop) throws IOException, WigFileException {
 		return query(new Interval(chr, start, stop));
+	}
+	
+	/**
+	 * Query for statistics about data in this Wig file corresponding to a specific interval
+	 * Without having to load the data into memory all at once into a Contig
+	 * @param interval the Interval of data to query for
+	 * @return a SummaryStatistics object of the data in this wig file from interval
+	 * @throws IOException if a disk read error occurs
+	 * @throws WigFileException if the Wig file does not contain data for this Interval
+	 */
+	public abstract SummaryStatistics queryStats(Interval interval) throws IOException, WigFileException;
+	
+	/**
+	 * Query for statistics about data in this Wig file corresponding to a specific interval
+	 * Without having to load the data into memory all at once into a Contig
+	 * @param interval the Interval of data to query for
+	 * @return a SummaryStatistics object of the data in this wig file from interval
+	 * @throws IOException if a disk read error occurs
+	 * @throws WigFileException if the Wig file does not contain data for this Interval
+	 */
+	public final SummaryStatistics queryStats(String chr, int start, int stop) throws IOException, WigFileException {
+		return queryStats(new Interval(chr, start, stop));
 	}
 	
 	/**

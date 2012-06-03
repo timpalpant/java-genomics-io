@@ -5,6 +5,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+
 import ed.javatools.BufferedRandomAccessFile;
 import edu.unc.genomics.Contig;
 import edu.unc.genomics.Interval;
@@ -52,6 +54,15 @@ abstract class ContigIndex extends Interval implements Serializable {
 	 * @param values the array to load the values into
 	 */
 	public abstract void fill(BufferedRandomAccessFile raf, Interval interval, float[] values) throws WigFileException, IOException;
+	
+	/**
+	 * Fill data from this contig into statistics
+	 * @param raf the file handle to get the data from
+	 * @param interval the query interval
+	 * @param stats the SummaryStatistics to load values into
+	 */
+	public abstract void fillStats(BufferedRandomAccessFile raf, Interval interval, SummaryStatistics stats) throws WigFileException, IOException;
+	
 	
 	/**
 	 * @return true if this index holds information about a fixedStep contig, false otherwise

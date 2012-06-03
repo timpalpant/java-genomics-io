@@ -34,7 +34,7 @@ public abstract class TextIntervalFileReader<T extends Interval> extends Interva
 	private Set<String> chromosomes;
 	private int count = 0;
 	
-	private final BufferedReader reader;
+	private final BufferedLineReader reader;
 	private final Iterator<T> iter;
 	
 	private Path bgzip;
@@ -45,9 +45,8 @@ public abstract class TextIntervalFileReader<T extends Interval> extends Interva
 		super(p);
 		this.factory = factory;
 		log.debug("Opening ASCII-text interval file reader "+p);
-		reader = Files.newBufferedReader(p, Charset.defaultCharset());
-		BufferedLineReader lineReader = new BufferedLineReader(reader);
-		iter = new StringIntervalIterator<T>(lineReader.iterator(), factory);
+		reader = new BufferedLineReader(Files.newBufferedReader(p, Charset.defaultCharset()));
+		iter = new StringIntervalIterator<T>(reader.iterator(), factory);
 	}
 	
 	@Override
@@ -56,7 +55,7 @@ public abstract class TextIntervalFileReader<T extends Interval> extends Interva
 	}
 	
 	@Override
-	public Set<String> chromosomes() {
+	public synchronized Set<String> chromosomes() {
 		if (chromosomes == null) {
 			if (tabixFile == null) {
 				convertToTabix();
@@ -69,7 +68,7 @@ public abstract class TextIntervalFileReader<T extends Interval> extends Interva
 	}
 	
 	@Override
-	public int count() {
+	public synchronized int count() {
 		if (count == 0) {
 			if (tabixFile == null) {
 				convertToTabix();
@@ -82,12 +81,12 @@ public abstract class TextIntervalFileReader<T extends Interval> extends Interva
 	}
 
 	@Override
-	public Iterator<T> iterator() {
+	public synchronized Iterator<T> iterator() {
 		return iter;
 	}
 
 	@Override
-	public Iterator<T> query(String chr, int start, int stop) {		
+	public synchronized Iterator<T> query(String chr, int start, int stop) {		
 		// Index the file with Tabix to enable querying
 		if (tabixFile == null) {
 			convertToTabix();
@@ -99,7 +98,7 @@ public abstract class TextIntervalFileReader<T extends Interval> extends Interva
 	/**
 	 * Filter, sort, BGZip, and index this file with Tabix for random querying
 	 */
-	private void convertToTabix() {
+	private synchronized void convertToTabix() {
 		log.debug("Auto-indexing ASCII interval file with Tabix");
 		try {
 			// Filter the input file
@@ -158,7 +157,7 @@ public abstract class TextIntervalFileReader<T extends Interval> extends Interva
 	 */
 	protected Comparator<String> getTabixComparator() {
 		// Make a new comparator that will sort the file by genomic location
-		Comparator<String> comparator = new Comparator<String>() {
+		return new Comparator<String>() {
 			public int compare(final String s1, final String s2) {
 				Conf conf = factory.tabixConf();
 				
@@ -191,8 +190,6 @@ public abstract class TextIntervalFileReader<T extends Interval> extends Interva
 				return c3;
 			}
 		};
-		
-		return comparator;
 	}
 	
 }

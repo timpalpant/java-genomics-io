@@ -51,8 +51,10 @@ public class IntervalFileWriter<T extends Interval> implements Closeable {
 	 * NOTE: There is no format checking, so the comment line must be correctly formatted/demarcated
 	 * @param line a line to write to this interval file
 	 */
-	public synchronized void writeComment(String line) {
-		writer.println(line);
+	public void writeComment(String line) {
+		synchronized (writer) {
+			writer.println(line);
+		}
 	}
 
 	/**
@@ -60,7 +62,9 @@ public class IntervalFileWriter<T extends Interval> implements Closeable {
 	 * @param entry the Interval to write to disk
 	 */
 	public synchronized void write(T entry) {
-		writer.println(entry.toOutput());
+		synchronized (writer) {
+			writer.println(entry.toOutput());
+		}
 	}
 	
 	/**
@@ -68,7 +72,9 @@ public class IntervalFileWriter<T extends Interval> implements Closeable {
 	 * @param line the line to write
 	 */
 	protected synchronized void write(String line) {
-		writer.println(line);
+		synchronized (writer) {
+			writer.println(line);
+		}
 	}
 
 }
