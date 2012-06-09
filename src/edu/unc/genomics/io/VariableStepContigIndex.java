@@ -72,8 +72,8 @@ class VariableStepContigIndex extends ContigIndex {
 	@Override
 	public void fill(BufferedRandomAccessFile raf, Interval interval, float[] values) throws WigFileException, IOException {
 		// Clamp to bases that are covered by this Contig
-		int low = Math.max(start, interval.low());
-		int high = Math.min(stop, interval.high());
+		int low = Math.max(getStart(), interval.low());
+		int high = Math.min(getStop(), interval.high());
 		
 		// Find the closest known upstream base-pair position
 		int closestUpstream = getUpstreamIndexedBP(low);
@@ -109,8 +109,8 @@ class VariableStepContigIndex extends ContigIndex {
 	@Override
 	public void fillStats(BufferedRandomAccessFile raf, Interval interval, SummaryStatistics stats) throws WigFileException, IOException {
 		// Clamp to bases that are covered by this Contig
-		int low = Math.max(start, interval.low());
-		int high = Math.min(stop, interval.high());
+		int low = Math.max(getStart(), interval.low());
+		int high = Math.min(getStop(), interval.high());
 		
 		// Find the closest known upstream base-pair position
 		int closestUpstream = getUpstreamIndexedBP(low);

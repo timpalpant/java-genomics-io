@@ -9,12 +9,10 @@ package edu.unc.genomics;
 public class ValuedInterval extends Interval {
 	private static final long serialVersionUID = 2976113135643438146L;
 	
-	protected String id;
 	protected Number value;
 	
 	public ValuedInterval(String chr, int start, int stop, String id, Number value) {
-		super(chr, start, stop);
-		this.id = id;
+		super(chr, start, stop, id);
 		this.value = value;
 	}
 	
@@ -41,7 +39,7 @@ public class ValuedInterval extends Interval {
 	
 	@Override
 	public String toBed() {
-		String idStr = (id == null) ? "." : id;
+		String idStr = (getId() == null) ? "." : getId();
 		String valueStr = (getValue() == null) ? "." : String.valueOf(getValue().intValue());
 		return getChr() + "\t" + (low()-1) + "\t" + high() + "\t" + idStr + "\t" + valueStr + "\t" + strand();
 	}
@@ -57,26 +55,10 @@ public class ValuedInterval extends Interval {
 	
 	@Override
 	public String toGFF() {
-		String idStr = (id == null) ? "no_id" : id;
+		String idStr = (getId() == null) ? "no_id" : getId();
 		String valueStr = (getValue() == null) ? "." : getValue().toString();
 		return getChr() + "\tSpotArray\tfeature\t" + low() + "\t" + high() + "\t" + valueStr + "\t" + strand() + "\t.\tprobe_id=" + idStr + ";count=1";
 	}
-
-	/**
-	 * @return the id
-	 */
-	public String getId() {
-		return id;
-	}
-	
-
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(final String id) {
-		this.id = id;
-	}
-	
 
 	/**
 	 * @return the value
@@ -84,7 +66,6 @@ public class ValuedInterval extends Interval {
 	public Number getValue() {
 		return value;
 	}
-	
 
 	/**
 	 * @param value the value to set

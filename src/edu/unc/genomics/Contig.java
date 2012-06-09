@@ -65,7 +65,7 @@ public class Contig extends Interval {
 	 * @return the data for Interval i, or NaN where data is not available
 	 */
 	public float[] get(Interval i) {
-		if (!i.getChr().equals(chr)) {
+		if (!i.getChr().equals(getChr())) {
 			return null;
 		}
 		
@@ -100,7 +100,7 @@ public class Contig extends Interval {
 			return Float.NaN;
 		}
 		
-		int i = Math.abs(bp-start);
+		int i = Math.abs(bp-getStart());
 		return values[i];
 	}
 	
@@ -239,7 +239,7 @@ public class Contig extends Interval {
 	 */
 	public String getFixedStepHeader() {
 		int actualSpan = Math.min(getMinSpan(), getMinStep());
-		return Contig.Type.FIXEDSTEP.getId()+" chrom="+chr+" start="+getFirstBaseWithData()+" span="+actualSpan+" step="+getMinStep();
+		return Contig.Type.FIXEDSTEP.getId()+" chrom="+getChr()+" start="+getFirstBaseWithData()+" span="+actualSpan+" step="+getMinStep();
 	}
 	
 	/**
@@ -247,7 +247,7 @@ public class Contig extends Interval {
 	 * @return a variableStep header line for a Wig file
 	 */
 	public String getVariableStepHeader() {
-		return Contig.Type.VARIABLESTEP.getId()+" chrom="+chr+" span="+getVariableStepSpan();
+		return Contig.Type.VARIABLESTEP.getId()+" chrom="+getChr()+" span="+getVariableStepSpan();
 	}
 	
 	/**

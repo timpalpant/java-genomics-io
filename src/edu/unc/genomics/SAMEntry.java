@@ -31,16 +31,16 @@ public class SAMEntry extends Interval implements Sequence {
 	 * @param stop
 	 */
 	public SAMEntry(SAMRecord r) {
-		super(r.getReferenceName(), r.getAlignmentStart(), r.getAlignmentEnd());
+		super(r.getReferenceName(), r.getAlignmentStart(), r.getAlignmentEnd(), r.getReadName());
 		this.r = r;
         
 		// Make the SAMEntry conform to standards
     int extend = (r.getInferredInsertSize() == 0) ? r.getReadLength() : Math.abs(r.getInferredInsertSize());
 		if (r.getReadNegativeStrandFlag()) {
-			start = r.getAlignmentStart() + r.getReadLength() - 1;
-			stop = start - extend + 1;
+			setStart(r.getAlignmentStart() + r.getReadLength() - 1);
+			setStop(getStart() - extend + 1);
 		} else {
-			stop = start + extend - 1;
+			setStop(getStart() + extend - 1);
 		}
 	}
 

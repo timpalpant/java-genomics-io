@@ -111,8 +111,8 @@ class FixedStepContigIndex extends ContigIndex {
 	@Override
 	public void fill(BufferedRandomAccessFile raf, Interval interval, float[] values) throws WigFileException, IOException {
 		// Clamp to bases that are covered by this Contig
-		int low = Math.max(start, interval.low());
-		int high = Math.min(stop, interval.high());
+		int low = Math.max(getStart(), interval.low());
+		int high = Math.min(getStop(), interval.high());
 		
 		// Figure out what lines we need
 		long startLine = getLineNumForBasePair(low);
@@ -155,8 +155,8 @@ class FixedStepContigIndex extends ContigIndex {
 	@Override
 	public void fillStats(BufferedRandomAccessFile raf, Interval interval, SummaryStatistics stats) throws WigFileException, IOException {
 		// Clamp to bases that are covered by this Contig
-		int low = Math.max(start, interval.low());
-		int high = Math.min(stop, interval.high());
+		int low = Math.max(getStart(), interval.low());
+		int high = Math.min(getStop(), interval.high());
 		
 		// Figure out what lines we need
 		long startLine = getLineNumForBasePair(low);

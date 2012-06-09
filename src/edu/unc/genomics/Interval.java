@@ -6,14 +6,20 @@ public class Interval implements Serializable {
 	
 	private static final long serialVersionUID = 7515817773660876485L;
 	
-	protected String chr;
-	protected int start;
-	protected int stop;
+	private String chr;
+	private int start;
+	private int stop;
+	private String id;
 	
 	public Interval(String chr, int start, int stop) {
+		this(chr, start, stop, null);
+	}
+	
+	public Interval(String chr, int start, int stop, String id) {
 		this.chr = chr;
 		this.start = start;
 		this.stop = stop;
+		this.id = id;
 	}
 	
 	/**
@@ -48,7 +54,8 @@ public class Interval implements Serializable {
 	 * @return an Interval in Bed format
 	 */
 	public String toBed() {
-		return chr + "\t" + (low()-1) + "\t" + high() + "\t.\t.\t" + strand();
+		String idStr = (id == null) ? "." : id;
+		return chr + "\t" + (low()-1) + "\t" + high() + "\t" + idStr + "\t.\t" + strand();
 	}
 	
 	/**
@@ -64,7 +71,8 @@ public class Interval implements Serializable {
 	 * @return an Interval in GFF format
 	 */
 	public String toGFF() {
-		return chr + "\tSpotArray\tfeature\t" + low() + "\t" + high() + "\t.\t" + strand() + "\t.\tprobe_id=no_id;count=1";
+		String idStr = (id == null) ? "no_id" : id;
+		return chr + "\tSpotArray\tfeature\t" + low() + "\t" + high() + "\t.\t" + strand() + "\t.\tprobe_id=" + idStr + ";count=1";
 	}
 	
 	/**
@@ -192,27 +200,35 @@ public class Interval implements Serializable {
 		return true;
 	}
 	
-	public String getChr() {
+	public final String getChr() {
 		return chr;
 	}
 	
-	public void setChr(final String chr) {
+	public final void setChr(final String chr) {
 		this.chr = chr;
 	}
 	
-	public int getStart() {
+	public final int getStart() {
 		return start;
 	}
 	
-	public void setStart(final int start) {
+	public final void setStart(final int start) {
 		this.start = start;
 	}
 	
-	public int getStop() {
+	public final int getStop() {
 		return stop;
 	}
 	
-	public void setStop(final int stop) {
+	public final void setStop(final int stop) {
 		this.stop = stop;
+	}
+	
+	public final String getId() {
+		return id;
+	}
+	
+	public final void setId(final String id) {
+		this.id = id;
 	}
 }
