@@ -60,6 +60,9 @@ public abstract class IntervalFileReader<T extends Interval> implements Iterable
 		} else if (sniffer.isGeneTrack()) {
 			log.debug("Autodetected GeneTrack filetype for: " + p);
 			return new GeneTrackFileReader(p);
+		} else if (sniffer.isVCF()) {
+			log.debug("Autodetected VCF filetype for: " + p);
+			return new VCFFileReader(p);
 		} else {
 			throw new IntervalFileSnifferException("Could not autodetect Interval file format");
 		}

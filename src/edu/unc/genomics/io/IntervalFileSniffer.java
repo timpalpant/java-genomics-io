@@ -11,6 +11,7 @@ import org.broad.igv.bbfile.BBFileReader;
 import edu.unc.genomics.BedEntry;
 import edu.unc.genomics.BedGraphEntry;
 import edu.unc.genomics.GFFEntry;
+import edu.unc.genomics.VCFEntry;
 import edu.unc.genomics.util.FileUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -138,6 +139,24 @@ public class IntervalFileSniffer {
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * @return true if this file is VCF format
+	 * @throws IOException
+	 */
+	public boolean isVCF() throws IOException {
+		if (!isAscii()) { return false; }
+		if (numColumns() < 8) { return false; }
+		if (!StringUtils.isNumeric(column(2))) { return false; }
+		
+		try { 
+			VCFEntry.parse(getFirstLine());
+		} catch (Exception e) {
+			return false;
+		}
+		
+		return true;
 	}
 	
 	/**

@@ -19,6 +19,7 @@ public class IntervalFileSnifferTest {
 	private static final Path TEST_GENETRACK = Paths.get("test/fixtures/test.genetrack");
 	private static final Path TEST_BAM = Paths.get("test/fixtures/test.bam");
 	private static final Path TEST_SAM = Paths.get("test/fixtures/test.sam");
+	private static final Path TEST_VCF = Paths.get("test/fixtures/test.vcf");
 
 	IntervalFileSniffer sniffer;
 
@@ -46,6 +47,7 @@ public class IntervalFileSnifferTest {
 		assertFalse(sniffer.isGeneTrack());
 		assertFalse(sniffer.isGFF());
 		assertFalse(sniffer.isSAM());
+		assertFalse(sniffer.isVCF());
 	}
 
 	@Test
@@ -58,6 +60,7 @@ public class IntervalFileSnifferTest {
 		assertFalse(sniffer.isGeneTrack());
 		assertFalse(sniffer.isGFF());
 		assertFalse(sniffer.isSAM());
+		assertFalse(sniffer.isVCF());
 	}
 
 	@Test
@@ -70,6 +73,7 @@ public class IntervalFileSnifferTest {
 		assertFalse(sniffer.isGeneTrack());
 		assertFalse(sniffer.isGFF());
 		assertFalse(sniffer.isSAM());
+		assertFalse(sniffer.isVCF());
 	}
 
 	@Test
@@ -82,6 +86,7 @@ public class IntervalFileSnifferTest {
 		assertFalse(sniffer.isGeneTrack());
 		assertFalse(sniffer.isBigBed());
 		assertFalse(sniffer.isSAM());
+		assertFalse(sniffer.isVCF());
 	}
 
 	@Test
@@ -94,6 +99,7 @@ public class IntervalFileSnifferTest {
 		assertFalse(sniffer.isBigBed());
 		assertFalse(sniffer.isGFF());
 		assertFalse(sniffer.isSAM());
+		assertFalse(sniffer.isVCF());
 	}
 
 	@Test
@@ -106,12 +112,27 @@ public class IntervalFileSnifferTest {
 		assertFalse(sniffer.isGeneTrack());
 		assertFalse(sniffer.isGFF());
 		assertFalse(sniffer.isSAM());
+		assertFalse(sniffer.isVCF());
 	}
 
 	@Test
 	public void testIsSAM() throws IOException {
 		sniffer = new IntervalFileSniffer(TEST_SAM);
 		assertTrue(sniffer.isSAM());
+		assertFalse(sniffer.isBAM());
+		assertFalse(sniffer.isBed());
+		assertFalse(sniffer.isBedGraph());
+		assertFalse(sniffer.isGeneTrack());
+		assertFalse(sniffer.isGFF());
+		assertFalse(sniffer.isBigBed());
+		assertFalse(sniffer.isVCF());
+	}
+	
+	@Test
+	public void testIsVCF() throws IOException {
+		sniffer = new IntervalFileSniffer(TEST_VCF);
+		assertTrue(sniffer.isVCF());
+		assertFalse(sniffer.isSAM());
 		assertFalse(sniffer.isBAM());
 		assertFalse(sniffer.isBed());
 		assertFalse(sniffer.isBedGraph());
