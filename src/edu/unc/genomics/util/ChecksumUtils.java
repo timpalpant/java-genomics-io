@@ -1,6 +1,5 @@
 package edu.unc.genomics.util;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,9 +31,9 @@ public class ChecksumUtils {
 	
 	public static long file(Path p, Checksum c) throws IOException {
 		log.debug("Calculating checksum for "+p);
-		try (CheckedInputStream cis = new CheckedInputStream(Files.newInputStream(p), c);
-				BufferedInputStream bis = new BufferedInputStream(cis)) {
-			while (bis.read() != -1) { }
+		byte[] buf = new byte[131_136];
+		try (CheckedInputStream cis = new CheckedInputStream(Files.newInputStream(p), c)) {
+			while (cis.read(buf, 0, buf.length) != -1);
 			log.debug("Checksum = "+cis.getChecksum().getValue());
 			return cis.getChecksum().getValue();
 		}
