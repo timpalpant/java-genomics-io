@@ -214,6 +214,10 @@ public class TextWigFileReader extends WigFileReader {
 	
 	@Override
 	public int getChrStop(String chr) {		
+		if (!includes(chr)) {
+			return -1;
+		}
+		
 		int stop = -1;
 		for (ContigIndex c : contigs.get(chr)) {
 			if (c.getStop() > stop) {
@@ -222,6 +226,40 @@ public class TextWigFileReader extends WigFileReader {
 		}
 		
 		return stop;
+	}
+	
+	@Override
+	public int getChrStep(String chr) {
+		if (!includes(chr)) {
+			return -1;
+		}
+		
+		int step = Integer.MAX_VALUE;
+		for (ContigIndex c : contigs.get(chr)) {
+			if (c.isVariableStep()) {
+				return 1;
+			} else if (((FixedStepContigIndex)c).getStep() < step) {
+				step = ((FixedStepContigIndex)c).getStep();
+			}
+		}
+		
+		return step;
+	}
+
+	@Override
+	public int getChrSpan(String chr) {
+		if (!includes(chr)) {
+			return -1;
+		}
+		
+		int span = Integer.MAX_VALUE;
+		for (ContigIndex c : contigs.get(chr)) {
+			if (c.getSpan() < span) {
+				span = c.getSpan();
+			}
+		}
+		
+		return span;
 	}
 	
 	@Override

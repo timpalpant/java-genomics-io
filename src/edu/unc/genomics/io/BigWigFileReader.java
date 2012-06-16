@@ -128,6 +128,16 @@ public class BigWigFileReader extends WigFileReader {
 		RPChromosomeRegion region = reader.getChromosomeBounds(chrID, chrID);
 		return region.getEndBase();
 	}
+	
+	@Override
+	public int getChrStep(String chr) {
+		return 1;
+	}
+
+	@Override
+	public int getChrSpan(String chr) {
+		return 1;
+	}
 
 	@Override
 	public synchronized boolean includes(String chr, int start, int stop) {

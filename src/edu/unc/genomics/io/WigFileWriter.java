@@ -82,15 +82,11 @@ public class WigFileWriter implements Closeable {
 	 * @param contig the Contig of values to write to this Wig file
 	 */
 	public final void write(final Contig contig) {
-		if(contig.isFixedStep()) {
-			writeFixedStepContig(contig);
+		float sparsity = ((float) contig.coverage()) / contig.length();
+		if (sparsity < 0.55 || contig.getVariableStepSpan() > contig.getMinStep()) {
+			writeVariableStepContig(contig);
 		} else {
-			float sparsity = ((float) contig.coverage()) / contig.length();
-			if (sparsity < 0.55 || contig.getVariableStepSpan() > 1) {
-				writeVariableStepContig(contig);
-			} else {
-				writeFixedStepContig(contig);
-			}
+			writeFixedStepContig(contig);
 		}
 	}
 	

@@ -128,6 +128,18 @@ public abstract class WigFileReader implements Closeable {
 	public abstract int getChrStop(String chr);
 	
 	/**
+	 * @param chr the chromosome to get the step of
+	 * @return the step size for chr in this Wig file
+	 */
+	public abstract int getChrStep(String chr);
+	
+	/**
+	 * @param chr the chromosome to get the span of
+	 * @return the span size for chr in this Wig file
+	 */
+	public abstract int getChrSpan(String chr);
+	
+	/**
 	 * Does this Wig file include data for a given Interval?
 	 * @param i the Interval to query for
 	 * @return true if this Wig file includes data for i
