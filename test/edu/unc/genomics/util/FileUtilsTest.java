@@ -38,11 +38,6 @@ public class FileUtilsTest {
 	}
 
 	@Test
-	public void testIsAsciiTextWithThreshold() throws IOException {
-		assertTrue(FileUtils.isAsciiText(testAscii, 1.0));
-	}
-
-	@Test
 	public void testCountLines() throws IOException {
 		assertEquals(122, FileUtils.countLines(testAscii));
 	}

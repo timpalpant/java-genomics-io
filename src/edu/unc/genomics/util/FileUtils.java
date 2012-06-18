@@ -2,8 +2,8 @@ package edu.unc.genomics.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.MalformedInputException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
@@ -22,7 +22,7 @@ import org.apache.log4j.Logger;
 public class FileUtils {
 	
 	private static final Logger log = Logger.getLogger(FileUtils.class);
-	public static double DEFAULT_THRESHOLD = 0.3;
+	public static final int DEFAULT_BLOCK_SIZE = 4096;
 
 	/**
 	 * Guess whether a file is ASCII text format, using a default threshold where the number
@@ -32,31 +32,14 @@ public class FileUtils {
 	 * @throws IOException
 	 */
 	public static boolean isAsciiText(Path p) throws IOException {
-		return isAsciiText(p, DEFAULT_THRESHOLD);
-	}
-	
-	/**
-	 * Guess whether a file is ASCII text format, allowing a certain fraction of mismatches
-	 * @param p the file to determine if it is ASCII
-	 * @param threshold the allowable fraction of characters that are not ASCII
-	 * @return true if the file has < threshold percent non-ASCII characters, false otherwise
-	 * @throws IOException
-	 */
-	public static boolean isAsciiText(Path p, double threshold) throws IOException {
-		int totalCount = 0;
-		int binaryCount = 0;
-		try (InputStream fis = Files.newInputStream(p)) {
-			for (int i = 1; i < 1024; i++) {
-				if (fis.available() == 0) { break; }
-				int current = fis.read();
-				if (current < 32 || current > 127) { binaryCount++; }
-				totalCount++;
-			}
+		char[] buf = new char[DEFAULT_BLOCK_SIZE];
+		try (BufferedReader reader = Files.newBufferedReader(p, Charset.defaultCharset())) {
+			reader.read(buf);
+		} catch (MalformedInputException e) {
+			return false;
 		}
 		
-		float binaryFraction = ((float)binaryCount)/totalCount;
-		log.debug("Found "+100*binaryFraction+"% non-ASCII characters in "+p);
-		return binaryFraction < threshold;
+		return true;
 	}
 	
 	/**
