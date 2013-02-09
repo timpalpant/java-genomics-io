@@ -49,6 +49,34 @@ public class Contig extends Interval {
 	public Contig(String chr, int start, int stop) {
 		this(chr, start, stop, null);
 	}
+	
+	/**
+	 * Copy a subset of data from this Contig into a new Contig. 
+	 * If the Contig is not for this interval, then null is returned.
+	 * If the specified start-stop are outside the Contig range,
+	 * then the returned array will be padded with NaNs.
+	 * @param i the interval to get data for
+	 * @return the data for Interval i, or NaN where data is not available
+	 */
+	public Contig copy(Interval i) {
+		if (!i.getChr().equals(getChr())) {
+			return null;
+		}
+		
+		return copy(i.getStart(), i.getStop());
+	}
+	
+	/**
+	 * Copy a subset of data from this Contig into a new Contig. 
+	 * If the specified start-stop are outside the Contig range,
+	 * then the returned array will be padded with NaNs.
+	 * @param start the first base pair
+	 * @param stop the last base pair
+	 * @return the data from start-stop, or NaN where data is not available
+	 */
+	public Contig copy(int start, int stop) {
+		return new Contig(getChr(), start, stop, get(start, stop));
+	}
 
 	/**
 	 * @return the values
