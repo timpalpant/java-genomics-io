@@ -14,6 +14,9 @@ import edu.unc.genomics.GFFEntry;
 import edu.unc.genomics.VCFEntry;
 import edu.unc.genomics.util.FileUtils;
 
+import edu.ucsc.genome.TrackHeader;
+import edu.ucsc.genome.TrackHeaderException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -33,6 +36,7 @@ public class IntervalFileSniffer {
 	
 	protected Path p;
 	protected String firstLine;
+  protected TrackHeader trackHeader;
 	
 	public IntervalFileSniffer(Path p) {
 		this.p = p;
@@ -93,13 +97,10 @@ public class IntervalFileSniffer {
 		if (!isAscii()) { return false; }
 		if (numColumns() != 4) { return false; }
 		if (!StringUtils.isNumeric(column(2)) || !StringUtils.isNumeric(column(3))) { return false; }
-		try {
-			Float.parseFloat(column(4));
-		} catch (Exception e) {
-			return false;
-		}
+		if (getTrackHeader() != null && getTrackHeader().getType() != TrackHeader.Type.BEDGRAPH) { return false; }
 		
-		try { 
+		try {
+      Float.parseFloat(column(4));
 			BedGraphEntry.parse(getFirstLine());
 		} catch (Exception e) {
 			return false;
@@ -191,7 +192,7 @@ public class IntervalFileSniffer {
 		
 		ValidationStringency stringency = SAMFileReader.getDefaultValidationStringency();
 		try {
-			SAMFileReader.setDefaultValidationStringency(SAMFileReader.ValidationStringency.STRICT);
+			SAMFileReader.setDefaultValidationStringency(SAMFileReader.ValidationStringency.DEFAULT_STRINGENCY);
 			SAMFileReader reader = new SAMFileReader(p.toFile());
 			// Ensure that the first record loads correctly
 			SAMRecord r = reader.iterator().next();
@@ -204,6 +205,28 @@ public class IntervalFileSniffer {
 		}
 		
 		return isSAM;
+	}
+
+	/**
+	 * @return the TrackHeader of an ASCII text file, if it exists; null otherwise
+	 * @throws IOException
+	 */
+	private TrackHeader getTrackHeader() throws IOException {
+		if (trackHeader == null) {
+      String trackLine = null;
+			try (BufferedReader reader = Files.newBufferedReader(p, Charset.defaultCharset())) {
+				trackLine = reader.readLine();
+				if (trackLine.startsWith("track")) {
+          trackHeader = TrackHeader.parse(trackLine);
+        }
+      } catch (TrackHeaderException e) { 
+        log.debug("Error parsing track line: "+trackLine);
+      }
+			
+			log.debug("Loaded track header of interval file: "+trackHeader);
+		}
+		
+		return trackHeader;
 	}
 	
 	/**

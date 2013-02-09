@@ -84,7 +84,7 @@ public abstract class WigFileReader implements Closeable {
 	 * @throws IOException if a disk read error occurs
 	 * @throws WigFileException if the Wig file does not contain data for this Interval
 	 */
-	public final Contig query(String chr, int start, int stop) throws IOException, WigFileException {
+	public final synchronized Contig query(String chr, int start, int stop) throws IOException, WigFileException {
 		return query(new Interval(chr, start, stop));
 	}
 	
@@ -106,7 +106,7 @@ public abstract class WigFileReader implements Closeable {
 	 * @throws IOException if a disk read error occurs
 	 * @throws WigFileException if the Wig file does not contain data for this Interval
 	 */
-	public final SummaryStatistics queryStats(String chr, int start, int stop) throws IOException, WigFileException {
+	public final synchronized SummaryStatistics queryStats(String chr, int start, int stop) throws IOException, WigFileException {
 		return queryStats(new Interval(chr, start, stop));
 	}
 	

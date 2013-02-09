@@ -834,7 +834,7 @@ public class SAMEntry extends Interval implements Sequence {
 	
 	@Override
 	public String toOutput() {
-		return getSAMString();
+		return getSAMString().trim();
 	}
 
 	/**
