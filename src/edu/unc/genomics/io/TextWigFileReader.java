@@ -42,6 +42,7 @@ public class TextWigFileReader extends WigFileReader {
 	private static Logger log = Logger.getLogger(TextWigFileReader.class);
 	
 	private BufferedRandomAccessFile raf;
+	private Path index;
 	private Map<String,List<ContigIndex>> contigs = new HashMap<>();
 	private long checksum;
 	private SummaryStatistics stats;
@@ -70,14 +71,14 @@ public class TextWigFileReader extends WigFileReader {
 		checksum = ChecksumUtils.crc32(p);
 		
 		// Attempt to load an index from disk, or generate one otherwise
-		Path indexFile = p.resolveSibling(p.getFileName()+INDEX_EXTENSION);
+		index = p.resolveSibling(p.getFileName()+INDEX_EXTENSION);
 		try {
-			loadIndex(indexFile, true);
+			loadIndex(index, true);
 		} catch (IOException | WigFileException e) {
 			// (Re)generate if the index could not be loaded
-			Files.deleteIfExists(indexFile);
+			Files.deleteIfExists(index);
 			generateIndex();
-			saveIndex(indexFile);
+			saveIndex(index);
 		}
 	}
 	
@@ -92,6 +93,7 @@ public class TextWigFileReader extends WigFileReader {
 		super(p);
 		log.debug("Opening ASCII-text Wig file "+p+" with index "+index);
 		raf = new BufferedRandomAccessFile(p.toFile(), "r");
+		this.index = index;
 
 		String headerLine = raf.readLine2();
 		if (headerLine.startsWith("track")) {
@@ -106,6 +108,23 @@ public class TextWigFileReader extends WigFileReader {
 		loadIndex(index, false);
 	}
 	
+	/**
+	 * Copy constructor - open a new file handle, but leave the index intact
+	 * @param other
+	 * @throws IOException
+	 */
+	public TextWigFileReader(TextWigFileReader other) throws IOException {
+		super(other.p);
+		index = other.index;
+		log.debug("Opening new file handle to ASCII-text Wig file "+p);
+		raf = new BufferedRandomAccessFile(other.p.toFile(), "r");
+		
+		// Shallow-copy the index
+		contigs = other.contigs;
+		checksum = other.checksum;
+		stats = other.stats;
+	}
+	
 	@Override
 	public void close() {
 		log.debug("Closing Wig file reader "+p);
@@ -117,7 +136,7 @@ public class TextWigFileReader extends WigFileReader {
 	}
 	
 	@Override
-	public synchronized Contig query(Interval interval) throws IOException, WigFileException {
+	public Contig query(Interval interval) throws IOException, WigFileException {
 		if (!includes(interval)) {
 			throw new WigFileException("WigFile does not contain data for region: "+interval);
 		}
@@ -137,7 +156,7 @@ public class TextWigFileReader extends WigFileReader {
 	}
 	
 	@Override
-	public synchronized SummaryStatistics queryStats(Interval interval) throws IOException, WigFileException {
+	public SummaryStatistics queryStats(Interval interval) throws IOException, WigFileException {
 		if (!includes(interval)) {
 			throw new WigFileException("WigFile does not contain data for region: "+interval);
 		}
@@ -516,6 +535,15 @@ public class TextWigFileReader extends WigFileReader {
 			e.printStackTrace();
 			// Remove the file because it's probably corrupt
 			Files.deleteIfExists(p);
+		}
+	}
+
+	@Override
+	public TextWigFileReader clone() {
+		try {
+			return new TextWigFileReader(this);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 	

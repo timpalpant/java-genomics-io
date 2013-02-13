@@ -21,7 +21,7 @@ import edu.unc.genomics.Interval;
  * @author timpalpant
  *
  */
-public abstract class WigFileReader implements Closeable {
+public abstract class WigFileReader implements Closeable, Cloneable {
 	
 	private static final Logger log = Logger.getLogger(WigFileReader.class);
 	protected final Path p;
@@ -84,7 +84,7 @@ public abstract class WigFileReader implements Closeable {
 	 * @throws IOException if a disk read error occurs
 	 * @throws WigFileException if the Wig file does not contain data for this Interval
 	 */
-	public final synchronized Contig query(String chr, int start, int stop) throws IOException, WigFileException {
+	public final Contig query(String chr, int start, int stop) throws IOException, WigFileException {
 		return query(new Interval(chr, start, stop));
 	}
 	
@@ -106,7 +106,7 @@ public abstract class WigFileReader implements Closeable {
 	 * @throws IOException if a disk read error occurs
 	 * @throws WigFileException if the Wig file does not contain data for this Interval
 	 */
-	public final synchronized SummaryStatistics queryStats(String chr, int start, int stop) throws IOException, WigFileException {
+	public final SummaryStatistics queryStats(String chr, int start, int stop) throws IOException, WigFileException {
 		return queryStats(new Interval(chr, start, stop));
 	}
 	
@@ -196,4 +196,7 @@ public abstract class WigFileReader implements Closeable {
 	
 	@Override
 	public abstract String toString();
+	
+	@Override
+	public abstract WigFileReader clone();
 }
