@@ -99,12 +99,10 @@ Similar abstraction is provided for Wig/BigWig files. Contiguous blocks of value
   $   System.out.println("Total = " + result.total());
   $ }
 
-Indexing is used to execute the queries efficiently. In addition, individual entries in a Wig file can be iterated over if the query is too large to load into memory all at once:
+Indexing is used to execute the queries efficiently. If the query is too large to load into memory all at once, you can ask for only statistics about the query:
 
-  $ Iterator<WigEntry> it = wig.getOverlappingEntries("chr23", 1, 100_000_000);
-  $ while(it.hasNext()) {
-  $   System.out.println(it.next().toBedGraph());
-  $ }
+  $ SummaryStatistics stats = wig.queryStats("chr23", 1, 100_000_000);
+  $ System.out.println("Mean of interval chr23:1-100,000,000 = "+stats.getMean());
   
 However, the order in which entries are returned is not guaranteed and will vary based on the structure of the underlying Wig file.
 
