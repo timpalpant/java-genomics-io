@@ -45,6 +45,14 @@ public class BigWigFileReader extends WigFileReader {
 		summary = reader.getTotalSummaryBlock();
 	}
 	
+	public BigWigFileReader(BigWigFileReader other) throws IOException {
+		super(other.p);
+		
+		log.debug("Cloning BigWig file reader "+p);
+		reader = new BBFileReader(other.p.toString());
+		summary = reader.getTotalSummaryBlock();
+	}
+	
 	public static boolean isBigWig(Path p) throws IOException {
 		boolean isBigWig = false;
 		try {
@@ -200,6 +208,15 @@ public class BigWigFileReader extends WigFileReader {
 		s.append("\tMax value:\t\t").append(max());
 		
 		return s.toString();
+	}
+
+	@Override
+	public BigWigFileReader clone() {
+		try {
+			return new BigWigFileReader(this);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }

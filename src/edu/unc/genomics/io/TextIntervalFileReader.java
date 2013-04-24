@@ -133,13 +133,12 @@ public abstract class TextIntervalFileReader<T extends Interval> extends Interva
 			// Index the BGZipped file with Tabix
 			index = Tabix.index(bgzip, factory.tabixConf());
 			index.toFile().deleteOnExit();
-		} catch (IOException e3) {
+		} catch (IOException ioe) {
 			log.error("Error sorting and compressing interval file");
-			throw new RuntimeException("Error sorting and compressing interval file");
-		} catch (TabixException e1) {
+			throw new RuntimeException(ioe);
+		} catch (TabixException te) {
 			log.error("Error indexing with Tabix");
-			e1.printStackTrace();
-			throw new RuntimeException("Error indexing Tabix file");
+			throw new RuntimeException(te);
 		}
 		
 		// Open the file with a new TabixFile reader
@@ -147,8 +146,7 @@ public abstract class TextIntervalFileReader<T extends Interval> extends Interva
 			tabixFile = new TabixFileReader<T>(bgzip, factory);
 		} catch (IOException e) {
 			log.error("Error initializing Tabix file");
-			e.printStackTrace();
-			throw new RuntimeException("Error initializing Tabix file");
+			throw new RuntimeException(e);
 		}
 	}
 	
