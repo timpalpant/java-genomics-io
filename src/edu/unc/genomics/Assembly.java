@@ -45,6 +45,7 @@ public class Assembly implements Iterable<String> {
 				line = line.trim();
 				if (line.length() == 0 || line.startsWith("#")) {
 					log.debug("Skipping comment/empty line "+lineNum+" in Assembly file");
+					continue;
 				}
 				int delim = line.indexOf('\t');
 				if (delim == -1) {
