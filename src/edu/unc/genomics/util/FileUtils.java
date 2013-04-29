@@ -33,7 +33,7 @@ public class FileUtils {
 	 */
 	public static boolean isAsciiText(Path p) throws IOException {
 		char[] buf = new char[DEFAULT_BLOCK_SIZE];
-		try (BufferedReader reader = Files.newBufferedReader(p, Charset.defaultCharset())) {
+		try (BufferedReader reader = Files.newBufferedReader(p, Charset.forName("US-ASCII"))) {
 			reader.read(buf);
 		} catch (MalformedInputException e) {
 			return false;

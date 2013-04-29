@@ -39,10 +39,16 @@ public class Assembly implements Iterable<String> {
 		log.debug("Loading assembly "+this);
 		try (BufferedReader reader = Files.newBufferedReader(p, Charset.defaultCharset())) {
 			String line;
+			int lineNum = 0;
 			while ((line = reader.readLine()) != null) {
+				lineNum++;
+				line = line.trim();
+				if (line.length() == 0 || line.startsWith("#")) {
+					log.debug("Skipping comment/empty line "+lineNum+" in Assembly file");
+				}
 				int delim = line.indexOf('\t');
 				if (delim == -1) {
-					throw new DataFormatException("Invalid format in Assembly file");
+					throw new DataFormatException("Invalid format in Assembly file (no tab found in line "+lineNum+": "+line+")");
 				}
 				
 				try {
@@ -50,7 +56,7 @@ public class Assembly implements Iterable<String> {
 					Integer length = Integer.valueOf(line.substring(delim+1));
 					index.put(chr, length);
 				} catch (NumberFormatException e) {
-					throw new DataFormatException("Invalid format in Assembly file");
+					throw new DataFormatException("Invalid format in Assembly file (could not parse chromosome length in line "+lineNum+": "+line+")");
 				}
 			}
 		}
