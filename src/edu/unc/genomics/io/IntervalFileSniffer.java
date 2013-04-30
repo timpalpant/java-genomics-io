@@ -146,7 +146,7 @@ public class IntervalFileSniffer {
 			BBFileReader reader = new BBFileReader(p.toString());
 			return reader.isBigBedFile();
 		} catch (Exception e) {
-			throw new IntervalFileSnifferException("Error opening BigBed file: "+e);
+			throw new IntervalFileSnifferException("Error opening BigBed file: "+e.getMessage());
 		}
 	}
 	
@@ -192,7 +192,7 @@ public class IntervalFileSniffer {
 		try {
 			BedEntry.parse(getFirstLine());
 		} catch (Exception e) {
-			throw new IntervalFileSnifferException("Error parsing Bed entry:"+e);
+			throw new IntervalFileSnifferException("Error parsing Bed entry: "+e.getMessage());
 		}
 		
 		return true;
@@ -242,7 +242,7 @@ public class IntervalFileSniffer {
 		try {
 			BedGraphEntry.parse(getFirstLine());
 		} catch (Exception e) {
-			throw new IntervalFileSnifferException("Error parsing BedGraph entry:"+e);
+			throw new IntervalFileSnifferException("Error parsing BedGraph entry: "+e.getMessage());
 		}
 		
 		return true;
@@ -286,7 +286,7 @@ public class IntervalFileSniffer {
 		try { 
 			GFFEntry.parse(getFirstLine());
 		} catch (Exception e) {
-			throw new IntervalFileSnifferException("Error parsing GFF entry:"+e);
+			throw new IntervalFileSnifferException("Error parsing GFF entry: "+e.getMessage());
 		}
 		
 		return true;
@@ -361,7 +361,7 @@ public class IntervalFileSniffer {
 		try { 
 			VCFEntry.parse(getFirstLine());
 		} catch (Exception e) {
-			throw new IntervalFileSnifferException("Error parsing VCF entry:"+e);
+			throw new IntervalFileSnifferException("Error parsing VCF entry: "+e.getMessage());
 		}
 		
 		return true;
@@ -391,7 +391,7 @@ public class IntervalFileSniffer {
 			SAMRecord r = reader.iterator().next();
 			return reader.isBinary();
 		} catch (Exception e) {
-			throw new IntervalFileSnifferException("Error opening BAM file: "+e);
+			throw new IntervalFileSnifferException("Error opening BAM file: "+e.getMessage());
 		} finally {
 			SAMFileReader.setDefaultValidationStringency(stringency);
 		}
@@ -422,7 +422,7 @@ public class IntervalFileSniffer {
 			SAMRecord r = reader.iterator().next();
 			return !reader.isBinary();
 		} catch (Exception e) {
-			throw new IntervalFileSnifferException("Error opening SAM file: "+e);
+			throw new IntervalFileSnifferException("Error opening SAM file: "+e.getMessage());
 		} finally {
 			SAMFileReader.setDefaultValidationStringency(stringency);
 		}
