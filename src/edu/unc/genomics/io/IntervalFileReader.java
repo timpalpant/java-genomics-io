@@ -12,6 +12,8 @@ import org.apache.log4j.Logger;
 
 import edu.unc.genomics.Interval;
 
+import edu.ucsc.genome.TrackHeader;
+
 /**
  * Base class for reading files of Interval information, including Bed, BigBed, BedGraph, GFF, GeneTrack, SAM, and BAM files
  * Subclasses will provide type-specific information, but this class may be used when only Interval info (chr:start-stop) is needed
@@ -39,6 +41,31 @@ public abstract class IntervalFileReader<T extends Interval> implements Iterable
 	public static IntervalFileReader<? extends Interval> autodetect(Path p) throws IntervalFileSnifferException, IOException {
 		IntervalFileSniffer sniffer = new IntervalFileSniffer(p);
 		
+		// Use the UCSC track line type if it is set
+		// This lets you specify the file type manually if it cannot
+		// be autodetected
+		TrackHeader header = sniffer.getTrackHeader();
+		if (header != null) {
+			TrackHeader.Type type = header.getType();
+			if (type != null) {
+				switch (type) {
+					case BED:
+						log.debug("track line indicates Bed filetype for: " + p);
+						return new BedFileReader(p);
+					case BEDGRAPH:
+						log.debug("track line indicates BedGraph filetype for: " + p);
+						return new BedGraphFileReader(p);
+					case GFF:
+						log.debug("track line indicates GFF filetype for: " + p);
+						return new GFFFileReader(p);
+					default:
+						log.warn("Unknown track type: "+type);
+						log.debug("Using heuristics to analyze first data line");
+				}
+			}
+		}
+		
+		// Use heuristics to analyze the first data line in the file
 		if (sniffer.isBigBed()) {
 			log.debug("Autodetected BigBed filetype for: " + p);
 			return new BigBedFileReader(p);
@@ -64,6 +91,8 @@ public abstract class IntervalFileReader<T extends Interval> implements Iterable
 			log.debug("Autodetected VCF filetype for: " + p);
 			return new VCFFileReader(p);
 		} else {
+			log.warn("Could not autodetect Interval file format");
+			sniffer.diagnose();
 			throw new IntervalFileSnifferException("Could not autodetect Interval file format");
 		}
 	}
