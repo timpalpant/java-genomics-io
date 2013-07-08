@@ -403,7 +403,9 @@ public class TextWigFileReader extends WigFileReader {
 					bp = contig.getStart() - ((FixedStepContigIndex)contig).getStep();
 				}
 			} else {
-				if (contig.isFixedStep()) {
+				if (contig == null) {
+					throw new WigFileFormatException("Missing contig header (fixedStep or variableStep). Illegal format in Wig file, line " + lineNum);
+				} else if (contig.isFixedStep()) {
 					bp += ((FixedStepContigIndex)contig).getStep();
 					try {
 						value = Double.parseDouble(line);

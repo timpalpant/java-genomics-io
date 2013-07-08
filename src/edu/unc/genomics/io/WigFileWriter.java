@@ -25,17 +25,6 @@ public class WigFileWriter implements Closeable {
 	
 	private static final Logger log = Logger.getLogger(WigFileWriter.class);
 	
-	// The format for writing numerical (float) values into Wig files
-	private static final DecimalFormat formatter = new DecimalFormat();
-	static {
-		formatter.setMaximumFractionDigits(8);
-		formatter.setGroupingUsed(false);
-		DecimalFormatSymbols symbols = formatter.getDecimalFormatSymbols();
-		symbols.setInfinity("Inf");
-		symbols.setNaN("NaN");
-		formatter.setDecimalFormatSymbols(symbols);
-	}
-	
 	private final Path p;
 	private final PrintWriter writer;
 	
@@ -76,22 +65,36 @@ public class WigFileWriter implements Closeable {
 	}
 	
 	/**
+	 * Formats values for writing into Wig files
+	 */
+	public static DecimalFormat newFormatter() {
+		DecimalFormat formatter = new DecimalFormat();
+		formatter.setMaximumFractionDigits(8);
+		formatter.setGroupingUsed(false);
+		DecimalFormatSymbols symbols = formatter.getDecimalFormatSymbols();
+		symbols.setInfinity("Inf");
+		symbols.setNaN("NaN");
+		formatter.setDecimalFormatSymbols(symbols);
+		return formatter;
+	}
+	
+	/**
 	 * Add a new Contig of values to this Wig file
 	 * The most compact format will automatically be chosen (fixedStep/variableStep) based on sparsity and layout
 	 * and it will be written with the largest resolution that still resolves all features in the data
 	 * @param contig the Contig of values to write to this Wig file
 	 */
 	public final void write(final Contig contig) {
-    if (contig.coverage() == 0) {
-      log.debug("Not writing empty contig with no data values");
-    } else {
-  		float sparsity = ((float) contig.coverage()) / contig.length();
-  		if (sparsity < 0.55 || contig.getVariableStepSpan() > contig.getMinStep()) {
-  			writeVariableStepContig(contig);
-  		} else {
-  			writeFixedStepContig(contig);
-  		}
-    }
+		if (contig.coverage() == 0) {
+		  log.debug("Not writing empty contig with no data values");
+		} else {
+			float sparsity = ((float) contig.coverage()) / contig.length();
+			if (sparsity < 0.55 || contig.getVariableStepSpan() > contig.getMinStep()) {
+				writeVariableStepContig(contig);
+			} else {
+				writeFixedStepContig(contig);
+			}
+		}
 	}
 	
 	/**
@@ -103,9 +106,10 @@ public class WigFileWriter implements Closeable {
 	 */
 	public final void writeFixedStepContig(final Contig contig) {
 		log.debug("Writing contig: "+contig.getFixedStepHeader());
+		DecimalFormat formatter = newFormatter();
+		int step = contig.getMinStep();
 		synchronized (writer) {
 			writer.println(contig.getFixedStepHeader());
-			int step = contig.getMinStep();
 			for (int bp = contig.getFirstBaseWithData(); bp <= contig.high(); bp += step) {
 				writer.println(formatter.format(contig.get(bp)));
 			}
@@ -121,10 +125,11 @@ public class WigFileWriter implements Closeable {
 	 */
 	public final void writeVariableStepContig(final Contig contig) {
 		log.debug("Writing contig: "+contig.getVariableStepHeader());
+		DecimalFormat formatter = newFormatter();
+		int bp = contig.getFirstBaseWithData();
+		int span = contig.getVariableStepSpan();
 		synchronized (writer) {
 			writer.println(contig.getVariableStepHeader());
-			int bp = contig.getFirstBaseWithData();
-			int span = contig.getVariableStepSpan();
 			while (bp <= contig.high()) {
 				float value = contig.get(bp);
 				// Write the value and skip the span size
