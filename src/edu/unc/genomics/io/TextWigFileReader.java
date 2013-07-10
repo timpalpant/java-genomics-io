@@ -346,16 +346,6 @@ public class TextWigFileReader extends WigFileReader {
 	 */
 	private void generateIndex() throws IOException, WigFileFormatException {
 		log.debug("Indexing ASCII text Wig file: " + p);
-		
-		// Skip the track line, if there is one
-		raf.seek(0);
-		long lineNum = 0;
-		String line = raf.readLine2();
-		if (!line.startsWith("track")) {
-			raf.seek(0);
-		} else {
-			lineNum++;
-		}
 
 		// Index the Contigs and data in the Wig File by going through it once
 		stats = new SummaryStatistics();
@@ -365,10 +355,15 @@ public class TextWigFileReader extends WigFileReader {
 		double value;
 		long cursor = raf.getFilePointer();
 		int count = 0;
+    String line = null;
+    long lineNum = 0;
+    raf.seek(0);
 		while ((line = raf.readLine2()) != null) {
 			lineNum++;
 			
-			if (line.startsWith(Contig.Type.FIXEDSTEP.getId()) || line.startsWith(Contig.Type.VARIABLESTEP.getId())) {
+      if (line.startsWith("track")) {
+        continue;
+      } else if (line.startsWith(Contig.Type.FIXEDSTEP.getId()) || line.startsWith(Contig.Type.VARIABLESTEP.getId())) {
 				// If this is the end of a previous Contig, store the stop info
 				if (contigs.size() > 0) {
 					contig.setStopLine(lineNum-1);
@@ -404,7 +399,7 @@ public class TextWigFileReader extends WigFileReader {
 				}
 			} else {
 				if (contig == null) {
-					throw new WigFileFormatException("Missing contig header (fixedStep or variableStep). Illegal format in Wig file, line " + lineNum);
+					throw new WigFileFormatException("Missing contig header (fixedStep or variableStep), line " + lineNum);
 				} else if (contig.isFixedStep()) {
 					bp += ((FixedStepContigIndex)contig).getStep();
 					try {
