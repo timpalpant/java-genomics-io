@@ -86,7 +86,9 @@ class VariableStepContigIndex extends ContigIndex {
 			int bp = low;
 			while ((line = raf.readLine2()) != null && bp <= high) {
 				// Break if at the next Contig
-				if (line.startsWith(Contig.Type.FIXEDSTEP.getId()) || line.startsWith(Contig.Type.VARIABLESTEP.getId())) {
+				if (line.startsWith("track") || 
+            line.startsWith(Contig.Type.FIXEDSTEP.getId()) || 
+            line.startsWith(Contig.Type.VARIABLESTEP.getId())) {
 					break;
 				}
 				
@@ -123,7 +125,9 @@ class VariableStepContigIndex extends ContigIndex {
 			int bp = low;
 			while ((line = raf.readLine2()) != null && bp <= high) {
 				// Break if at the next Contig
-				if (line.startsWith(Contig.Type.FIXEDSTEP.getId()) || line.startsWith(Contig.Type.VARIABLESTEP.getId())) {
+				if (line.startsWith("track") || 
+            line.startsWith(Contig.Type.FIXEDSTEP.getId()) || 
+            line.startsWith(Contig.Type.VARIABLESTEP.getId())) {
 					break;
 				}
 				
