@@ -119,3 +119,8 @@ Wig files can be written using a WigFileWriter. Contigs can be written in fixedS
 === Full application examples
 
 See https://github.com/timpalpant/java-genomics-toolkit for some full implementations using this library. A good starting point is: https://github.com/timpalpant/java-genomics-toolkit/blob/master/src/edu/unc/genomics/ngs/IntervalStats.java which demonstrates iterating over a list of intervals in a Bed/BedGraph/GFF file, querying for data from each interval in a Wig file, and calculating the mean value of the data in each interval.
+
+== License
+
+Copyright 2013 Timothy Palpant.
+This work is licensed under the LGPLv3, subject to the terms and conditions in LICENSE and LICENSE.LESSER.
