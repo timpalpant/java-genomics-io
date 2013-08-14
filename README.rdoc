@@ -45,7 +45,7 @@ Entries in line-based interval files can be iterated over, or the file can be qu
 
 The format of the interval file can also be auto-detected so that your application can be format-agnostic:
 
-  $ try (IntervalFile<? extends Interval> loci = IntervalFile.autodetect(lociFile)){
+  $ try (IntervalFile<? extends Interval> loci = IntervalFile.autodetect(lociFile)) {
   $   for (Interval interval : loci) {
   $     System.out.println(interval.toBed());
   $   }
@@ -103,13 +103,11 @@ Indexing is used to execute the queries efficiently. If the query is too large t
 
   $ SummaryStatistics stats = wig.queryStats("chr23", 1, 100_000_000);
   $ System.out.println("Mean of interval chr23:1-100,000,000 = "+stats.getMean());
-  
-However, the order in which entries are returned is not guaranteed and will vary based on the structure of the underlying Wig file.
 
 Wig files can be written using a WigFileWriter. Contigs can be written in fixedStep or variableStep format, or the most dense format can automatically be chosen based on the sparsity and layout of the data:
 
   $ try (WigFileWriter writer = new WigFileWriter(wigFile)) {
-  $   writer.writeFixedStep(contig);
+  $   writer.writeFixedStepContig(contig);
   $   writer.writeVariableStepContig(contig);
   $
   $   // Automatically decide which format is denser
