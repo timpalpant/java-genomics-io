@@ -385,12 +385,17 @@ public class TextWigFileReader extends WigFileReader {
 					String firstLine = raf.readLine2();
 					int delim = firstLine.indexOf('\t');
 					if (delim == -1) {
-						throw new WigFileFormatException("Illegal format in variableStep contig, line " + lineNum);
+						delim = firstLine.indexOf(' ');
+						if (delim == -1) {
+							throw new WigFileFormatException("Illegal format in variableStep contig, line " 
+								+ lineNum + ". Can't find tab or space delimiting bp, value pair");
+						}
 					}
 					try {
 						bp = Integer.parseInt(firstLine.substring(0, delim));
 					} catch (NumberFormatException e) {
-						throw new WigFileFormatException("Illegal format in variableStep contig, line " + lineNum);
+						throw new WigFileFormatException("Illegal format in variableStep contig, line " 
+								+ lineNum + ". Can't parse base pair " + firstLine.substring(0, delim));
 					}
 					contig.setStart(bp);
 					raf.seek(cursor);
@@ -405,19 +410,26 @@ public class TextWigFileReader extends WigFileReader {
 					try {
 						value = Double.parseDouble(line);
 					} catch (NumberFormatException e) {
-						throw new WigFileFormatException("Illegal format in fixedStep contig, line " + lineNum);
+						throw new WigFileFormatException("Illegal format in fixedStep contig, line " 
+							+ lineNum + ". Can't parse value " + line);
 					}
 				} else {
 					int delim = line.indexOf('\t');
 					if (delim == -1) {
-						throw new WigFileFormatException("Illegal format in variableStep contig, line " + lineNum);
+						delim = line.indexOf(' ');
+						if (delim == -1) {
+							throw new WigFileFormatException("Illegal format in variableStep contig, line " 
+								+ lineNum + ". Can't find tab or space delimiting bp, value pair");
+						}
 					}
 					
 					try {
 						bp = Integer.parseInt(line.substring(0, delim));
 						value = Double.parseDouble(line.substring(delim+1));
 					} catch (NumberFormatException e) {
-						throw new WigFileFormatException("Illegal format in variableStep contig, line " + lineNum);
+						throw new WigFileFormatException("Illegal format in variableStep contig, line " 
+							+ lineNum + ". Can't parse bp " + line.substring(0, delim) 
+							+ " or value " + line.substring(delim+1));
 					}
 				}
 				
