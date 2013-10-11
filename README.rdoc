@@ -58,7 +58,7 @@ This is particularly useful for writing Galaxy tools (http://getgalaxy.org).
 
 Alternatively, if the file format is known and type-specific data is needed, it can be opened directly:
 
-  $ try (BAMFile bam = new BAMFile(bamFile)) {
+  $ try (BAMFileReader bam = new BAMFileReader(bamFile)) {
   $   for (BAMEntry entry : bam) {
   $     System.out.println(entry.getQuality());
   $   }
