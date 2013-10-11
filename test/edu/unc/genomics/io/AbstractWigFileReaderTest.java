@@ -171,9 +171,13 @@ public abstract class AbstractWigFileReaderTest {
 		assertEquals(4, result.numBases());
 	}
 	
-	@Test(expected = WigFileException.class)
-	public void testQueryException() throws WigFileException, IOException {
-		test.query("chrI", -2, 8);
+	@Test()
+	public void testQueryOutsideData() throws WigFileException, IOException {
+	  // API change 10/11/13: Readers no longer throw an exception
+	  // if data is outside the end of the chromosome; instead just
+	  // return NaNs where there is no data
+	  Contig result = test.query("chrI", -2, 8);
+	  assertEquals(8, result.coverage());
 	}
 
 	@Test
