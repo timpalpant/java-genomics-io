@@ -128,6 +128,19 @@ public abstract class WigFileReader implements Closeable, Cloneable {
 	public abstract int getChrStop(String chr);
 	
 	/**
+	 * @param chr the chromosome to get the extents of
+	 * @return an Interval representing the first - last bases 
+	 *         with data for this chromosome
+	 */
+	public Interval getChrExtents(String chr) {
+	  if (!includes(chr)) {
+	    return null;
+	  }
+	  
+	  return new Interval(chr, getChrStart(chr), getChrStop(chr));
+	}
+	
+	/**
 	 * @param chr the chromosome to get the step of
 	 * @return the step size for chr in this Wig file
 	 */

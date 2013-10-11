@@ -30,7 +30,8 @@ public class Contig extends Interval {
 	 * @param chr the chromosome of the interval
 	 * @param start the start base pair of the interval
 	 * @param stop the stop base pair of the interval
-	 * @param values the values for this interval, one for each base pair. The value for start should be in values[0], start+/-1 in values[1], etc.
+	 * @param values the values for this interval, one for each base pair. 
+	 *        The value for start should be in values[0], start+/-1 in values[1], etc.
 	 * @throws ContigException if values.length != (start-stop+1)
 	 */
 	public Contig(String chr, int start, int stop, float[] values) throws ContigException {

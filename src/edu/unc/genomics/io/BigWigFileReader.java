@@ -68,14 +68,11 @@ public class BigWigFileReader extends WigFileReader {
 	}
 	
 	@Override
-	public synchronized Contig query(Interval interval) throws WigFileException {
-		if (!includes(interval)) {
-			throw new WigFileException("BigWigFile does not contain data for region: "+interval);
-		}
-		
+	public synchronized Contig query(Interval interval) {
 		float[] values = new float[interval.length()];
 		Arrays.fill(values, Float.NaN);
-		BigWigIterator it = reader.getBigWigIterator(interval.getChr(), interval.low()-1, interval.getChr(), interval.high(), false);
+		BigWigIterator it = reader.getBigWigIterator(interval.getChr(), interval.low()-1, 
+		    interval.getChr(), interval.high(), false);
 		while (it.hasNext()) {
 			WigItem item = it.next();
 			float value = item.getWigValue();
@@ -96,13 +93,10 @@ public class BigWigFileReader extends WigFileReader {
 	}
 	
 	@Override
-	public synchronized SummaryStatistics queryStats(Interval interval) throws WigFileException {
-		if (!includes(interval)) {
-			throw new WigFileException("BigWigFile does not contain data for region: "+interval);
-		}
-		
+	public synchronized SummaryStatistics queryStats(Interval interval) {
 		SummaryStatistics stats = new SummaryStatistics();
-		BigWigIterator it = reader.getBigWigIterator(interval.getChr(), interval.low()-1, interval.getChr(), interval.high(), false);
+		BigWigIterator it = reader.getBigWigIterator(interval.getChr(), interval.low()-1, 
+		    interval.getChr(), interval.high(), false);
 		while (it.hasNext()) {
 			WigItem item = it.next();
 			float value = item.getWigValue();

@@ -161,6 +161,48 @@ public class Interval implements Serializable {
 		return isWatson() ? Strand.WATSON : Strand.CRICK;
 	}
 	
+	/**
+	 * Calculate the intersection of this interval and another interval
+	 * Returns null if the chromosome of other is different
+	 * The returned interval is always Watson oriented (start <= stop)
+	 * @param other an Interval to intersect with this one
+	 * @return a new Interval which is contained in this and other
+	 */
+	public final Interval intersection(final Interval other) {
+	  if (other == null || !chr.equals(other.chr)) {
+	    // Return an empty interval with our chromosome
+	    return null;
+	  }
+	  
+	  int low = Math.max(low(), other.low());
+	  int high = Math.min(high(), other.high());
+	  // If there is no overlap, return null
+	  if (low > high) return null;
+	  return new Interval(chr, low, high);
+	}
+	
+	/**
+   * Calculate the union of this interval and another interval
+   * Union is defined as an interval which covers both intervals
+   * The returned interval is always Watson oriented (start <= stop)
+   * An error is raised if the other interval does not have the same chromosome
+   * @param other an interval to intersect with this one
+   * @return a new interval which spans this and other
+	 * @throws IntervalException 
+   */
+  public final Interval union(final Interval other) throws IntervalException {
+    if (other == null) {
+      return new Interval(chr, low(), high());
+    } else if (!chr.equals(other.chr)) {
+      throw new IntervalException("Cannot union intervals with different chromosomes"
+          +" ("+chr+", "+other.chr+")");
+    }
+    
+    int low = Math.min(low(), other.low());
+    int high = Math.max(high(), other.high());
+    return new Interval(chr, low, high);
+  }
+	
 	@Override
 	public final String toString() {
 		return chr + ":" + start + "-" + stop;

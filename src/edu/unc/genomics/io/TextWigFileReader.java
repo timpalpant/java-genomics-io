@@ -58,7 +58,9 @@ public class TextWigFileReader extends WigFileReader {
 		raf = new BufferedRandomAccessFile(p.toFile(), "r");
 
 		String headerLine = raf.readLine2();
-		if (headerLine.startsWith("track")) {
+		if (headerLine == null) {
+		  throw new WigFileFormatException("Cannot open empty Wig file "+p+" for reading");
+		} else if (headerLine.startsWith("track")) {
 			try {
 				header = TrackHeader.parse(headerLine);
 			} catch (TrackHeaderException e) {
@@ -96,7 +98,9 @@ public class TextWigFileReader extends WigFileReader {
 		this.index = index;
 
 		String headerLine = raf.readLine2();
-		if (headerLine.startsWith("track")) {
+		if (headerLine == null) {
+      throw new WigFileFormatException("Cannot open empty Wig file "+p+" for reading");
+    } else if (headerLine.startsWith("track")) {
 			try {
 				header = TrackHeader.parse(headerLine);
 			} catch (TrackHeaderException e) {
@@ -131,16 +135,12 @@ public class TextWigFileReader extends WigFileReader {
 		try {
 			raf.close();
 		} catch (IOException e) { 
-			throw new RuntimeException("Error closing TextWigFile");
+			throw new RuntimeException("Error closing TextWigFile "+p);
 		}
 	}
 	
 	@Override
 	public Contig query(Interval interval) throws IOException, WigFileException {
-		if (!includes(interval)) {
-			throw new WigFileException("WigFile does not contain data for region: "+interval);
-		}
-		
 		float[] values = new float[interval.length()];
 		Arrays.fill(values, Float.NaN);
 		// Load the values from each relevant contig into the array
@@ -157,11 +157,8 @@ public class TextWigFileReader extends WigFileReader {
 	
 	@Override
 	public SummaryStatistics queryStats(Interval interval) throws IOException, WigFileException {
-		if (!includes(interval)) {
-			throw new WigFileException("WigFile does not contain data for region: "+interval);
-		}
-		
-		SummaryStatistics stats = new SummaryStatistics();
+	  SummaryStatistics stats = new SummaryStatistics();
+
 		// Load the values from each relevant contig
 		for (ContigIndex c : getContigsOverlappingInterval(interval)) {
 			c.fillStats(raf, interval, stats);
@@ -173,10 +170,12 @@ public class TextWigFileReader extends WigFileReader {
 	private List<ContigIndex> getContigsOverlappingInterval(Interval interval) {
 		List<ContigIndex> relevantContigs = new ArrayList<>();
 		
-		for (ContigIndex c : contigs.get(interval.getChr())) {
-			if (c.getStop() >= interval.low() && c.getStart() <= interval.high()) {
-				relevantContigs.add(c);
-			}
+		if (contigs.containsKey(interval.getChr())) {
+  		for (ContigIndex c : contigs.get(interval.getChr())) {
+  		  if (c.intersection(interval) != null) {
+  				relevantContigs.add(c);
+  			}
+  		}
 		}
 		
 		log.debug("Found "+relevantContigs.size()+" contigs overlapping query interval "+interval);

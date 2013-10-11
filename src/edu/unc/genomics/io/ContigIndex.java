@@ -53,7 +53,8 @@ abstract class ContigIndex extends Interval implements Serializable {
 	 * @param interval the query interval
 	 * @param values the array to load the values into
 	 */
-	public abstract void fill(BufferedRandomAccessFile raf, Interval interval, float[] values) throws WigFileException, IOException;
+	public abstract void fill(BufferedRandomAccessFile raf, Interval interval, float[] values) 
+	    throws WigFileException, IOException;
 	
 	/**
 	 * Fill data from this contig into statistics
@@ -61,7 +62,8 @@ abstract class ContigIndex extends Interval implements Serializable {
 	 * @param interval the query interval
 	 * @param stats the SummaryStatistics to load values into
 	 */
-	public abstract void fillStats(BufferedRandomAccessFile raf, Interval interval, SummaryStatistics stats) throws WigFileException, IOException;
+	public abstract void fillStats(BufferedRandomAccessFile raf, Interval interval, SummaryStatistics stats) 
+	    throws WigFileException, IOException;
 	
 	
 	/**
