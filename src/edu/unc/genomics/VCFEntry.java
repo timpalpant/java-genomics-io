@@ -19,8 +19,8 @@ public class VCFEntry extends Interval {
 	private static final long serialVersionUID = 6831019853585975440L;
 	
 	private String ref;
-	private String[] alt;
-	private double qual;
+	private String[] alt = null;
+	private Double qual = null;
 	private String filter;
 	private Map<String,String> info = new LinkedHashMap<>();
 	private String[] format;
@@ -45,8 +45,12 @@ public class VCFEntry extends Interval {
 		String id = entry[2];
 		VCFEntry vcf = new VCFEntry(chr, pos, id);
 		vcf.setRef(entry[3]);
-		vcf.setAlt(entry[4].split(","));
-		vcf.setQual(Double.parseDouble(entry[5]));
+    if (!entry[4].equalsIgnoreCase(".")) {
+      vcf.setAlt(entry[4].split(","));
+    }
+    if (!entry[5].equalsIgnoreCase(".")) {
+      vcf.setQual(Double.parseDouble(entry[5]));
+    }
 		vcf.setFilter(entry[6]);
 		for (String token : entry[7].split(";")) {
 			String[] keypair = token.split("=");
@@ -123,14 +127,14 @@ public class VCFEntry extends Interval {
 	/**
 	 * @return the qual
 	 */
-	public final double getQual() {
+	public final Double getQual() {
 		return qual;
 	}
 
 	/**
 	 * @param qual the qual to set
 	 */
-	public final void setQual(double qual) {
+	public final void setQual(Double qual) {
 		this.qual = qual;
 	}
 
