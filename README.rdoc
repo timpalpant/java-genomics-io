@@ -59,16 +59,16 @@ This is particularly useful for writing Galaxy tools (http://getgalaxy.org).
 Alternatively, if the file format is known and type-specific data is needed, it can be opened directly:
 
   $ try (BAMFileReader bam = new BAMFileReader(bamFile)) {
-  $   for (BAMEntry entry : bam) {
+  $   for (SAMEntry entry : bam) {
   $     System.out.println(entry.getQuality());
   $   }
   $ }
 
 Interval files can also be queried to retrieve only entries that overlap a given locus. Queries are performed efficiently by first indexing the files with a pure-Java reimplementation of Samtools/Tabix. For example, to retrieve all BAM alignments overlapping the region chr1:1,000,000-2,000,000:
 
-  $ Iterator<BAMEntry> result = bam.query("chr1", 1_000_000, 2_000_000);
+  $ Iterator<SAMEntry> result = bam.query("chr1", 1_000_000, 2_000_000);
   $ while(result.hasNext()) {
-  $   BAMEntry entry = result.next();
+  $   SAMEntry entry = result.next();
   $   // process the alignment
   $ }
 
