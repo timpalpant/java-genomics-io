@@ -59,7 +59,7 @@ public class BedEntry extends ValuedInterval {
 		
 		if (entry.length >= 5 && !entry[4].equalsIgnoreCase(".")) {
 			try {
-				bed.setValue(Integer.valueOf(entry[4]));
+				bed.setValue(Float.valueOf(entry[4]));
 			} catch (NumberFormatException e) {
 				throw new IntervalFileFormatException("Invalid Bed value column (must be integer): "+entry[4]);
 			}
