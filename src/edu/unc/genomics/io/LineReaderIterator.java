@@ -10,43 +10,43 @@ import org.apache.log4j.Logger;
  *
  */
 public class LineReaderIterator implements Iterator<String> {
-	
-	private static Logger log = Logger.getLogger(LineReaderIterator.class);
 
-	private final LineReader reader;
-	private String nextLine;
-	
-	public LineReaderIterator(LineReader reader) {
-		this.reader = reader;
-		advance();
-	}
-	
-	@Override
-	public boolean hasNext() {
-		return (nextLine != null);
-	}
+  private static Logger log = Logger.getLogger(LineReaderIterator.class);
 
-	@Override
-	public String next() {
-		String line = nextLine;
-		advance();
-		return line;
-	}
+  private final LineReader reader;
+  private String nextLine;
 
-	@Override
-	public void remove() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException("Cannot remove records from a BufferedReaderIterator");
-	}
-	
-	private void advance() {
-		try {
-			nextLine = reader.readLine();
-		} catch (IOException e) {
-			log.error("Error getting next line from BufferedReader");
-			e.printStackTrace();
-			nextLine = null;
-			throw new RuntimeException("Error getting next line from BufferedReader");
-		}
-	}
+  public LineReaderIterator(LineReader reader) {
+    this.reader = reader;
+    advance();
+  }
+
+  @Override
+  public boolean hasNext() {
+    return (nextLine != null);
+  }
+
+  @Override
+  public String next() {
+    String line = nextLine;
+    advance();
+    return line;
+  }
+
+  @Override
+  public void remove() throws UnsupportedOperationException {
+    throw new UnsupportedOperationException("Cannot remove records from a BufferedReaderIterator");
+  }
+
+  private void advance() {
+    try {
+      nextLine = reader.readLine();
+    } catch (IOException e) {
+      log.error("Error getting next line from BufferedReader");
+      e.printStackTrace();
+      nextLine = null;
+      throw new RuntimeException("Error getting next line from BufferedReader");
+    }
+  }
 
 }

@@ -12,21 +12,21 @@ import org.junit.Test;
 import edu.unc.genomics.util.ChecksumUtils;
 
 public class ChecksumUtilsTest {
-	
-	private static final Path TEST = Paths.get("test/fixtures/test.wig");
 
-	@Before
-	public void setUp() throws Exception {
-	}
+  private static final Path TEST = Paths.get("test/fixtures/test.wig");
 
-	@Test
-	public void testAdler32() throws IOException {
-		assertEquals(643785759L, ChecksumUtils.adler32(TEST));
-	}
+  @Before
+  public void setUp() throws Exception {
+  }
 
-	@Test
-	public void testCrc32() throws IOException {
-		assertEquals(2455014470L, ChecksumUtils.crc32(TEST));
-	}
+  @Test
+  public void testAdler32() throws IOException {
+    assertEquals(643785759L, ChecksumUtils.adler32(TEST));
+  }
+
+  @Test
+  public void testCrc32() throws IOException {
+    assertEquals(2455014470L, ChecksumUtils.crc32(TEST));
+  }
 
 }

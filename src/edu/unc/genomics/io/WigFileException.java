@@ -10,21 +10,21 @@ import java.util.zip.DataFormatException;
  */
 public class WigFileException extends DataFormatException {
 
-	private static final long serialVersionUID = 3824318160375643583L;
+  private static final long serialVersionUID = 3824318160375643583L;
 
-	/**
+  /**
 	 * 
 	 */
-	public WigFileException() {
-		// TODO Auto-generated constructor stub
-	}
+  public WigFileException() {
+    // TODO Auto-generated constructor stub
+  }
 
-	/**
-	 * @param message
-	 */
-	public WigFileException(String message) {
-		super(message);
-		// TODO Auto-generated constructor stub
-	}
+  /**
+   * @param message
+   */
+  public WigFileException(String message) {
+    super(message);
+    // TODO Auto-generated constructor stub
+  }
 
 }

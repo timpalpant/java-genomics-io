@@ -7,11 +7,11 @@ import org.junit.Before;
 
 public class TextWigFileReaderTest extends AbstractWigFileReaderTest {
 
-	public static final Path TEST_WIG = Paths.get("test/fixtures/test.wig");
-	
-	@Before
-	public void setUp() throws Exception {
-		test = new TextWigFileReader(TEST_WIG);
-	}
-	
+  public static final Path TEST_WIG = Paths.get("test/fixtures/test.wig");
+
+  @Before
+  public void setUp() throws Exception {
+    test = new TextWigFileReader(TEST_WIG);
+  }
+
 }

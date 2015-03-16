@@ -7,11 +7,11 @@ import org.junit.Before;
 
 public class BedFileReaderTest extends AbstractBedFileReaderTest {
 
-	public static final Path TEST_BED = Paths.get("test/fixtures/test.bed");
+  public static final Path TEST_BED = Paths.get("test/fixtures/test.bed");
 
-	@Before
-	public void setUp() throws Exception {
-		test = new BedFileReader(TEST_BED);
-	}
+  @Before
+  public void setUp() throws Exception {
+    test = new BedFileReader(TEST_BED);
+  }
 
 }

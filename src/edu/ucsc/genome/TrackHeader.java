@@ -6,621 +6,659 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
 /**
- * @author timpalpant
- * Represents a track line for the UCSC Genome Browser
+ * @author timpalpant Represents a track line for the UCSC Genome Browser
  * 
- * Optional parameters: See http://genome.ucsc.edu/goldenPath/help/customTrack.html#TRACK
- * and http://genome.ucsc.edu/goldenPath/help/wiggle.html
+ *         Optional parameters: See
+ *         http://genome.ucsc.edu/goldenPath/help/customTrack.html#TRACK and
+ *         http://genome.ucsc.edu/goldenPath/help/wiggle.html
  * 
- * name              trackLabel           # default is "User Track"
- * description       centerlabel          # default is "User Supplied Track"
- * visibility        full|dense|hide      # default is hide (will also take numeric values 2|1|0)
- * color             RRR,GGG,BBB          # default is 255,255,255
- * altColor          RRR,GGG,BBB          # default is 128,128,128
- * priority          N                    # default is 100
- * autoScale         on|off               # default is on
- * alwaysZero        on|off               # default is off
- * gridDefault       on|off               # default is off
- * maxHeightPixels   max:default:min      # default is 128:128:11
- * graphType         bar|points           # default is bar
- * viewLimits        lower:upper          # default is range found in data
- * yLineMark         real-value           # default is 0.0
- * yLineOnOff        on|off               # default is off
- * windowingFunction maximum|mean|minimum # default is maximum
- * smoothingWindow   off|[2-16]           # default is off
+ *         name trackLabel # default is "User Track" description centerlabel #
+ *         default is "User Supplied Track" visibility full|dense|hide # default
+ *         is hide (will also take numeric values 2|1|0) color RRR,GGG,BBB #
+ *         default is 255,255,255 altColor RRR,GGG,BBB # default is 128,128,128
+ *         priority N # default is 100 autoScale on|off # default is on
+ *         alwaysZero on|off # default is off gridDefault on|off # default is
+ *         off maxHeightPixels max:default:min # default is 128:128:11 graphType
+ *         bar|points # default is bar viewLimits lower:upper # default is range
+ *         found in data yLineMark real-value # default is 0.0 yLineOnOff on|off
+ *         # default is off windowingFunction maximum|mean|minimum # default is
+ *         maximum smoothingWindow off|[2-16] # default is off
  */
 public class TrackHeader {
-	
-	private static final Logger log = Logger.getLogger(TrackHeader.class);
-	
-	protected Type type;
-	protected String name;
-	protected String description;
-	protected String visibility;
-	protected Short[] color;
-	protected Short[] altColor;
-	protected Short priority;
-	protected Boolean autoScale;
-	protected Boolean alwaysZero;
-	protected Boolean gridDefault;
-	protected Integer[] maxHeightPixels;
-	protected String graphType;
-	protected Double[] viewLimits;
-	protected Double yLineMark;
-	protected Boolean yLineOnOff;
-	protected String windowingFunction;
-	protected Byte smoothingWindow;
-	protected Boolean itemRgb;
-	protected String colorByStrand;
-	protected Boolean useScore;
-	protected String group;
-	protected String db;
-	protected String url;
-	protected String htmlUrl;
-	
-	/**
-	 * Matches key-value attribute pairs in a track line, with optional quotation marks around the value
-	 * (quotation marks are mandatory for values with whitespace)
-	 */
-	private static final Pattern ATTRIBUTE_PATTERN = Pattern.compile("\\b[\\w]*=(\".*?\"|\'.*?\'|\\S*)");
-	
-	public TrackHeader(Type type) {
-		this.type = type;
-	}
-	
-	public TrackHeader() {
-		this(null);
-	}
-	
-	public static TrackHeader newWiggle() {
-		return new TrackHeader(Type.WIGGLE);
-	}
-	
-	public static TrackHeader newBed() {
-		return new TrackHeader(Type.BED);
-	}
-	
-	public static TrackHeader newBedGraph() {
-		return new TrackHeader(Type.BEDGRAPH);
-	}
-	
-	public static TrackHeader newGFF() {
-		return new TrackHeader(Type.GFF);
-	}
-	
-	/**
-	 * Parse a UCSC track line into a TrackHeader object
-	 * @param line a UCSC track line
-	 * @return a TrackHeader object parsed from line
-	 * @throws TrackHeaderException if there is a formatting error in the track line
-	 */
-	public static TrackHeader parse(String line) throws TrackHeaderException {
-		log.debug("Parsing UCSC track header: "+line);
-		TrackHeader header = new TrackHeader();
-		
-		Matcher m = ATTRIBUTE_PATTERN.matcher(line);
-		while (m.find()) {
-			String token = m.group();
-			log.debug("Parsing token: "+token);
-			int delim = token.indexOf('=');
-			String key = token.substring(0, delim);
-			String value = token.substring(delim+1);
-			if (key.length() == 0 || value.length() == 0) { 
-				throw new TrackHeaderException("Invalid token: '" + token + "' in UCSC track header"); 
-			}
-			char firstChar = value.charAt(0);
-			if (firstChar == '\"' || firstChar == '\'') { 
-				value = value.substring(1); 
-			}
-			char lastChar = value.charAt(value.length()-1);
-			if (lastChar == '\"' || lastChar == '\'') { 
-				value = value.substring(0, value.length()-1); 
-			}
-			
-			// Attempt to parse and set the relevant parameter
-			try {
-				switch(key) {
-				case "type":
-					header.setType(Type.forId(value));
-					break;
-				case "name":
-					header.setName(value);
-					break;
-				case "description":
-					header.setDescription(value);
-					break;
-				case "visibility":
-					header.setVisibility(value);
-					break;
-				case "color":
-					String[] rgb = value.split(":");
-					header.setColor(Short.parseShort(rgb[0]), Short.parseShort(rgb[1]), Short.parseShort(rgb[2]));
-					break;
-				case "altColor":
-					String[] altrgb = value.split(":");
-					header.setColor(Short.parseShort(altrgb[0]), Short.parseShort(altrgb[1]), Short.parseShort(altrgb[2]));
-					break;
-				case "priority":
-					header.setPriority(Short.parseShort(value));
-					break;
-				case "autoScale":
-					header.setAutoScale(parseBoolean(value));
-					break;
-				case "alwaysZero":
-					header.setAlwaysZero(parseBoolean(value));
-					break;
-				case "gridDefault":
-					header.setGridDefault(parseBoolean(value));
-					break;
-				case "maxHeightPixels":
-					String[] mdm = value.split(":");
-					header.setMaxHeightPixels(Integer.parseInt(mdm[0]), Integer.parseInt(mdm[1]), Integer.parseInt(mdm[2]));
-					break;
-				case "graphType":
-					header.setGraphType(value);
-					break;
-				case "viewLimits":
-					String[] limits = value.split(":");
-					header.setViewLimits(Double.parseDouble(limits[0]), Double.parseDouble(limits[1]));
-					break;
-				case "yLineMark":
-					header.setyLineMark(Double.parseDouble(value));
-					break;
-				case "yLineOnOff":
-					header.setyLineOnOff(parseBoolean(value));
-					break;
-				case "windowingFunction":
-					header.setWindowingFunction(value);
-					break;
-				case "smoothingWindow":
-					header.setSmoothingWindow(Byte.parseByte(value));
-					break;
-				case "itemRgb":
-					header.setItemRgb(parseBoolean(value));
-					break;
-				case "colorByStrand":
-					header.setColorByStrand(value);
-					break;
-				case "useScore":
-					header.setUseScore(parseBoolean(value));
-					break;
-				case "group":
-					header.setGroup(value);
-					break;
-				case "db":
-					header.setDb(value);
-					break;
-				case "url":
-					header.setUrl(value);
-					break;
-				case "htmlUrl":
-					header.setHtmlUrl(value);
-					break;
-				default:
-					throw new TrackHeaderException("Unknown track attribute: " + key);
-				}
-			} catch (Exception e) {
-				throw new TrackHeaderException("Invalid or unknown attribute: " + token);
-			}
-		}
-		
-		return header;
-	}
-	
-	@Override
-	public String toString() {
-		StringBuilder s = new StringBuilder("track");
-		
-		if (type != null) { s.append(" type=").append(type.toString()); }
-		if (name != null) { s.append(" name='").append(name).append("'"); }
-		if (description != null) { s.append(" description='").append(description).append("'"); }
-		if (autoScale != null) {
-			String autoScaleStr = autoScale ? "on" : "off";
-			s.append(" autoScale=").append(autoScaleStr); 
-		}
-		if (visibility != null) { s.append(" visibility=").append(visibility); }
-		if (viewLimits != null) {
-			s.append(" viewLimits=").append(viewLimits[0]).append(":").append(viewLimits[1]); 
-		}
-		if (color != null) { s.append(" color=").append(color); }
-		if (altColor != null) { s.append(" altColor=").append(altColor); }
-		if (priority != null) { s.append(" priority=").append(priority); }
-		if (alwaysZero != null) { s.append(" color=").append(color); }
-		
-		// TODO: Include all properties
-        
+
+  private static final Logger log = Logger.getLogger(TrackHeader.class);
+
+  protected Type type;
+  protected String name;
+  protected String description;
+  protected String visibility;
+  protected Short[] color;
+  protected Short[] altColor;
+  protected Short priority;
+  protected Boolean autoScale;
+  protected Boolean alwaysZero;
+  protected Boolean gridDefault;
+  protected Integer[] maxHeightPixels;
+  protected String graphType;
+  protected Double[] viewLimits;
+  protected Double yLineMark;
+  protected Boolean yLineOnOff;
+  protected String windowingFunction;
+  protected Byte smoothingWindow;
+  protected Boolean itemRgb;
+  protected String colorByStrand;
+  protected Boolean useScore;
+  protected String group;
+  protected String db;
+  protected String url;
+  protected String htmlUrl;
+
+  /**
+   * Matches key-value attribute pairs in a track line, with optional quotation
+   * marks around the value (quotation marks are mandatory for values with
+   * whitespace)
+   */
+  private static final Pattern ATTRIBUTE_PATTERN = Pattern.compile("\\b[\\w]*=(\".*?\"|\'.*?\'|\\S*)");
+
+  public TrackHeader(Type type) {
+    this.type = type;
+  }
+
+  public TrackHeader() {
+    this(null);
+  }
+
+  public static TrackHeader newWiggle() {
+    return new TrackHeader(Type.WIGGLE);
+  }
+
+  public static TrackHeader newBed() {
+    return new TrackHeader(Type.BED);
+  }
+
+  public static TrackHeader newBedGraph() {
+    return new TrackHeader(Type.BEDGRAPH);
+  }
+
+  public static TrackHeader newGFF() {
+    return new TrackHeader(Type.GFF);
+  }
+
+  /**
+   * Parse a UCSC track line into a TrackHeader object
+   * 
+   * @param line
+   *          a UCSC track line
+   * @return a TrackHeader object parsed from line
+   * @throws TrackHeaderException
+   *           if there is a formatting error in the track line
+   */
+  public static TrackHeader parse(String line) throws TrackHeaderException {
+    log.debug("Parsing UCSC track header: " + line);
+    TrackHeader header = new TrackHeader();
+
+    Matcher m = ATTRIBUTE_PATTERN.matcher(line);
+    while (m.find()) {
+      String token = m.group();
+      log.debug("Parsing token: " + token);
+      int delim = token.indexOf('=');
+      String key = token.substring(0, delim);
+      String value = token.substring(delim + 1);
+      if (key.length() == 0 || value.length() == 0) {
+        throw new TrackHeaderException("Invalid token: '" + token + "' in UCSC track header");
+      }
+      char firstChar = value.charAt(0);
+      if (firstChar == '\"' || firstChar == '\'') {
+        value = value.substring(1);
+      }
+      char lastChar = value.charAt(value.length() - 1);
+      if (lastChar == '\"' || lastChar == '\'') {
+        value = value.substring(0, value.length() - 1);
+      }
+
+      // Attempt to parse and set the relevant parameter
+      try {
+        switch (key) {
+        case "type":
+          header.setType(Type.forId(value));
+          break;
+        case "name":
+          header.setName(value);
+          break;
+        case "description":
+          header.setDescription(value);
+          break;
+        case "visibility":
+          header.setVisibility(value);
+          break;
+        case "color":
+          String[] rgb = value.split(":");
+          header.setColor(Short.parseShort(rgb[0]), Short.parseShort(rgb[1]), Short.parseShort(rgb[2]));
+          break;
+        case "altColor":
+          String[] altrgb = value.split(":");
+          header.setColor(Short.parseShort(altrgb[0]), Short.parseShort(altrgb[1]), Short.parseShort(altrgb[2]));
+          break;
+        case "priority":
+          header.setPriority(Short.parseShort(value));
+          break;
+        case "autoScale":
+          header.setAutoScale(parseBoolean(value));
+          break;
+        case "alwaysZero":
+          header.setAlwaysZero(parseBoolean(value));
+          break;
+        case "gridDefault":
+          header.setGridDefault(parseBoolean(value));
+          break;
+        case "maxHeightPixels":
+          String[] mdm = value.split(":");
+          header.setMaxHeightPixels(Integer.parseInt(mdm[0]), Integer.parseInt(mdm[1]), Integer.parseInt(mdm[2]));
+          break;
+        case "graphType":
+          header.setGraphType(value);
+          break;
+        case "viewLimits":
+          String[] limits = value.split(":");
+          header.setViewLimits(Double.parseDouble(limits[0]), Double.parseDouble(limits[1]));
+          break;
+        case "yLineMark":
+          header.setyLineMark(Double.parseDouble(value));
+          break;
+        case "yLineOnOff":
+          header.setyLineOnOff(parseBoolean(value));
+          break;
+        case "windowingFunction":
+          header.setWindowingFunction(value);
+          break;
+        case "smoothingWindow":
+          header.setSmoothingWindow(Byte.parseByte(value));
+          break;
+        case "itemRgb":
+          header.setItemRgb(parseBoolean(value));
+          break;
+        case "colorByStrand":
+          header.setColorByStrand(value);
+          break;
+        case "useScore":
+          header.setUseScore(parseBoolean(value));
+          break;
+        case "group":
+          header.setGroup(value);
+          break;
+        case "db":
+          header.setDb(value);
+          break;
+        case "url":
+          header.setUrl(value);
+          break;
+        case "htmlUrl":
+          header.setHtmlUrl(value);
+          break;
+        default:
+          throw new TrackHeaderException("Unknown track attribute: " + key);
+        }
+      } catch (Exception e) {
+        throw new TrackHeaderException("Invalid or unknown attribute: " + token);
+      }
+    }
+
+    return header;
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder s = new StringBuilder("track");
+
+    if (type != null) {
+      s.append(" type=").append(type.toString());
+    }
+    if (name != null) {
+      s.append(" name='").append(name).append("'");
+    }
+    if (description != null) {
+      s.append(" description='").append(description).append("'");
+    }
+    if (autoScale != null) {
+      String autoScaleStr = autoScale ? "on" : "off";
+      s.append(" autoScale=").append(autoScaleStr);
+    }
+    if (visibility != null) {
+      s.append(" visibility=").append(visibility);
+    }
+    if (viewLimits != null) {
+      s.append(" viewLimits=").append(viewLimits[0]).append(":").append(viewLimits[1]);
+    }
+    if (color != null) {
+      s.append(" color=").append(color);
+    }
+    if (altColor != null) {
+      s.append(" altColor=").append(altColor);
+    }
+    if (priority != null) {
+      s.append(" priority=").append(priority);
+    }
+    if (alwaysZero != null) {
+      s.append(" color=").append(color);
+    }
+
+    // TODO: Include all properties
+
     return s.toString();
-	}
-	
-	/**
-	 * Parse a boolean value that may be on/off, yes/no, or true/false
-	 * @param value a boolean flag of the form on/off, yes/no, or true/false
-	 * @return the boolean value of the flag
-	 */
-	private static boolean parseBoolean(String value) {
-		if (value.equalsIgnoreCase("on") || value.equalsIgnoreCase("yes") || value.equalsIgnoreCase("true")) {
-			return true;
-		}
-		
-		return false;
-	}
+  }
 
-	/**
-	 * @return the type
-	 */
-	public Type getType() {
-		return type;
-	}
+  /**
+   * Parse a boolean value that may be on/off, yes/no, or true/false
+   * 
+   * @param value
+   *          a boolean flag of the form on/off, yes/no, or true/false
+   * @return the boolean value of the flag
+   */
+  private static boolean parseBoolean(String value) {
+    if (value.equalsIgnoreCase("on") || value.equalsIgnoreCase("yes") || value.equalsIgnoreCase("true")) {
+      return true;
+    }
 
-	/**
-	 * @param type the type to set
-	 */
-	public void setType(Type type) {
-		this.type = type;
-	}
+    return false;
+  }
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+  /**
+   * @return the type
+   */
+  public Type getType() {
+    return type;
+  }
 
-	/**
-	 * @param name the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+  /**
+   * @param type
+   *          the type to set
+   */
+  public void setType(Type type) {
+    this.type = type;
+  }
 
-	/**
-	 * @return the description
-	 */
-	public String getDescription() {
-		return description;
-	}
+  /**
+   * @return the name
+   */
+  public String getName() {
+    return name;
+  }
 
-	/**
-	 * @param description the description to set
-	 */
-	public void setDescription(String description) {
-		this.description = description;
-	}
+  /**
+   * @param name
+   *          the name to set
+   */
+  public void setName(String name) {
+    this.name = name;
+  }
 
-	/**
-	 * @return the visibility
-	 */
-	public String getVisibility() {
-		return visibility;
-	}
+  /**
+   * @return the description
+   */
+  public String getDescription() {
+    return description;
+  }
 
-	/**
-	 * @param visibility the visibility to set
-	 */
-	public void setVisibility(String visibility) {
-		this.visibility = visibility;
-	}
+  /**
+   * @param description
+   *          the description to set
+   */
+  public void setDescription(String description) {
+    this.description = description;
+  }
 
-	/**
-	 * @return the color
-	 */
-	public Short[] getColor() {
-		return color;
-	}
+  /**
+   * @return the visibility
+   */
+  public String getVisibility() {
+    return visibility;
+  }
 
-	/**
-	 * @param color the color to set
-	 */
-	public void setColor(short red, short green, short blue) {
-		color = new Short[3];
-		color[0] = red;
-		color[1] = green;
-		color[2] = blue;
-	}
+  /**
+   * @param visibility
+   *          the visibility to set
+   */
+  public void setVisibility(String visibility) {
+    this.visibility = visibility;
+  }
 
-	/**
-	 * @return the altColor
-	 */
-	public Short[] getAltColor() {
-		return altColor;
-	}
+  /**
+   * @return the color
+   */
+  public Short[] getColor() {
+    return color;
+  }
 
-	/**
-	 * @param altColor the altColor to set
-	 */
-	public void setAltColor(short red, short green, short blue) {
-		altColor = new Short[3];
-		altColor[0] = red;
-		altColor[1] = green;
-		altColor[2] = blue;
-	}
+  /**
+   * @param color
+   *          the color to set
+   */
+  public void setColor(short red, short green, short blue) {
+    color = new Short[3];
+    color[0] = red;
+    color[1] = green;
+    color[2] = blue;
+  }
 
-	/**
-	 * @return the priority
-	 */
-	public Short getPriority() {
-		return priority;
-	}
+  /**
+   * @return the altColor
+   */
+  public Short[] getAltColor() {
+    return altColor;
+  }
 
-	/**
-	 * @param priority the priority to set
-	 */
-	public void setPriority(short priority) {
-		this.priority = priority;
-	}
+  /**
+   * @param altColor
+   *          the altColor to set
+   */
+  public void setAltColor(short red, short green, short blue) {
+    altColor = new Short[3];
+    altColor[0] = red;
+    altColor[1] = green;
+    altColor[2] = blue;
+  }
 
-	/**
-	 * @return the autoScale
-	 */
-	public boolean isAutoScale() {
-		return autoScale;
-	}
+  /**
+   * @return the priority
+   */
+  public Short getPriority() {
+    return priority;
+  }
 
-	/**
-	 * @param autoScale the autoScale to set
-	 */
-	public void setAutoScale(boolean autoScale) {
-		this.autoScale = autoScale;
-	}
+  /**
+   * @param priority
+   *          the priority to set
+   */
+  public void setPriority(short priority) {
+    this.priority = priority;
+  }
 
-	/**
-	 * @return the alwaysZero
-	 */
-	public boolean isAlwaysZero() {
-		return alwaysZero;
-	}
+  /**
+   * @return the autoScale
+   */
+  public boolean isAutoScale() {
+    return autoScale;
+  }
 
-	/**
-	 * @param alwaysZero the alwaysZero to set
-	 */
-	public void setAlwaysZero(boolean alwaysZero) {
-		this.alwaysZero = alwaysZero;
-	}
+  /**
+   * @param autoScale
+   *          the autoScale to set
+   */
+  public void setAutoScale(boolean autoScale) {
+    this.autoScale = autoScale;
+  }
 
-	/**
-	 * @return the gridDefault
-	 */
-	public Boolean getGridDefault() {
-		return gridDefault;
-	}
+  /**
+   * @return the alwaysZero
+   */
+  public boolean isAlwaysZero() {
+    return alwaysZero;
+  }
 
-	/**
-	 * @param gridDefault the gridDefault to set
-	 */
-	public void setGridDefault(boolean gridDefault) {
-		this.gridDefault = gridDefault;
-	}
+  /**
+   * @param alwaysZero
+   *          the alwaysZero to set
+   */
+  public void setAlwaysZero(boolean alwaysZero) {
+    this.alwaysZero = alwaysZero;
+  }
 
-	/**
-	 * @return the maxHeightPixels
-	 */
-	public Integer[] getMaxHeightPixels() {
-		return maxHeightPixels;
-	}
+  /**
+   * @return the gridDefault
+   */
+  public Boolean getGridDefault() {
+    return gridDefault;
+  }
 
-	/**
-	 * @param maxHeightPixels the maxHeightPixels to set
-	 */
-	public void setMaxHeightPixels(int maxHeight, int defaultHeight, int minHeight) {
-		maxHeightPixels = new Integer[3];
-		maxHeightPixels[0] = maxHeight;
-		maxHeightPixels[1] = defaultHeight;
-		maxHeightPixels[2] = minHeight;
-	}
+  /**
+   * @param gridDefault
+   *          the gridDefault to set
+   */
+  public void setGridDefault(boolean gridDefault) {
+    this.gridDefault = gridDefault;
+  }
 
-	/**
-	 * @return the graphType
-	 */
-	public String getGraphType() {
-		return graphType;
-	}
+  /**
+   * @return the maxHeightPixels
+   */
+  public Integer[] getMaxHeightPixels() {
+    return maxHeightPixels;
+  }
 
-	/**
-	 * @param graphType the graphType to set
-	 */
-	public void setGraphType(String graphType) {
-		this.graphType = graphType;
-	}
+  /**
+   * @param maxHeightPixels
+   *          the maxHeightPixels to set
+   */
+  public void setMaxHeightPixels(int maxHeight, int defaultHeight, int minHeight) {
+    maxHeightPixels = new Integer[3];
+    maxHeightPixels[0] = maxHeight;
+    maxHeightPixels[1] = defaultHeight;
+    maxHeightPixels[2] = minHeight;
+  }
 
-	/**
-	 * @return the viewLimits
-	 */
-	public Double[] getViewLimits() {
-		return viewLimits;
-	}
+  /**
+   * @return the graphType
+   */
+  public String getGraphType() {
+    return graphType;
+  }
 
-	/**
-	 * @param viewLimits the viewLimits to set
-	 */
-	public void setViewLimits(double min, double max) {
-		viewLimits = new Double[2];
-		viewLimits[0] = min;
-		viewLimits[1] = max;
-	}
+  /**
+   * @param graphType
+   *          the graphType to set
+   */
+  public void setGraphType(String graphType) {
+    this.graphType = graphType;
+  }
 
-	/**
-	 * @return the yLineMark
-	 */
-	public Double isyLineMark() {
-		return yLineMark;
-	}
+  /**
+   * @return the viewLimits
+   */
+  public Double[] getViewLimits() {
+    return viewLimits;
+  }
 
-	/**
-	 * @param yLineMark the yLineMark to set
-	 */
-	public void setyLineMark(double yLineMark) {
-		this.yLineMark = yLineMark;
-	}
+  /**
+   * @param viewLimits
+   *          the viewLimits to set
+   */
+  public void setViewLimits(double min, double max) {
+    viewLimits = new Double[2];
+    viewLimits[0] = min;
+    viewLimits[1] = max;
+  }
 
-	/**
-	 * @return the yLineOnOff
-	 */
-	public boolean isyLineOnOff() {
-		return yLineOnOff;
-	}
+  /**
+   * @return the yLineMark
+   */
+  public Double isyLineMark() {
+    return yLineMark;
+  }
 
-	/**
-	 * @param yLineOnOff the yLineOnOff to set
-	 */
-	public void setyLineOnOff(boolean yLineOnOff) {
-		this.yLineOnOff = yLineOnOff;
-	}
+  /**
+   * @param yLineMark
+   *          the yLineMark to set
+   */
+  public void setyLineMark(double yLineMark) {
+    this.yLineMark = yLineMark;
+  }
 
-	/**
-	 * @return the windowingFunction
-	 */
-	public String getWindowingFunction() {
-		return windowingFunction;
-	}
+  /**
+   * @return the yLineOnOff
+   */
+  public boolean isyLineOnOff() {
+    return yLineOnOff;
+  }
 
-	/**
-	 * @param windowingFunction the windowingFunction to set
-	 */
-	public void setWindowingFunction(String windowingFunction) {
-		this.windowingFunction = windowingFunction;
-	}
+  /**
+   * @param yLineOnOff
+   *          the yLineOnOff to set
+   */
+  public void setyLineOnOff(boolean yLineOnOff) {
+    this.yLineOnOff = yLineOnOff;
+  }
 
-	/**
-	 * @return the smoothingWindow
-	 */
-	public Byte getSmoothingWindow() {
-		return smoothingWindow;
-	}
+  /**
+   * @return the windowingFunction
+   */
+  public String getWindowingFunction() {
+    return windowingFunction;
+  }
 
-	/**
-	 * @param smoothingWindow the smoothingWindow to set
-	 */
-	public void setSmoothingWindow(byte smoothingWindow) {
-		this.smoothingWindow = smoothingWindow;
-	}
+  /**
+   * @param windowingFunction
+   *          the windowingFunction to set
+   */
+  public void setWindowingFunction(String windowingFunction) {
+    this.windowingFunction = windowingFunction;
+  }
 
-	/**
-	 * @return the itemRgb
-	 */
-	public Boolean getItemRgb() {
-		return itemRgb;
-	}
+  /**
+   * @return the smoothingWindow
+   */
+  public Byte getSmoothingWindow() {
+    return smoothingWindow;
+  }
 
-	/**
-	 * @param itemRgb the itemRgb to set
-	 */
-	public void setItemRgb(boolean itemRgb) {
-		this.itemRgb = itemRgb;
-	}
+  /**
+   * @param smoothingWindow
+   *          the smoothingWindow to set
+   */
+  public void setSmoothingWindow(byte smoothingWindow) {
+    this.smoothingWindow = smoothingWindow;
+  }
 
-	/**
-	 * @return the colorByStrand
-	 */
-	public String getColorByStrand() {
-		return colorByStrand;
-	}
+  /**
+   * @return the itemRgb
+   */
+  public Boolean getItemRgb() {
+    return itemRgb;
+  }
 
-	/**
-	 * @param colorByStrand the colorByStrand to set
-	 */
-	public void setColorByStrand(String colorByStrand) {
-		this.colorByStrand = colorByStrand;
-	}
+  /**
+   * @param itemRgb
+   *          the itemRgb to set
+   */
+  public void setItemRgb(boolean itemRgb) {
+    this.itemRgb = itemRgb;
+  }
 
-	/**
-	 * @return the useScore
-	 */
-	public Boolean getUseScore() {
-		return useScore;
-	}
+  /**
+   * @return the colorByStrand
+   */
+  public String getColorByStrand() {
+    return colorByStrand;
+  }
 
-	/**
-	 * @param useScore the useScore to set
-	 */
-	public void setUseScore(boolean useScore) {
-		this.useScore = useScore;
-	}
+  /**
+   * @param colorByStrand
+   *          the colorByStrand to set
+   */
+  public void setColorByStrand(String colorByStrand) {
+    this.colorByStrand = colorByStrand;
+  }
 
-	/**
-	 * @return the group
-	 */
-	public String getGroup() {
-		return group;
-	}
+  /**
+   * @return the useScore
+   */
+  public Boolean getUseScore() {
+    return useScore;
+  }
 
-	/**
-	 * @param group the group to set
-	 */
-	public void setGroup(String group) {
-		this.group = group;
-	}
+  /**
+   * @param useScore
+   *          the useScore to set
+   */
+  public void setUseScore(boolean useScore) {
+    this.useScore = useScore;
+  }
 
-	/**
-	 * @return the db
-	 */
-	public String getDb() {
-		return db;
-	}
+  /**
+   * @return the group
+   */
+  public String getGroup() {
+    return group;
+  }
 
-	/**
-	 * @param db the db to set
-	 */
-	public void setDb(String db) {
-		this.db = db;
-	}
+  /**
+   * @param group
+   *          the group to set
+   */
+  public void setGroup(String group) {
+    this.group = group;
+  }
 
-	/**
-	 * @return the url
-	 */
-	public String getUrl() {
-		return url;
-	}
+  /**
+   * @return the db
+   */
+  public String getDb() {
+    return db;
+  }
 
-	/**
-	 * @param url the url to set
-	 */
-	public void setUrl(String url) {
-		this.url = url;
-	}
+  /**
+   * @param db
+   *          the db to set
+   */
+  public void setDb(String db) {
+    this.db = db;
+  }
 
-	/**
-	 * @return the htmlUrl
-	 */
-	public String getHtmlUrl() {
-		return htmlUrl;
-	}
+  /**
+   * @return the url
+   */
+  public String getUrl() {
+    return url;
+  }
 
-	/**
-	 * @param htmlUrl the htmlUrl to set
-	 */
-	public void setHtmlUrl(String htmlUrl) {
-		this.htmlUrl = htmlUrl;
-	}
-	
-	public static enum Type {
-		WIGGLE("wiggle_0"),
-		BED("bed"),
-		BEDGRAPH("bedGraph"),
-		GFF("gff");
-		
-		private final String id;
-		
-		Type(final String id) {
-			this.id = id;
-		}
-		
-		public static Type forId(final String id) {
-			for (Type t : Type.values()) {
-				if (t.getId().equals(id)) {
-					return t;
-				}
-			}
-			
-			return null;
-		}
-		
-		public String getId() {
-			return id;
-		}
-		
-		@Override
-		public String toString() {
-			return getId();
-		}
-	}
+  /**
+   * @param url
+   *          the url to set
+   */
+  public void setUrl(String url) {
+    this.url = url;
+  }
+
+  /**
+   * @return the htmlUrl
+   */
+  public String getHtmlUrl() {
+    return htmlUrl;
+  }
+
+  /**
+   * @param htmlUrl
+   *          the htmlUrl to set
+   */
+  public void setHtmlUrl(String htmlUrl) {
+    this.htmlUrl = htmlUrl;
+  }
+
+  public static enum Type {
+    WIGGLE("wiggle_0"), BED("bed"), BEDGRAPH("bedGraph"), GFF("gff");
+
+    private final String id;
+
+    Type(final String id) {
+      this.id = id;
+    }
+
+    public static Type forId(final String id) {
+      for (Type t : Type.values()) {
+        if (t.getId().equals(id)) {
+          return t;
+        }
+      }
+
+      return null;
+    }
+
+    public String getId() {
+      return id;
+    }
+
+    @Override
+    public String toString() {
+      return getId();
+    }
+  }
 }

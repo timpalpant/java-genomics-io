@@ -19,24 +19,24 @@ import edu.unc.genomics.IntervalFactory;
  */
 public class BedGraphFileReader extends TextIntervalFileReader<BedGraphEntry> {
 
-	private static final Logger log = Logger.getLogger(BedGraphFileReader.class);
-	
-	public BedGraphFileReader(Path p) throws IOException {
-		super(p, new BedGraphEntryFactory());
-		log.debug("Opening BedGraph file reader "+p);
-	}
+  private static final Logger log = Logger.getLogger(BedGraphFileReader.class);
 
-	public static class BedGraphEntryFactory implements IntervalFactory<BedGraphEntry> {
+  public BedGraphFileReader(Path p) throws IOException {
+    super(p, new BedGraphEntryFactory());
+    log.debug("Opening BedGraph file reader " + p);
+  }
 
-		@Override
-		public BedGraphEntry parse(String line) {
-			return BedGraphEntry.parse(line);
-		}
+  public static class BedGraphEntryFactory implements IntervalFactory<BedGraphEntry> {
 
-		@Override
-		public Conf tabixConf() {
-			return TabixWriter.BED_CONF;
-		}
-		
-	}
+    @Override
+    public BedGraphEntry parse(String line) {
+      return BedGraphEntry.parse(line);
+    }
+
+    @Override
+    public Conf tabixConf() {
+      return TabixWriter.BED_CONF;
+    }
+
+  }
 }

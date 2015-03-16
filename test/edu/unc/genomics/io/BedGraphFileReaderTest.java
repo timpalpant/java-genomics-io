@@ -14,51 +14,51 @@ import edu.unc.genomics.Interval;
 
 public class BedGraphFileReaderTest extends AbstractIntervalFileReaderTest {
 
-	public static final Path TEST_BEDGRAPH = Paths.get("test/fixtures/test.bedGraph");
+  public static final Path TEST_BEDGRAPH = Paths.get("test/fixtures/test.bedGraph");
 
-	@Before
-	public void setUp() throws Exception {
-		test = new BedGraphFileReader(TEST_BEDGRAPH);
-	}
+  @Before
+  public void setUp() throws Exception {
+    test = new BedGraphFileReader(TEST_BEDGRAPH);
+  }
 
-	@Test
-	public void testCount() {
-		assertEquals(10, test.count());
-	}
+  @Test
+  public void testCount() {
+    assertEquals(10, test.count());
+  }
 
-	@Test
-	public void testChromosomes() {
-		assertTrue(test.chromosomes().contains("chrI"));
-		assertTrue(test.chromosomes().contains("chrII"));
-		assertTrue(test.chromosomes().contains("chrIII"));
-		assertTrue(test.chromosomes().contains("chrIV"));
-		assertEquals(4, test.chromosomes().size());
-	}
+  @Test
+  public void testChromosomes() {
+    assertTrue(test.chromosomes().contains("chrI"));
+    assertTrue(test.chromosomes().contains("chrII"));
+    assertTrue(test.chromosomes().contains("chrIII"));
+    assertTrue(test.chromosomes().contains("chrIV"));
+    assertEquals(4, test.chromosomes().size());
+  }
 
-	@Test
-	public void testQuery() {
-		Iterator<? extends Interval> it = test.query("chrI", 10, 97);
-		int count = 0;
-		while (it.hasNext()) {
-			it.next();
-			count++;
-		}
-		assertEquals(3, count);
-	}
+  @Test
+  public void testQuery() {
+    Iterator<? extends Interval> it = test.query("chrI", 10, 97);
+    int count = 0;
+    while (it.hasNext()) {
+      it.next();
+      count++;
+    }
+    assertEquals(3, count);
+  }
 
-	@Test
-	public void testIterator() {
-		int count = 0;
-		for (Interval entry : test) {
-			count++;
-		}
-		assertEquals(10, count);
-	}
+  @Test
+  public void testIterator() {
+    int count = 0;
+    for (Interval entry : test) {
+      count++;
+    }
+    assertEquals(10, count);
+  }
 
-	@Test
-	public void testLoadAll() {
-		List<? extends Interval> all = test.loadAll();
-		assertEquals(10, all.size());
-	}
+  @Test
+  public void testLoadAll() {
+    List<? extends Interval> all = test.loadAll();
+    assertEquals(10, all.size());
+  }
 
 }

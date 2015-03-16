@@ -47,340 +47,334 @@ import net.sf.samtools.util.BlockCompressedOutputStream;
  */
 public class TabixWriter extends TabixReader {
 
-	private static final Charset LATIN1 = Charset.forName("ISO-8859-1");
+  private static final Charset LATIN1 = Charset.forName("ISO-8859-1");
 
-	public static final int TI_PRESET_GENERIC = 0;
-	public static final int TI_PRESET_SAM = 1;
-	public static final int TI_PRESET_VCF = 2;
-	public static final int TI_FLAG_UCSC = 0x10000;
+  public static final int TI_PRESET_GENERIC = 0;
+  public static final int TI_PRESET_SAM = 1;
+  public static final int TI_PRESET_VCF = 2;
+  public static final int TI_FLAG_UCSC = 0x10000;
 
-	public static final Conf GFF_CONF = new Conf(0, 1, 4, 5, '#', 0);
-	public static final Conf BED_CONF = new Conf(TI_FLAG_UCSC, 1, 2, 3, '#', 0);
-	public static final Conf PSLTBL_CONF = new Conf(TI_FLAG_UCSC, 15, 17, 18, '#', 0);
-	public static final Conf SAM_CONF = new Conf(TI_PRESET_SAM, 3, 4, 0, '@', 0);
-	public static final Conf VCF_CONF = new Conf(TI_PRESET_VCF, 1, 2, 0, '#', 0);
+  public static final Conf GFF_CONF = new Conf(0, 1, 4, 5, '#', 0);
+  public static final Conf BED_CONF = new Conf(TI_FLAG_UCSC, 1, 2, 3, '#', 0);
+  public static final Conf PSLTBL_CONF = new Conf(TI_FLAG_UCSC, 15, 17, 18, '#', 0);
+  public static final Conf SAM_CONF = new Conf(TI_PRESET_SAM, 3, 4, 0, '@', 0);
+  public static final Conf VCF_CONF = new Conf(TI_PRESET_VCF, 1, 2, 0, '#', 0);
 
-	/** The binning index. */
-	List<Map<Integer, List<TPair64>>> binningIndex = new ArrayList<Map<Integer, List<TPair64>>>();
+  /** The binning index. */
+  List<Map<Integer, List<TPair64>>> binningIndex = new ArrayList<Map<Integer, List<TPair64>>>();
 
-	/** The linear index. */
-	List<List<Long>> linearIndex = new ArrayList<List<Long>>();
+  /** The linear index. */
+  List<List<Long>> linearIndex = new ArrayList<List<Long>>();
 
-	public TabixWriter(final Path p, Conf conf) throws IOException {
-		super(p);
-		applyConf(conf);
-		mChr2tid = new LinkedHashMap<String, Integer>();
-	}
+  public TabixWriter(final Path p, Conf conf) throws IOException {
+    super(p);
+    applyConf(conf);
+    mChr2tid = new LinkedHashMap<String, Integer>();
+  }
 
-	private void applyConf(Conf conf) {
-		mPreset = conf.preset;
-		mSc = conf.chrColumn;
-		mBc = conf.startColumn;
-		mEc = conf.endColumn;
-		mMeta = conf.commentChar;
-		mSkip = conf.linesToSkip;
-	}
+  private void applyConf(Conf conf) {
+    mPreset = conf.preset;
+    mSc = conf.chrColumn;
+    mBc = conf.startColumn;
+    mEc = conf.endColumn;
+    mMeta = conf.commentChar;
+    mSkip = conf.linesToSkip;
+  }
 
-	public Path createIndex() throws IOException, TabixException {
-		// Make the index
-		BlockCompressedInputStream fp = new BlockCompressedInputStream(mFn.toFile());
-		makeIndex(fp);
-		fp.close();
-		
-		// Save the index to disk
-		BlockCompressedOutputStream fpidx = new BlockCompressedOutputStream(index.toFile());
-		saveIndex(fpidx);
-		fpidx.close();
-		
-		return index;
-	}
+  public Path createIndex() throws IOException, TabixException {
+    // Make the index
+    BlockCompressedInputStream fp = new BlockCompressedInputStream(mFn.toFile());
+    makeIndex(fp);
+    fp.close();
 
-	private void makeIndex(BlockCompressedInputStream fp) throws IOException, TabixException {
-		int last_bin, save_bin;
-		int last_coor, last_tid, save_tid;
-		long save_off, last_off, lineno = 0, offset0 = (long) -1;
-		String str;
+    // Save the index to disk
+    BlockCompressedOutputStream fpidx = new BlockCompressedOutputStream(index.toFile());
+    saveIndex(fpidx);
+    fpidx.close();
 
-		save_bin = save_tid = last_tid = last_bin = 0xffffffff; // Was unsigned in C
-																														// implementation.
-		save_off = last_off = 0;
-		last_coor = 0xffffffff; // Should be unsigned.
-		while ((str = readLine(fp)) != null) {
-			++lineno;
-			if (lineno <= mSkip || str.charAt(0) == mMeta) {
-				last_off = fp.getFilePointer();
-				continue;
-			}
-			TIntv intv = getIntv(str);
-			if (intv.beg < 0 || intv.end < 0) {
-				throw new TabixException("The indexes overlap or are out of bounds.");
-			}
-			if (last_tid != intv.tid) { // change of chromosomes
-				if (last_tid > intv.tid) {
-					throw new TabixException(String.format("The chromosome blocks are not continuous at line %d, is the file sorted? [pos %d].", lineno, intv.beg + 1));
-				}
-				last_tid = intv.tid;
-				last_bin = 0xffffffff;
-			} else if (last_coor > intv.beg) {
-				throw new TabixException(String.format("File out of order at line %d.", lineno));
-			}
-			long tmp = insertLinear(linearIndex.get(intv.tid), intv.beg, intv.end, last_off);
-			if (last_off == 0)
-				offset0 = tmp;
-			if (intv.bin != last_bin) { // then possibly write the binning index
-				if (save_bin != 0xffffffff) { // save_bin==0xffffffffu only happens to
-																			// the first record
-					insertBinning(binningIndex.get(save_tid), save_bin, save_off,
-							last_off);
-				}
-				save_off = last_off;
-				save_bin = last_bin = intv.bin;
-				save_tid = intv.tid;
-				if (save_tid < 0)
-					break;
-			}
-			if (fp.getFilePointer() <= last_off) {
-				throw new TabixException(String.format("Bug in BGZF: %x < %x.", fp.getFilePointer(), last_off));
-			}
-			last_off = fp.getFilePointer();
-			last_coor = intv.beg;
-		}
-		if (save_tid >= 0)
-			insertBinning(binningIndex.get(save_tid), save_bin, save_off, fp.getFilePointer());
-		mergeChunks();
-		fillMissing();
-		if (offset0 != (long) -1 && !linearIndex.isEmpty()
-				&& linearIndex.get(0) != null) {
-			int beg = (int) (offset0 >> 32), end = (int) (offset0 & 0xffffffff);
-			for (int i = beg; i <= end; ++i) {
-				linearIndex.get(0).set(i, 0L);
-			}
-		}
-	}
+    return index;
+  }
 
-	private void insertBinning(Map<Integer, List<TPair64>> binningForChr,
-			int bin, long beg, long end) {
-		if (!binningForChr.containsKey(bin)) {
-			binningForChr.put(bin, new ArrayList<TPair64>());
-		}
-		List<TPair64> list = binningForChr.get(bin);
-		list.add(new TPair64(beg, end));
-	}
+  private void makeIndex(BlockCompressedInputStream fp) throws IOException, TabixException {
+    int last_bin, save_bin;
+    int last_coor, last_tid, save_tid;
+    long save_off, last_off, lineno = 0, offset0 = (long) -1;
+    String str;
 
-	private long insertLinear(List<Long> linearForChr, int beg, int end,
-			long offset) {
-		beg = beg >> TAD_LIDX_SHIFT;
-		end = (end - 1) >> TAD_LIDX_SHIFT;
+    save_bin = save_tid = last_tid = last_bin = 0xffffffff; // Was unsigned in C
+                                                            // implementation.
+    save_off = last_off = 0;
+    last_coor = 0xffffffff; // Should be unsigned.
+    while ((str = readLine(fp)) != null) {
+      ++lineno;
+      if (lineno <= mSkip || str.charAt(0) == mMeta) {
+        last_off = fp.getFilePointer();
+        continue;
+      }
+      TIntv intv = getIntv(str);
+      if (intv.beg < 0 || intv.end < 0) {
+        throw new TabixException("The indexes overlap or are out of bounds.");
+      }
+      if (last_tid != intv.tid) { // change of chromosomes
+        if (last_tid > intv.tid) {
+          throw new TabixException(String.format(
+              "The chromosome blocks are not continuous at line %d, is the file sorted? [pos %d].", lineno,
+              intv.beg + 1));
+        }
+        last_tid = intv.tid;
+        last_bin = 0xffffffff;
+      } else if (last_coor > intv.beg) {
+        throw new TabixException(String.format("File out of order at line %d.", lineno));
+      }
+      long tmp = insertLinear(linearIndex.get(intv.tid), intv.beg, intv.end, last_off);
+      if (last_off == 0)
+        offset0 = tmp;
+      if (intv.bin != last_bin) { // then possibly write the binning index
+        if (save_bin != 0xffffffff) { // save_bin==0xffffffffu only happens to
+                                      // the first record
+          insertBinning(binningIndex.get(save_tid), save_bin, save_off, last_off);
+        }
+        save_off = last_off;
+        save_bin = last_bin = intv.bin;
+        save_tid = intv.tid;
+        if (save_tid < 0)
+          break;
+      }
+      if (fp.getFilePointer() <= last_off) {
+        throw new TabixException(String.format("Bug in BGZF: %x < %x.", fp.getFilePointer(), last_off));
+      }
+      last_off = fp.getFilePointer();
+      last_coor = intv.beg;
+    }
+    if (save_tid >= 0)
+      insertBinning(binningIndex.get(save_tid), save_bin, save_off, fp.getFilePointer());
+    mergeChunks();
+    fillMissing();
+    if (offset0 != (long) -1 && !linearIndex.isEmpty() && linearIndex.get(0) != null) {
+      int beg = (int) (offset0 >> 32), end = (int) (offset0 & 0xffffffff);
+      for (int i = beg; i <= end; ++i) {
+        linearIndex.get(0).set(i, 0L);
+      }
+    }
+  }
 
-		// Expand the array if necessary.
-		int newSize = Math.max(beg, end) + 1;
-		while (linearForChr.size() < newSize) {
-			linearForChr.add(0L);
-		}
-		if (beg == end) {
-			if (linearForChr.get(beg) == 0L) {
-				linearForChr.set(beg, offset);
-			}
-		} else {
-			for (int i = beg; i <= end; ++i) {
-				if (linearForChr.get(i) == 0L) {
-					linearForChr.set(i, offset);
-				}
-			}
-		}
-		return (long) beg << 32 | end;
-	}
+  private void insertBinning(Map<Integer, List<TPair64>> binningForChr, int bin, long beg, long end) {
+    if (!binningForChr.containsKey(bin)) {
+      binningForChr.put(bin, new ArrayList<TPair64>());
+    }
+    List<TPair64> list = binningForChr.get(bin);
+    list.add(new TPair64(beg, end));
+  }
 
-	private void mergeChunks() {
-		for (int i = 0; i < binningIndex.size(); i++) {
-			Map<Integer, List<TPair64>> binningForChr = binningIndex.get(i);
-			for (Integer k : binningForChr.keySet()) {
-				List<TPair64> p = binningForChr.get(k);
-				int m = 0;
-				for (int l = 1; l < p.size(); l++) {
-					if (p.get(m).v >> 16 == p.get(l).u >> 16) {
-						p.get(m).v = p.get(l).v;
-					} else {
-						p.set(++m, p.get(l));
-					}
-				}
-				while (p.size() > m + 1) {
-					p.remove(p.size() - 1);
-				}
-			}
-		}
-	}
+  private long insertLinear(List<Long> linearForChr, int beg, int end, long offset) {
+    beg = beg >> TAD_LIDX_SHIFT;
+    end = (end - 1) >> TAD_LIDX_SHIFT;
 
-	private void fillMissing() {
-		for (int i = 0; i < linearIndex.size(); ++i) {
-			List<Long> linearForChr = linearIndex.get(i);
-			for (int j = 1; j < linearForChr.size(); ++j) {
-				if (linearForChr.get(j) == 0) {
-					linearForChr.set(j, linearForChr.get(j - 1));
-				}
-			}
-		}
-	}
+    // Expand the array if necessary.
+    int newSize = Math.max(beg, end) + 1;
+    while (linearForChr.size() < newSize) {
+      linearForChr.add(0L);
+    }
+    if (beg == end) {
+      if (linearForChr.get(beg) == 0L) {
+        linearForChr.set(beg, offset);
+      }
+    } else {
+      for (int i = beg; i <= end; ++i) {
+        if (linearForChr.get(i) == 0L) {
+          linearForChr.set(i, offset);
+        }
+      }
+    }
+    return (long) beg << 32 | end;
+  }
 
-	public static void writeInt(final OutputStream os, int value)
-			throws IOException {
-		byte[] buf = new byte[4];
-		ByteBuffer.wrap(buf).order(ByteOrder.LITTLE_ENDIAN).putInt(value);
-		os.write(buf);
-	}
+  private void mergeChunks() {
+    for (int i = 0; i < binningIndex.size(); i++) {
+      Map<Integer, List<TPair64>> binningForChr = binningIndex.get(i);
+      for (Integer k : binningForChr.keySet()) {
+        List<TPair64> p = binningForChr.get(k);
+        int m = 0;
+        for (int l = 1; l < p.size(); l++) {
+          if (p.get(m).v >> 16 == p.get(l).u >> 16) {
+            p.get(m).v = p.get(l).v;
+          } else {
+            p.set(++m, p.get(l));
+          }
+        }
+        while (p.size() > m + 1) {
+          p.remove(p.size() - 1);
+        }
+      }
+    }
+  }
 
-	public static void writeLong(final OutputStream os, long value)
-			throws IOException {
-		byte[] buf = new byte[8];
-		ByteBuffer.wrap(buf).order(ByteOrder.LITTLE_ENDIAN).putLong(value);
-		os.write(buf);
-	}
+  private void fillMissing() {
+    for (int i = 0; i < linearIndex.size(); ++i) {
+      List<Long> linearForChr = linearIndex.get(i);
+      for (int j = 1; j < linearForChr.size(); ++j) {
+        if (linearForChr.get(j) == 0) {
+          linearForChr.set(j, linearForChr.get(j - 1));
+        }
+      }
+    }
+  }
 
-	private void saveIndex(BlockCompressedOutputStream fp) throws IOException {
-		fp.write("TBI\1".getBytes(LATIN1));
-		writeInt(fp, binningIndex.size());
+  public static void writeInt(final OutputStream os, int value) throws IOException {
+    byte[] buf = new byte[4];
+    ByteBuffer.wrap(buf).order(ByteOrder.LITTLE_ENDIAN).putInt(value);
+    os.write(buf);
+  }
 
-		// Write the ti_conf_t
-		writeInt(fp, mPreset);
-		writeInt(fp, mSc);
-		writeInt(fp, mBc);
-		writeInt(fp, mEc);
-		writeInt(fp, mMeta);
-		writeInt(fp, mSkip);
+  public static void writeLong(final OutputStream os, long value) throws IOException {
+    byte[] buf = new byte[8];
+    ByteBuffer.wrap(buf).order(ByteOrder.LITTLE_ENDIAN).putLong(value);
+    os.write(buf);
+  }
 
-		// Write sequence dictionary. Since mChr2tid is a LinkedHashmap, the keyset
-		// will be returned in insertion order.
-		int l = 0;
-		for (String k : mChr2tid.keySet()) {
-			l += k.length() + 1;
-		}
-		writeInt(fp, l);
-		for (String k : mChr2tid.keySet()) {
-			fp.write(k.getBytes(LATIN1));
-			fp.write(0);
-		}
+  private void saveIndex(BlockCompressedOutputStream fp) throws IOException {
+    fp.write("TBI\1".getBytes(LATIN1));
+    writeInt(fp, binningIndex.size());
 
-		for (int i = 0; i < mChr2tid.size(); i++) {
-			Map<Integer, List<TPair64>> binningForChr = binningIndex.get(i);
+    // Write the ti_conf_t
+    writeInt(fp, mPreset);
+    writeInt(fp, mSc);
+    writeInt(fp, mBc);
+    writeInt(fp, mEc);
+    writeInt(fp, mMeta);
+    writeInt(fp, mSkip);
 
-			// Write the binning index.
-			writeInt(fp, binningForChr.size());
-			for (int k : binningForChr.keySet()) {
-				List<TPair64> p = binningForChr.get(k);
-				writeInt(fp, k);
-				writeInt(fp, p.size());
-				for (TPair64 bin : p) {
-					writeLong(fp, bin.u);
-					writeLong(fp, bin.v);
-				}
-			}
-			// Write the linear index.
-			List<Long> linearForChr = linearIndex.get(i);
-			writeInt(fp, linearForChr.size());
-			for (int x = 0; x < linearForChr.size(); x++) {
-				writeLong(fp, linearForChr.get(x));
-			}
-		}
-	}
+    // Write sequence dictionary. Since mChr2tid is a LinkedHashmap, the keyset
+    // will be returned in insertion order.
+    int l = 0;
+    for (String k : mChr2tid.keySet()) {
+      l += k.length() + 1;
+    }
+    writeInt(fp, l);
+    for (String k : mChr2tid.keySet()) {
+      fp.write(k.getBytes(LATIN1));
+      fp.write(0);
+    }
 
-	/**
-	 * Override chr2tid so that getInv() adds new chromosomes as we read the
-	 * source file.
-	 */
-	@Override
-	public int chr2tid(String chr) {
-		if (!mChr2tid.containsKey(chr)) {
-			// Doesn't exist yet.
-			mChr2tid.put(chr, mChr2tid.size());
+    for (int i = 0; i < mChr2tid.size(); i++) {
+      Map<Integer, List<TPair64>> binningForChr = binningIndex.get(i);
 
-			// Expand our indices.
-			binningIndex.add(new HashMap<Integer, List<TPair64>>());
-			linearIndex.add(new ArrayList<Long>());
-		}
-		return mChr2tid.get(chr);
-	}
+      // Write the binning index.
+      writeInt(fp, binningForChr.size());
+      for (int k : binningForChr.keySet()) {
+        List<TPair64> p = binningForChr.get(k);
+        writeInt(fp, k);
+        writeInt(fp, p.size());
+        for (TPair64 bin : p) {
+          writeLong(fp, bin.u);
+          writeLong(fp, bin.v);
+        }
+      }
+      // Write the linear index.
+      List<Long> linearForChr = linearIndex.get(i);
+      writeInt(fp, linearForChr.size());
+      for (int x = 0; x < linearForChr.size(); x++) {
+        writeLong(fp, linearForChr.get(x));
+      }
+    }
+  }
 
-	/**
-	 * Override getIntv because it's a good time to figure out which bin things
-	 * should go into.
-	 * 
-	 * @param line
-	 *          a line read from the source file
-	 * @return an object describing the interval
-	 */
-	@Override
-	protected TIntv getIntv(String line) {
-		TIntv result = super.getIntv(line);
-		result.bin = reg2bin(result.beg, result.end);
-		return result;
-	}
+  /**
+   * Override chr2tid so that getInv() adds new chromosomes as we read the
+   * source file.
+   */
+  @Override
+  public int chr2tid(String chr) {
+    if (!mChr2tid.containsKey(chr)) {
+      // Doesn't exist yet.
+      mChr2tid.put(chr, mChr2tid.size());
 
-	private int reg2bin(int beg, int end) {
-		--end;
-		if (beg >> 14 == end >> 14)
-			return 4681 + (beg >> 14);
-		if (beg >> 17 == end >> 17)
-			return 585 + (beg >> 17);
-		if (beg >> 20 == end >> 20)
-			return 73 + (beg >> 20);
-		if (beg >> 23 == end >> 23)
-			return 9 + (beg >> 23);
-		if (beg >> 26 == end >> 26)
-			return 1 + (beg >> 26);
-		return 0;
-	}
+      // Expand our indices.
+      binningIndex.add(new HashMap<Integer, List<TPair64>>());
+      linearIndex.add(new ArrayList<Long>());
+    }
+    return mChr2tid.get(chr);
+  }
 
-	public static class Conf {
-		public final int preset;
-		public final int chrColumn;
-		public final int startColumn;
-		public final int endColumn;
-		public final char commentChar;
-		public final int linesToSkip;
+  /**
+   * Override getIntv because it's a good time to figure out which bin things
+   * should go into.
+   * 
+   * @param line
+   *          a line read from the source file
+   * @return an object describing the interval
+   */
+  @Override
+  protected TIntv getIntv(String line) {
+    TIntv result = super.getIntv(line);
+    result.bin = reg2bin(result.beg, result.end);
+    return result;
+  }
 
-		public Conf(int preset, int chrColumn, int startColumn, int endColumn,
-				char commentChar, int linesToSkip) {
-			this.preset = preset;
-			this.chrColumn = chrColumn;
-			this.startColumn = startColumn;
-			this.endColumn = endColumn;
-			this.commentChar = commentChar;
-			this.linesToSkip = linesToSkip;
-		}
-	}
-	
-	public class TabixException extends Exception {
+  private int reg2bin(int beg, int end) {
+    --end;
+    if (beg >> 14 == end >> 14)
+      return 4681 + (beg >> 14);
+    if (beg >> 17 == end >> 17)
+      return 585 + (beg >> 17);
+    if (beg >> 20 == end >> 20)
+      return 73 + (beg >> 20);
+    if (beg >> 23 == end >> 23)
+      return 9 + (beg >> 23);
+    if (beg >> 26 == end >> 26)
+      return 1 + (beg >> 26);
+    return 0;
+  }
 
-		/**
+  public static class Conf {
+    public final int preset;
+    public final int chrColumn;
+    public final int startColumn;
+    public final int endColumn;
+    public final char commentChar;
+    public final int linesToSkip;
+
+    public Conf(int preset, int chrColumn, int startColumn, int endColumn, char commentChar, int linesToSkip) {
+      this.preset = preset;
+      this.chrColumn = chrColumn;
+      this.startColumn = startColumn;
+      this.endColumn = endColumn;
+      this.commentChar = commentChar;
+      this.linesToSkip = linesToSkip;
+    }
+  }
+
+  public class TabixException extends Exception {
+
+    /**
 		 * 
 		 */
-		private static final long serialVersionUID = -7503271407068631460L;
+    private static final long serialVersionUID = -7503271407068631460L;
 
-		public TabixException() {
-			super();
-			// TODO Auto-generated constructor stub
-		}
+    public TabixException() {
+      super();
+      // TODO Auto-generated constructor stub
+    }
 
-		public TabixException(String message, Throwable cause,
-				boolean enableSuppression, boolean writableStackTrace) {
-			super(message, cause, enableSuppression, writableStackTrace);
-			// TODO Auto-generated constructor stub
-		}
+    public TabixException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+      super(message, cause, enableSuppression, writableStackTrace);
+      // TODO Auto-generated constructor stub
+    }
 
-		public TabixException(String message, Throwable cause) {
-			super(message, cause);
-			// TODO Auto-generated constructor stub
-		}
+    public TabixException(String message, Throwable cause) {
+      super(message, cause);
+      // TODO Auto-generated constructor stub
+    }
 
-		public TabixException(String message) {
-			super(message);
-			// TODO Auto-generated constructor stub
-		}
+    public TabixException(String message) {
+      super(message);
+      // TODO Auto-generated constructor stub
+    }
 
-		public TabixException(Throwable cause) {
-			super(cause);
-			// TODO Auto-generated constructor stub
-		}
-		
-	}
+    public TabixException(Throwable cause) {
+      super(cause);
+      // TODO Auto-generated constructor stub
+    }
+
+  }
 }
