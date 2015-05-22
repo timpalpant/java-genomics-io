@@ -24,7 +24,7 @@ public class BedEntryTest {
     assertEquals(10, test.getStart());
     assertEquals(1, test.getStop());
     assertEquals("Spot8", test.getId());
-    assertEquals(1, test.getValue());
+    assertEquals(1.0f, test.getValue());
     assertEquals(Strand.CRICK, test.strand());
   }
 
