@@ -26,7 +26,7 @@ class FixedStepContigIndex extends ContigIndex {
   }
 
   public static FixedStepContigIndex parseHeader(String headerLine) throws WigFileFormatException {
-    String[] tokens = headerLine.split(" ");
+    String[] tokens = headerLine.split("\\s+");
     if (tokens.length == 0 || !tokens[0].equals(Contig.Type.FIXEDSTEP.getId())) {
       throw new WigFileFormatException("Not a valid fixedStep header line: " + headerLine);
     }

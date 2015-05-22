@@ -23,7 +23,7 @@ class VariableStepContigIndex extends ContigIndex {
   }
 
   public static VariableStepContigIndex parseHeader(String headerLine) throws WigFileFormatException {
-    String[] tokens = headerLine.split(" ");
+    String[] tokens = headerLine.split("\\s+");
     if (tokens.length == 0 || !tokens[0].equals(Contig.Type.VARIABLESTEP.getId())) {
       throw new WigFileFormatException("Not a valid variableStep header line: " + headerLine);
     }
@@ -93,10 +93,10 @@ class VariableStepContigIndex extends ContigIndex {
           break;
         }
 
-        int delim = line.indexOf('\t');
-        bp = Integer.parseInt(line.substring(0, delim));
+        String[] entry = line.split("\\s+");
+        bp = Integer.parseInt(entry[0]);
         if (bp + getSpan() - 1 >= low) {
-          float value = Float.parseFloat(line.substring(delim + 1));
+          float value = Float.parseFloat(entry[1]);
           if (!Float.isNaN(value)) {
             for (int i = bp; i <= bp + getSpan() - 1; i++) {
               if (interval.includes(i)) {
@@ -132,10 +132,10 @@ class VariableStepContigIndex extends ContigIndex {
           break;
         }
 
-        int delim = line.indexOf('\t');
-        bp = Integer.parseInt(line.substring(0, delim));
+        String[] entry = line.split("\\s+");
+        bp = Integer.parseInt(entry[0]);
         if (bp + getSpan() - 1 >= low) {
-          float value = Float.parseFloat(line.substring(delim + 1));
+          float value = Float.parseFloat(entry[1]);
           if (!Float.isNaN(value)) {
             for (int i = bp; i <= bp + getSpan() - 1; i++) {
               if (interval.includes(i)) {
