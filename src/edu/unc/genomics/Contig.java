@@ -524,7 +524,8 @@ public class Contig extends Interval {
    * mean of the previous values to be the value for each span.
    */
   public void setSpan(int span) {
-    float[] spanValues = new float[actualNumberOfValues()];
+    int n = (int) Math.ceil(((float) length()) / span);
+    float[] spanValues = new float[n];
     
     int i = 0;
     int stop = high();
