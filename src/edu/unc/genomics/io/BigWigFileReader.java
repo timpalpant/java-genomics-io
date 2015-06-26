@@ -94,7 +94,7 @@ public class BigWigFileReader extends WigFileReader {
 
     return new Contig(interval, values);
   }
-
+  
   @Override
   public synchronized SummaryStatistics queryStats(Interval interval) {
     SummaryStatistics stats = new SummaryStatistics();

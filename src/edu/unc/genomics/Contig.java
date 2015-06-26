@@ -3,6 +3,7 @@ package edu.unc.genomics;
 import java.util.Arrays;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.ArithmeticUtils;
 
 /**
@@ -15,8 +16,9 @@ public class Contig extends Interval {
 
   private static final long serialVersionUID = -4260411310249231783L;
 
-  private final float[] values;
+  private float[] values;
   private SummaryStatistics stats;
+  private int span = 1;
 
   public Contig(Interval interval) {
     this(interval, null);
@@ -24,6 +26,10 @@ public class Contig extends Interval {
 
   public Contig(Interval interval, float[] values) throws ContigException {
     this(interval.getChr(), interval.getStart(), interval.getStop(), values);
+  }
+  
+  public Contig(Interval interval, float[] values, int span) throws ContigException {
+    this(interval.getChr(), interval.getStart(), interval.getStop(), values, span);
   }
 
   /**
@@ -42,14 +48,19 @@ public class Contig extends Interval {
    *           if values.length != (start-stop+1)
    */
   public Contig(String chr, int start, int stop, float[] values) throws ContigException {
+    this(chr, start, stop, values, 1);
+  }
+  
+  public Contig(String chr, int start, int stop, float[] values, int span) throws ContigException {
     super(chr, start, stop);
 
     // Verify that values has the correct length
+    this.span = span;
     if (values == null) {
-      values = new float[length()];
+      values = new float[actualNumberOfValues()];
       Arrays.fill(values, Float.NaN);
-    } else if (values.length != length()) {
-      throw new ContigException("Incorrect number of values for Contig (" + values.length + " != " + length() + ")");
+    } else if (values.length != actualNumberOfValues()) {
+      throw new ContigException("Incorrect number of values for Contig (" + values.length + " != " + actualNumberOfValues() + ")");
     }
     this.values = values;
   }
@@ -90,11 +101,28 @@ public class Contig extends Interval {
   public Contig copy(int start, int stop) {
     return new Contig(getChr(), start, stop, get(start, stop));
   }
+  
+  public int actualNumberOfValues() {
+    return (int) Math.ceil(((float) length()) / span);
+  }
 
   /**
    * @return the values
    */
   public float[] getValues() {
+    if (span == 1) {
+      return values;
+    }
+    
+    float[] expandedValues = new float[length()];
+    for (int i = 0; i < length(); i++) {
+      expandedValues[i] = get(getStart()+i);
+    }
+    
+    return expandedValues;
+  }
+  
+  public float[] getCondensedValues() {
     return values;
   }
 
@@ -149,7 +177,7 @@ public class Contig extends Interval {
       return Float.NaN;
     }
 
-    int i = Math.abs(bp - getStart());
+    int i = Math.abs(bp - getStart()) / span;
     return values[i];
   }
 
@@ -214,10 +242,10 @@ public class Contig extends Interval {
       throw new ContigException(bp + " is outside the range of this Contig");
     }
 
-    values[bp - low()] = value;
-    // Recompute stats if they have previously been computed
+    values[(bp - low())/span] = value;
+    // Invalidate stats if they have previously been computed
     if (stats != null) {
-      computeStats();
+      stats = null;
     }
   }
 
@@ -238,7 +266,9 @@ public class Contig extends Interval {
     stats = new SummaryStatistics();
     for (float v : values) {
       if (!Float.isNaN(v) && !Float.isInfinite(v)) {
-        stats.addValue(v);
+        for (int i = 0; i < span; i++) {
+          stats.addValue(v);
+        }
       }
     }
   }
@@ -355,10 +385,10 @@ public class Contig extends Interval {
    */
   public int getMinSpan() {
     int minSpan = length();
-    int span = 1;
+    int span = this.span;
     int firstbp = getFirstBaseWithData();
     float prevValue = get(firstbp);
-    for (int bp = firstbp + 1; bp <= high(); bp++) {
+    for (int bp = firstbp + 1; bp <= high(); bp += this.span) {
       float value = get(bp);
       if (value == prevValue) {
         span++;
@@ -367,12 +397,12 @@ public class Contig extends Interval {
           minSpan = span;
         }
 
-        if (minSpan == 1) {
+        if (minSpan <= this.span) {
           break;
         }
 
         prevValue = value;
-        span = 1;
+        span = this.span;
       }
     }
 
@@ -390,10 +420,10 @@ public class Contig extends Interval {
    */
   public int getVariableStepSpan() {
     int minSpan = getMinSpan();
-    int span = 1;
+    int span = this.span;
     int firstbp = getFirstBaseWithData();
     float prevValue = get(firstbp);
-    for (int bp = firstbp + 1; bp <= high(); bp++) {
+    for (int bp = firstbp + 1; bp <= high(); bp += this.span) {
       float value = get(bp);
       if (value == prevValue) {
         span++;
@@ -404,12 +434,12 @@ public class Contig extends Interval {
           }
         }
 
-        if (minSpan == 1) {
+        if (minSpan <= this.span) {
           break;
         }
 
         prevValue = value;
-        span = 1;
+        span = this.span;
       }
     }
 
@@ -423,7 +453,7 @@ public class Contig extends Interval {
    */
   public int getMinStep() {
     if (!isFixedStep()) {
-      return 1;
+      return span;
     }
 
     // Since the Contig must have fixed step size, find the first step size
@@ -440,7 +470,7 @@ public class Contig extends Interval {
     float firstValue = get(firstbp);
     boolean passedNaN = false;
     int bp;
-    for (bp = firstbp + 1; bp <= high(); bp++) {
+    for (bp = firstbp + 1; bp <= high(); bp += this.span) {
       float nextValue = get(bp);
       if (Float.isNaN(nextValue)) {
         passedNaN = true;
@@ -486,6 +516,29 @@ public class Contig extends Interval {
     }
 
     return true;
+  }
+  
+  /**
+   * Sets the span for this Contig.
+   * Note that this actually downsamples the values, taking the
+   * mean of the previous values to be the value for each span.
+   */
+  public void setSpan(int span) {
+    float[] spanValues = new float[actualNumberOfValues()];
+    
+    int i = 0;
+    int stop = high();
+    for (int bp = low(); bp <= stop; bp += span) {
+      double total = 0;
+      for (int j = 0; j < Math.min(span, stop-bp); j++) {
+        total += get(bp+j);
+      }
+      spanValues[i] = (float) (total / span);
+      i++;
+    }
+    
+    values = spanValues;
+    this.span = span;
   }
 
   /**

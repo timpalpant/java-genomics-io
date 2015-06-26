@@ -90,6 +90,26 @@ public abstract class WigFileReader implements Closeable, Cloneable {
 
   /**
    * Query for a Contig of data in this Wig file corresponding to a specific
+   * interval. Downsample data to interval @span.
+   * 
+   * @param interval
+   *          the Interval of data to query for
+   * @param span
+              the discretization of the returned Contig
+   * @return a Contig of data from the Interval interval
+   * @throws IOException
+   *           if a disk read error occurs
+   * @throws WigFileException
+   *           if the Wig file does not contain data for this Interval
+   */
+  public synchronized Contig query(Interval interval, int span) throws IOException, WigFileException {
+    Contig contig = query(interval);
+    contig.setSpan(span);
+    return contig;
+  }
+
+  /**
+   * Query for a Contig of data in this Wig file corresponding to a specific
    * interval
    * 
    * @param chr
@@ -106,6 +126,26 @@ public abstract class WigFileReader implements Closeable, Cloneable {
    */
   public final Contig query(String chr, int start, int stop) throws IOException, WigFileException {
     return query(new Interval(chr, start, stop));
+  }
+  
+  /**
+   * Query for a Contig of data in this Wig file corresponding to a specific
+   * interval
+   * 
+   * @param chr
+   *          the chromosome of the interval
+   * @param start
+   *          the start base pair of the interval
+   * @param stop
+   *          the stop base pair of the interval
+   * @return a Contig of data from the specified interval
+   * @throws IOException
+   *           if a disk read error occurs
+   * @throws WigFileException
+   *           if the Wig file does not contain data for this Interval
+   */
+  public final Contig query(String chr, int start, int stop, int span) throws IOException, WigFileException {
+    return query(new Interval(chr, start, stop), span);
   }
 
   /**
