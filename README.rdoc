@@ -37,7 +37,7 @@ Reports for the unit test results and code coverage are output in the reports su
 
 There are two major categories of readers/writers: for line-based interval files and for (Big)Wig files.
 
-http://palpant.us/java-genomics-io/images/api.png
+https://preview.ibb.co/gW3JAk/api.png
 
 === Line-based interval files
 
@@ -120,5 +120,5 @@ See https://github.com/timpalpant/java-genomics-toolkit for some full implementa
 
 == License
 
-Copyright 2013 Timothy Palpant.
+Copyright 2017 Timothy Palpant.
 This work is licensed under the LGPLv3, subject to the terms and conditions in LICENSE and LICENSE.LESSER.
