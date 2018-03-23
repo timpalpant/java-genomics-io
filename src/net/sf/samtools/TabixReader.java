@@ -70,7 +70,7 @@ public class TabixReader implements LineReader, Iterable<String> {
   static final int TAD_MIN_CHUNK_GAP = 32768;
   static final int TAD_LIDX_SHIFT = 14;
 
-  protected static Path index;
+  protected Path index;
 
   class TPair64 implements Comparable<TPair64> {
     long u, v;
